@@ -1,0 +1,40 @@
+.screen { min-height: 100svh; background: #eceff4; color: #15171e; font-family: "Poppins", Arial, sans-serif; display:flex; flex-direction:column; font-size:14px; }
+.screen, .screen * { box-sizing:border-box; }
+.main { flex:1; display:flex; justify-content:center; align-items:center; padding:64px 24px; }
+.card { width:690px; max-width:100%; background:#fff; border:1px solid #d0d5e2; border-radius:16px; overflow:hidden; box-shadow:0 1px 2px #14213b08; }
+.header { background:#3c56df; color:#fff; padding:22px 24px; display:flex; align-items:center; gap:12px; }
+.header h1 { font-size:16px; font-weight:500; margin:0; line-height:1.5; }
+.logo { width:40px; height:40px; border-radius:11px; background:#eef1ff; color:#3c56df; display:grid; place-items:center; flex-shrink:0; }
+.form { padding:34px 30px 30px; display:flex; flex-direction:column; gap:24px; }
+.field label, .roles legend { display:block; font-size:16px; font-weight:500; margin-bottom:8px; }
+.inputWrap { min-height:49px; border:1px solid #737885; border-radius:11px; display:flex; align-items:center; gap:11px; padding:0 13px; }
+.inputWrap:focus-within { outline:2px solid #3c56df; outline-offset:2px; }
+.inputWrap > svg { flex-shrink:0; }
+.inputWrap input { width:100%; min-width:0; background:transparent; border:0; outline:none; font:inherit; color:inherit; padding:13px 0; }
+.inputWrap input::placeholder { color:#757983; font-size:14px; }
+.eye { border:0; background:transparent; padding:7px 0 7px 7px; display:flex; color:inherit; cursor:pointer; }
+.eye svg { width:18px; }
+.help { margin:7px 0 0; font-size:11px; display:flex; align-items:center; gap:5px; color:#525765; }
+.help svg { width:13px; height:13px; }
+.roles { border:0; margin:0; padding:0; min-width:0; }
+.roleGrid { display:grid; grid-template-columns:1fr 1fr 1fr 1.3fr; gap:24px; }
+.role { position:relative; display:flex; justify-content:center; align-items:center; gap:16px; min-height:49px; border:1px solid #dfe1e8; border-radius:11px; cursor:pointer; white-space:nowrap; font-size:16px; }
+.role input { position:absolute; opacity:0; width:1px; height:1px; }
+.role:has(input:focus-visible) { outline:2px solid #3c56df; outline-offset:3px; }
+.selected { border-color:#4c65ff; background:#eef1ff; }
+.remember { display:flex; align-items:center; gap:8px; color:#555a69; cursor:pointer; font-size:14px; }
+.remember input { margin:0; width:17px; height:17px; accent-color:#3c56df; }
+.submit { min-height:49px; width:100%; border:0; border-radius:11px; background:#3d56e6; color:#fff; font:inherit; font-size:16px; font-weight:500; display:flex; align-items:center; justify-content:center; gap:12px; cursor:pointer; }
+.submit:hover { background:#324ace; }
+.submit svg { color:#b2c4ff; width:19px; }
+.notice { background:#e6eafa; border:1px solid #c9cee3; border-radius:11px; padding:16px; }
+.notice h2 { display:flex; align-items:center; gap:6px; font-size:15px; font-weight:600; margin:0 0 14px; }
+.notice h2 svg { width:16px; height:16px; }
+.notice p { font-size:11px; line-height:1.65; color:#4b5060; margin:0; }
+.notice p + p { margin-top:12px; }
+.message { margin:0; color:#324ace; font-size:13px; line-height:1.6; }
+.footer { border-top:1px solid #e2e6ef; display:flex; justify-content:space-between; gap:16px; padding:17px 30px; font-size:10px; color:#747985; }
+.footer > span:first-child { color:#454b57; }
+.dot { margin:0 14px; }
+.screen button:focus-visible { outline:2px solid #2437a3; outline-offset:3px; }
+@media(max-width:600px) { .main { padding:32px 16px; } .form { padding:24px 20px; gap:22px; } .header { padding:18px 20px; } .header h1 { font-size:13px; } .roleGrid { grid-template-columns:1fr 1fr; gap:12px; } .role { font-size:14px; gap:10px; } .footer { flex-direction:column; align-items:center; text-align:center; padding:16px; line-height:1.7; } }
