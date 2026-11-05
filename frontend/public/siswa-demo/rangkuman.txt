@@ -1,0 +1,9 @@
+BAHAN BELAJAR CONTOH - LMS SMP
+
+Jaringan komputer menghubungkan perangkat agar dapat berbagi data.
+Switch menghubungkan perangkat dalam jaringan lokal.
+Router menghubungkan jaringan yang berbeda.
+
+Latihan: gambarkan topologi star untuk laboratorium sekolah.
+
+Dokumen demo. Ganti dengan lampiran asli dari API Laravel.

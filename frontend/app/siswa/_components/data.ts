@@ -1,0 +1,121 @@
+// Data tampilan sementara. Ganti sumber data ini dengan response API Laravel.
+export const subjects = [
+  {
+    id: "informatika",
+    name: "Informatika",
+    teacher: "Hendro Gunawan, S.Kom.",
+    room: "Lab Komputer 1",
+    progress: 67,
+    score: 90,
+    icon: "laptop",
+    next: "Algoritma, Pemrograman Dasar & Struktur Percabangan",
+    tasks: 2,
+  },
+  {
+    id: "matematika",
+    name: "Matematika",
+    teacher: "Siti Nurhayati, S.Pd.",
+    room: "Ruang VIII B",
+    progress: 76,
+    score: 86,
+    icon: "calculator",
+    next: "Persamaan Linear Dua Variabel",
+    tasks: 1,
+  },
+  {
+    id: "ipa",
+    name: "Ilmu Pengetahuan Alam (IPA)",
+    teacher: "Budi Santoso, S.Pd.",
+    room: "Laboratorium IPA",
+    progress: 70,
+    score: 88,
+    icon: "test-tube",
+    next: "Sistem Pencernaan Manusia",
+    tasks: 1,
+  },
+  {
+    id: "bahasa-indonesia",
+    name: "Bahasa Indonesia",
+    teacher: "Dewi Lestari, S.Pd.",
+    room: "Ruang VIII B",
+    progress: 90,
+    score: 92,
+    icon: "book-2",
+    next: "Teks Eksplanasi",
+    tasks: 1,
+  },
+  {
+    id: "bahasa-inggris",
+    name: "Bahasa Inggris",
+    teacher: "Rina Wulandari, S.Pd.",
+    room: "Ruang VIII B",
+    progress: 62,
+    score: 84,
+    icon: "chat-round-dots",
+    next: "Describing People",
+    tasks: 1,
+  },
+  {
+    id: "ppkn",
+    name: "Pendidikan Pancasila",
+    teacher: "Agus Pratama, S.Pd.",
+    room: "Ruang VIII B",
+    progress: 80,
+    score: 90,
+    icon: "flag",
+    next: "Keberagaman Masyarakat Indonesia",
+    tasks: 2,
+  },
+];
+export const modules = [
+  "Pengenalan Jaringan Komputer & Sambungan Sederhana",
+  "Interaksi Perangkat Keras dengan Sistem Operasi",
+  "Aplikasi, Pengolahan Data & Visualisasi Sederhana",
+  "Algoritma, Pemrograman Dasar & Struktur Percabangan",
+  "Pemrograman Berbasis Blok (Scratch)",
+  "Etika dan Keamanan Digital",
+];
+export const assignments = [
+  "Tugas 01: Analisis Topologi Jaringan Komputer & Skema LAN",
+  "Tugas 02: Praktik Algoritma dan Diagram Alir",
+  "Kuis Formatif Bab 1: Logika Komputasional & Dekomposisi Masalah",
+  "Refleksi: Strategi Penyelesaian Masalah",
+];
+export const questions = [
+  {
+    text: "Tahapan dalam berpikir komputasional yang memecah masalah besar menjadi bagian-bagian kecil disebut …",
+    options: ["Pengenalan pola", "Dekomposisi", "Abstraksi", "Algoritma"],
+    answer: 1,
+  },
+  {
+    text: "Urutan langkah logis dan sistematis untuk menyelesaikan suatu masalah disebut …",
+    options: ["Algoritma", "Data", "Perangkat keras", "Jaringan"],
+    answer: 0,
+  },
+  {
+    text: "Mengabaikan detail yang tidak diperlukan dan berfokus pada informasi penting merupakan proses …",
+    options: ["Pengulangan", "Dekomposisi", "Abstraksi", "Percabangan"],
+    answer: 2,
+  },
+  {
+    text: "Menemukan kesamaan dari beberapa masalah merupakan contoh …",
+    options: [
+      "Pengenalan pola",
+      "Penghapusan data",
+      "Kompilasi",
+      "Penyimpanan",
+    ],
+    answer: 0,
+  },
+  {
+    text: "Struktur algoritma untuk memilih tindakan berdasarkan kondisi disebut …",
+    options: ["Urutan", "Percabangan", "Variabel", "Komentar"],
+    answer: 1,
+  },
+];
+export const student = {
+  name: "Andi Pratama",
+  className: "VIII B",
+  nis: "202408001",
+  school: "SMP Negeri 1 Yogyakarta",
+};
