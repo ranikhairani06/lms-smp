@@ -6,19 +6,22 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
+<!-- END:nextjs-agent-rules -->
+
 ## Aturan styling (WAJIB DIIKUTI)
 
 - Sumber kebenaran desain: frontend/app/globals.css (design system EduSpace dari UI/UX).
-- Dilarang menulis nilai hardcode di file .module.css: warna hex/rgb, font-size, line-height,
-  border-radius, box-shadow, padding/margin/gap. Selalu pakai var(--token) dari globals.css.
+- Dilarang menulis nilai hardcode di file CSS mana pun (.css maupun .module.css): warna hex/rgb,
+  font-size, line-height, border-radius, box-shadow, padding/margin/gap. Selalu pakai var(--token)
+  dari globals.css.
 - Spasi hanya boleh dari skala --space-xs sampai --space-2xl. Jarak antar card = var(--space-lg).
 - Font hanya Poppins lewat var(--font-family). Jangan menambah font, ukuran, atau radius di luar token.
 - Warna semantik (success/error/warning/info) hanya untuk status, bukan dekorasi.
 - Teks di atas warna amber (secondary) harus gelap, bukan putih.
 - Jangan mengubah logika, struktur JSX, nama kelas yang dipakai di TSX, atau pemanggilan API.
   Hanya ubah styling.
-- Jika ada nilai yang tidak punya token padanan, JANGAN membuat token baru.
-  Biarkan nilainya, lalu laporkan di akhir pekerjaan.
+- Jangan membuat token baru. Nilai di luar skala dibulatkan sesuai tabel
+  "Pemetaan nilai ke token" di bawah.
 - Beri komentar CSS yang menjelaskan bagian tampilan apa.
 - Setelah selesai, jalankan npm run lint dan npm run build lalu laporkan hasilnya.
 
@@ -29,5 +32,52 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 ## Pengecualian (jangan dikerjakan tanpa perintah)
 - Jangan hapus atau ubah blok .parent-* di student.css (sekitar baris 9312-9336).
 - Jangan menghapus selector yang tampak tidak terpakai; cukup laporkan.
+## Pemetaan nilai ke token (keputusan UI/UX, WAJIB)
 
-<!-- END:nextjs-agent-rules -->
+Semua nilai di luar skala resmi harus dibulatkan ke token. Jangan membuat token baru
+dan jangan meninggalkan nilai hardcode.
+
+### Spasi (hanya margin, padding, gap)
+- 2px, 3px, 4px -> --space-xs
+- 6px -> --space-sm (padding vertikal badge/chip/tag -> --space-xs)
+- 8px -> --space-sm
+- 10px -> --space-sm
+- 12px -> --space-md (padding/margin kartu, panel, section, tombol);
+          --space-sm (gap antar elemen kecil sejajar: ikon+teks, badge, chip)
+- 14px, 16px, 18px -> --space-md
+- 20px, 24px -> --space-lg
+- 32px -> --space-xl, 48px -> --space-2xl
+- width, height, top, left, dan sejenisnya TIDAK diubah.
+
+### Font
+- Ukuran 9/10/11px -> 12px. 14px -> 16px (teks isi utama) atau 12px (keterangan/meta).
+- Selalu pakai pasangan token ukuran + line-height:
+  teks isi/keterangan -> --text-p16-size/-line, --text-p12-size/-line, --text-p18-*
+  tombol, badge, label form, nav, tab -> --text-l16-*, --text-l12-*, --text-l18-*
+  judul -> --text-h5-* sampai --text-h1-*
+- Font hanya Poppins (var(--font-family)).
+
+### Radius
+- 4px -> --radius-xs, 6px/8px -> --radius-s, 10px/12px -> --radius-m, 16px/20px -> --radius-l,
+  999px -> --radius-pill, 50% -> --radius-circle.
+- Radius gabungan (misalnya 6px 0 0 6px) -> var(--radius-s) 0 0 var(--radius-s).
+
+### Warna
+- #FFFFFF/#fff/white -> --color-surface; #3B5BDB -> --color-primary; #1B1D23 -> --color-text-primary;
+  #1E3A8A -> --color-primary-dark; #E6EAFB -> --color-primary-tint; #FFC94D -> --color-secondary
+- #4A4E58 dan #555963 -> --color-text-secondary
+- #818695 -> --color-text-secondary (teks) atau --color-text-disabled (placeholder/nonaktif)
+- #EDF0F4 -> --color-background (latar) atau --color-border (garis)
+- #C4C8D2 -> --color-border (properti border) atau --color-text-disabled (properti color)
+- #28A745 -> --color-success (isi/ikon/bar) atau --color-success-dark (teks di atas tint)
+- #16833B -> --color-success-dark; #1260A6 -> --color-info-dark
+- Teks di atas amber harus gelap. Badge dan banner: latar tint, teks varian dark.
+- transparent dan none dibiarkan.
+
+### Bayangan
+- Card/panel -> --shadow-1, dropdown/menu -> --shadow-2, modal/dialog -> --shadow-3.
+- Bayangan lain (misalnya pada tombol) -> none.
+
+### Variabel lokal
+- Variabel --es-*, --parent-*, --lms-*, --ad-* didefinisikan sebagai alias token global
+  (contoh: --es-primary: var(--color-primary)).
