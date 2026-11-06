@@ -6,4 +6,20 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
+## Aturan styling (WAJIB DIIKUTI)
+
+- Sumber kebenaran desain: frontend/app/globals.css (design system EduSpace dari UI/UX).
+- Dilarang menulis nilai hardcode di file .module.css: warna hex/rgb, font-size, line-height,
+  border-radius, box-shadow, padding/margin/gap. Selalu pakai var(--token) dari globals.css.
+- Spasi hanya boleh dari skala --space-xs sampai --space-2xl. Jarak antar card = var(--space-lg).
+- Font hanya Poppins lewat var(--font-family). Jangan menambah font, ukuran, atau radius di luar token.
+- Warna semantik (success/error/warning/info) hanya untuk status, bukan dekorasi.
+- Teks di atas warna amber (secondary) harus gelap, bukan putih.
+- Jangan mengubah logika, struktur JSX, nama kelas yang dipakai di TSX, atau pemanggilan API.
+  Hanya ubah styling.
+- Jika ada nilai yang tidak punya token padanan, JANGAN membuat token baru.
+  Biarkan nilainya, lalu laporkan di akhir pekerjaan.
+- Beri komentar CSS yang menjelaskan bagian tampilan apa.
+- Setelah selesai, jalankan npm run lint dan npm run build lalu laporkan hasilnya.
+
 <!-- END:nextjs-agent-rules -->
