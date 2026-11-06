@@ -121,10 +121,10 @@
   --space-2xl: 48px;
  
   /* ---------- 1.11 Elevasi (3 level) ---------- */
-  /* [ASUMSI] nilai bayangan tidak tertulis di DESIGN.md; sesuaikan dengan Figma. */
-  --shadow-1: 0 1px 2px rgba(27, 29, 35, 0.06);                                   /* Card (sangat halus) */
-  --shadow-2: 0 4px 12px rgba(27, 29, 35, 0.10);                                  /* Dropdown */
-  --shadow-3: 0 12px 32px rgba(27, 29, 35, 0.16);                                 /* Modal */
+  /* Y dan blur dari UI/UX. warna & opacity: cocokkan dengan Figma. */
+  --shadow-1: 0 1px 2px rgb(196, 200, 210);    /* Card: y 1, blur 2 */
+  --shadow-2: 0 4px 12px rgb(196, 200, 210);   /* Dropdown: y 4, blur 12 */
+  --shadow-3: 0 0 10px rgb(196, 200, 210);     /* Modal: y 0, blur 10 */
  
   /* ---------- 1.12 Frame acuan & layout ---------- */
   --frame-desktop-width: 1440px;

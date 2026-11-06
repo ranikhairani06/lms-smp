@@ -22,4 +22,12 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - Beri komentar CSS yang menjelaskan bagian tampilan apa.
 - Setelah selesai, jalankan npm run lint dan npm run build lalu laporkan hasilnya.
 
+## Font
+- Poppins dimuat lewat @font-face lokal di globals.css (file di public/fonts).
+  Jangan menambah @import Google Fonts atau @font-face baru di file lain.
+
+## Pengecualian (jangan dikerjakan tanpa perintah)
+- Jangan hapus atau ubah blok .parent-* di student.css (sekitar baris 9312-9336).
+- Jangan menghapus selector yang tampak tidak terpakai; cukup laporkan.
+
 <!-- END:nextjs-agent-rules -->
