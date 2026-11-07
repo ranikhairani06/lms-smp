@@ -181,8 +181,9 @@ export default function LoginForm({ initialRole = "student", roleMismatch = fals
                 </p>
 
                 <p className={styles.firstLogin}>
-                  Login pertama? Kata sandi default wajib diganti sebelum
-                  mengakses sistem.
+                  {role === "Admin"
+                    ? "Akun administrator langsung masuk ke dashboard tanpa reset password pertama kali."
+                    : "Login pertama? Kata sandi default wajib diganti sebelum mengakses sistem."}
                 </p>
 
                 <p>

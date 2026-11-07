@@ -58,6 +58,6 @@ export async function requireUser(role?: Role, allowPasswordChange = false) {
   const user = await currentUser();
   if (!user) redirect(role ? `/login?role=${role}` : "/login");
   if (role && user.role !== role) redirect(`/login?role=${role}&reason=role-mismatch`);
-  if (user.must_change_password && !allowPasswordChange) redirect("/password-update");
+  if (user.role !== "admin" && user.must_change_password && !allowPasswordChange) redirect("/password-update");
   return user;
 }

@@ -14,11 +14,12 @@ export type AuthUser = {
 };
 
 export function portalPath(user: AuthUser): string {
-  if (user.must_change_password) return "/password-update";
+  // Admin selalu langsung masuk dashboard tanpa reset password pertama kali.
+  if (user.role !== "admin" && user.must_change_password) return "/password-update";
   if (user.role === "student") return "/siswa";
   if (user.role === "parent") return "/orang-tua";
   if (user.role === "teacher") return "/guru";
-  return "/akun";
+  return "/admin";
 }
 
 export function initials(name: string): string {

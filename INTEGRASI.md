@@ -41,7 +41,7 @@ Karena request Laravel dilakukan oleh server Next.js, alur ini tidak membutuhkan
 | Ganti password, termasuk login pertama | `PUT /api/auth/password` |
 | Logout dan pencabutan token | `POST /api/auth/logout` |
 
-Portal `/siswa`, `/orang-tua`, dan `/guru` memeriksa sesi, kewajiban ganti password, serta peran melalui backend. Header portal dan formulir ganti password menampilkan identitas akun yang masuk. Guru diarahkan ke `/guru`; admin masih menggunakan `/akun`. Membuka portal dengan sesi role lain menampilkan login untuk role yang diperlukan beserta penjelasan.
+Portal `/siswa`, `/orang-tua`, `/guru`, dan `/admin` memeriksa sesi serta peran melalui backend. Siswa, orang tua, dan guru tetap mengikuti kewajiban ganti password saat login pertama; admin langsung diarahkan ke `/admin` tanpa reset password. Header portal menampilkan identitas akun yang masuk. Membuka portal dengan sesi role lain menampilkan login untuk role yang diperlukan beserta penjelasan.
 
 Portal guru memiliki 17 layar sesuai PDF UI/UX. Akses demo melalui `/login?role=teacher` dengan `G001` / `GuruDev!2026`. Data pembelajaran masih contoh dan perubahan pratinjau disimpan di browser, belum dikirim ke API. Rute, batas fitur, dan aturan desain dijelaskan di [panduan portal guru](frontend/app/guru/README.md).
 
