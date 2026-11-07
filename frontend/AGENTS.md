@@ -95,3 +95,9 @@ dan jangan meninggalkan nilai hardcode.
 ### Variabel lokal
 - Variabel --es-*, --parent-*, --lms-*, --ad-* didefinisikan sebagai alias token global
   (contoh: --es-primary: var(--color-primary)).
+  
+## Lint
+- Lint saat ini gagal karena 3 error react-hooks/set-state-in-effect di
+  app/siswa/_components/quiz.tsx (baris 367, 390, 444). Ini sudah ada sebelum refactor styling.
+  Jangan diperbaiki dan jangan diubah.
+- Syarat selesai: npm run build berhasil dan tidak ada error lint baru di luar tiga itu.

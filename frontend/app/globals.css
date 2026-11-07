@@ -12,11 +12,45 @@
  
 /* ==========================================================================
    0. FONT: Poppins (Regular, Medium, SemiBold, Bold, ExtraBold)
-   Jika memakai Next.js, lebih baik pakai next/font/google lalu hubungkan ke
-   variabel --font-poppins. Baris @import di bawah adalah alternatif.
+   Font dimuat dari file lokal di public/fonts.
    ========================================================================== */
-@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap");
 @import "tailwindcss";
+
+@font-face {
+  font-family: Poppins;
+  src: url("/fonts/poppins-latin-400-normal.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: Poppins;
+  src: url("/fonts/poppins-latin-500-normal.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: Poppins;
+  src: url("/fonts/poppins-latin-600-normal.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: Poppins;
+  src: url("/fonts/poppins-latin-700-normal.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: Poppins;
+  src: url("/fonts/poppins-latin-800-normal.woff2") format("woff2");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
  
 /* ==========================================================================
    1. DESIGN TOKENS (CSS Custom Properties)
@@ -978,4 +1012,3 @@ body {
 }
 .icon-s { width: var(--space-md); height: var(--space-md); }
 .icon-l { width: var(--space-xl); height: var(--space-xl); }
- 

@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import { requireUser } from "@/lib/backend";
 import AdminShell from "@/app/admin/_components/AdminShell";
-import "@/app/admin/admin-fonts.css";
 
 /**
  * Proteksi seluruh halaman /admin.
