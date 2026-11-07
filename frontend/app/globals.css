@@ -16,7 +16,7 @@
    variabel --font-poppins. Baris @import di bawah adalah alternatif.
    ========================================================================== */
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap");
- 
+@import "tailwindcss";
  
 /* ==========================================================================
    1. DESIGN TOKENS (CSS Custom Properties)
@@ -167,11 +167,12 @@ body {
   -webkit-font-smoothing: antialiased;
 }
  
-a {
-  color: var(--color-primary);                 /* tautan memakai Primary */
+/* Tautan teks bergaya Primary (pakai class="link" bila perlu) */
+.link {
+  color: var(--color-primary);
   text-decoration: none;
 }
-a:hover {
+.link:hover {
   color: var(--color-primary-hover);
 }
  
