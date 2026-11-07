@@ -37,6 +37,20 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 Semua nilai di luar skala resmi harus dibulatkan ke token. Jangan membuat token baru
 dan jangan meninggalkan nilai hardcode.
 
+## Inline style di TSX
+- Nilai statis di style={{ }} (warna, font-size, radius, spasi) memakai var(--token), mengikuti
+  "Pemetaan nilai ke token". Contoh: style={{ color: "var(--color-error)", gap: "var(--space-sm)" }}.
+- Nilai dinamis dari data atau perhitungan (lebar progress, posisi, tinggi grafik, zoom) dibiarkan.
+- Tambahan pemetaan: #737A88 -> --color-text-secondary; #E03131 -> --color-error;
+  #2F9E44 -> --color-success; #E8A317 -> --color-warning; #966508 -> --color-warning-dark;
+  #8DA1F3 -> --color-primary-light; fontSize 9 -> var(--text-p12-size);
+  padding 14px -> var(--space-md); margin 80px -> var(--space-2xl).
+- Jangan mengubah JSX selain isi atribut style.
+
+## Admin
+- Komponen admin yang dipakai: app/admin/_components/AdminUI.tsx dan AdminShell.tsx.
+- Abaikan app/admin/_components/admin/AdminUI.tsx (duplikat yang tidak diimpor), jangan diubah atau dihapus.
+
 ### Spasi (hanya margin, padding, gap)
 - 2px, 3px, 4px -> --space-xs
 - 6px -> --space-sm (padding vertikal badge/chip/tag -> --space-xs)
