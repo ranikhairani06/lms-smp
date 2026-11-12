@@ -5,33 +5,33 @@
 */
 
 .adminApp {
-  --ad-primary: #3B5BDB;
-  --ad-primary-light: #5B7CF0;
-  --ad-primary-dark: #1E3A8A;
-  --ad-primary-hover: #2F4FC4;
-  --ad-primary-tint: #E6EAFB;
+  --ad-primary: var(--color-primary);
+  --ad-primary-light: var(--color-primary-light);
+  --ad-primary-dark: var(--color-primary-dark);
+  --ad-primary-hover: var(--color-primary-hover);
+  --ad-primary-tint: var(--color-primary-tint);
 
-  --ad-secondary: #FFC94D;
-  --ad-secondary-tint: #FFF6DE;
+  --ad-secondary: var(--color-secondary);
+  --ad-secondary-tint: var(--color-secondary-tint);
 
-  --ad-info: #1C7ED6;
-  --ad-info-tint: #EAF4FC;
+  --ad-info: var(--color-info);
+  --ad-info-tint: var(--color-info-tint);
 
-  --ad-success: #2F9E44;
-  --ad-success-tint: #EDF8EF;
+  --ad-success: var(--color-success);
+  --ad-success-tint: var(--color-success-tint);
 
-  --ad-warning: #E8A317;
-  --ad-warning-tint: #FDF6E7;
+  --ad-warning: var(--color-warning);
+  --ad-warning-tint: var(--color-warning-tint);
 
-  --ad-error: #E03131;
-  --ad-error-tint: #FCECEC;
+  --ad-error: var(--color-error);
+  --ad-error-tint: var(--color-error-tint);
 
-  --ad-text: #1B1D23;
-  --ad-muted: #4A4E58;
-  --ad-disabled: #C4C8D2;
-  --ad-border: #C4C8D2;
-  --ad-bg: #EDEFF3;
-  --ad-surface: #FFFFFF;
+  --ad-text: var(--color-text-primary);
+  --ad-muted: var(--color-text-secondary);
+  --ad-disabled: var(--color-text-disabled);
+  --ad-border: var(--color-border);
+  --ad-bg: var(--color-background);
+  --ad-surface: var(--color-surface);
 
   min-height: 100vh;
 
