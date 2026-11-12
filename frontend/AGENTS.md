@@ -108,4 +108,4 @@ dan jangan meninggalkan nilai hardcode.
   --color-text-disabled hanya untuk placeholder dan elemen yang benar-benar nonaktif.
 - Latar hover di atas kartu putih -> var(--color-primary-tint) atau var(--color-background), BUKAN --color-surface
   (putih di atas putih membuat hover tidak terlihat).
-- Warna lain yang tidak jelas fungsinya: JANGAN ditebak. Biarkan, lalu laporkan lengkap dengan nomor baris.
+- Warna lain yang tidak jelas fungsinya: JANGAN ditebak. Biarkan, lalu laporkan lengkap dengan nomor baris. 
