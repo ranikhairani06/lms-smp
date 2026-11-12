@@ -109,3 +109,49 @@ dan jangan meninggalkan nilai hardcode.
 - Latar hover di atas kartu putih -> var(--color-primary-tint) atau var(--color-background), BUKAN --color-surface
   (putih di atas putih membuat hover tidak terlihat).
 - Warna lain yang tidak jelas fungsinya: JANGAN ditebak. Biarkan, lalu laporkan lengkap dengan nomor baris. 
+## Mencocokkan halaman dengan desain Figma (WAJIB saat diminta merevisi halaman)
+
+Gambar Figma yang saya lampirkan adalah acuan yang benar. Kode saat ini hasil slicing awal
+dan boleh berbeda dari desain.
+
+### Cara kerja
+1. Sebelum mengubah apa pun, tulis transkripsi singkat teks dari gambar Figma yang akan kamu
+   ubah atau tambahkan (judul, label, angka contoh, nama tombol). Jika ada teks yang tidak
+   terbaca jelas, tulis "tidak jelas" dan JANGAN menebak.
+2. Bandingkan dengan kode halaman: konten (teks, label, bagian/kartu, urutan, jumlah item),
+   tata letak (jumlah kolom, posisi), komponen (tombol, badge, tabel, progress), dan gaya.
+3. Perbaiki hanya yang berbeda. Jangan merombak bagian yang sudah sama.
+
+### Aturan konten
+- Teks statis (judul, label, keterangan, nama tombol) harus persis seperti di Figma.
+- Data contoh yang ditulis langsung di kode: ganti sesuai Figma. Data yang berasal dari
+  API/backend: JANGAN diganti dengan teks Figma dan jangan hapus pemanggilan API; cukup
+  sesuaikan tampilannya.
+- Bagian yang ada di Figma tapi belum ada di kode: tambahkan sebagai tampilan statis dengan
+  data contoh dari Figma, beri komentar TODO-DATA. Jangan membuat endpoint atau logika baru.
+- Bagian yang ada di kode tapi tidak ada di Figma: hapus HANYA jika murni statis (tanpa
+  logika, API, atau penanganan klik). Jika punya logika, biarkan dan laporkan.
+- Jangan menambah fitur, halaman, atau rute baru.
+
+### Aturan kode
+- Ikuti seluruh "Aturan styling" dan "Pemetaan nilai ke token": tidak ada nilai hardcode.
+- Nama gaya teks di Figma sama dengan nama token: Heading/h5 = --text-h5-*, Paragraf/p18 =
+  --text-p18-*, Label/l16 = --text-l16-*. Pakai token itu persis, termasuk ketebalannya
+  (Bold = --font-weight-bold, SemiBold = --font-weight-semibold). Untuk elemen yang sedang
+  diperbaiki, ini mengalahkan aturan "jangan ubah ukuran font".
+- Pakai kelas dan komponen yang sudah ada. Kelas baru hanya di file CSS role yang sama,
+  dengan awalan role yang sudah dipakai di file itu, dan wajib memakai token.
+- Komponen bersama (ui.tsx, AdminUI.tsx, shell): boleh menambah varian atau prop opsional.
+  Jangan mengubah tampilan default karena dipakai halaman lain. Jika perlu mengubah default,
+  laporkan dulu tanpa mengubah.
+- Responsif: jika Figma menyertakan versi mobile, ikuti. Jika tidak, jangan ubah perilaku
+  mobile yang ada.
+- Jangan ubah logika, pemanggilan API, routing, nama props, atau halaman lain di luar yang diminta.
+- Jangan menjalankan perintah git.
+- Jalankan npm run build. Lint boleh gagal hanya karena 3 error lama di quiz.tsx.
+
+### Laporan akhir (wajib)
+1. Perbedaan yang diperbaiki (file dan bagian).
+2. Perbedaan yang sengaja tidak diubah dan alasannya.
+3. Hal yang butuh keputusan saya.
+4. File yang berubah dan hasil build.
