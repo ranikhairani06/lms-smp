@@ -33,13 +33,13 @@ export default function TahunAjaranPage() {
       {/* Bagian tampilan: kartu total tahun akademik dan periode mendatang. */}
       <div className={s.twoCards}>
         <div className={s.metricCard}><small>Total Tahun Akademik</small><strong>3 Periode</strong><p>5 Semester Tercatat</p></div>
-        <div className={s.metricCard}><small>Periode Mendatang</small><strong>2026/2027 Genap</strong><p><span style={{ color: "#966508" }}>◷ Dimulai 05 Jan 2027</span></p></div>
+        <div className={s.metricCard}><small>Periode Mendatang</small><strong>2026/2027 Genap</strong><p><span style={{ color: "var(--color-warning-dark)" }}>◷ Dimulai 05 Jan 2027</span></p></div>
       </div>
       {/* Bagian tampilan: progres siklus semester aktif. */}
-      <div className={s.panel} style={{ marginBottom: 24 }}>
+      <div className={s.panel} style={{ marginBottom: "var(--space-lg)" }}>
         <div className={s.panelTitle}><h2>Siklus Akademik Terjadwal</h2><span>Progres Semester Ganjil Berjalan: Minggu ke-14 dari 23</span></div>
         <div className={s.progressSegments}><span /><span /><span /></div>
-        <div className={s.heroTags} style={{ marginTop: 8 }}><span style={{ color: "#4A4E58", background: "transparent", border: 0 }}>● Pembelajaran Aktif</span><span style={{ color: "#4A4E58", background: "transparent", border: 0 }}>● Asesmen Akhir &amp; Rapor</span><span style={{ color: "#4A4E58", background: "transparent", border: 0 }}>● Transisi Genap 2026/2027</span></div>
+        <div className={s.heroTags} style={{ marginTop: "var(--space-sm)" }}><span style={{ color: "var(--color-text-secondary)", background: "transparent", border: 0 }}>● Pembelajaran Aktif</span><span style={{ color: "var(--color-text-secondary)", background: "transparent", border: 0 }}>● Asesmen Akhir &amp; Rapor</span><span style={{ color: "var(--color-text-secondary)", background: "transparent", border: 0 }}>● Transisi Genap 2026/2027</span></div>
       </div>
       {/* Bagian tampilan: daftar semester, status operasional, dan aksi manajemen. */}
       <div className={s.panel}>

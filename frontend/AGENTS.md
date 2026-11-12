@@ -101,3 +101,11 @@ dan jangan meninggalkan nilai hardcode.
   app/siswa/_components/quiz.tsx (baris 367, 390, 444). Ini sudah ada sebelum refactor styling.
   Jangan diperbaiki dan jangan diubah.
 - Syarat selesai: npm run build berhasil dan tidak ada error lint baru di luar tiga itu.
+## Warna di luar palet (aturan cadangan)
+- Border berwarna apa pun yang tidak ada di palet (misalnya #eeebfa, #d7d6e6, #e0ddef, #e5e7ee) -> var(--color-border).
+- Warna teks di luar palet -> var(--color-text-secondary). Warna latar netral di luar palet -> var(--color-background).
+- Teks pesan kosong (empty state) dan teks yang harus terbaca -> var(--color-text-secondary), BUKAN --color-text-disabled.
+  --color-text-disabled hanya untuk placeholder dan elemen yang benar-benar nonaktif.
+- Latar hover di atas kartu putih -> var(--color-primary-tint) atau var(--color-background), BUKAN --color-surface
+  (putih di atas putih membuat hover tidak terlihat).
+- Warna lain yang tidak jelas fungsinya: JANGAN ditebak. Biarkan, lalu laporkan lengkap dengan nomor baris.

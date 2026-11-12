@@ -24,7 +24,7 @@ export default function UpdateDataPage() {
     <>
       <PageHeading breadcrumbs={["LMS", "Update Data"]} title="Update Data Siswa" description="Pantau siswa yang belum memperbarui profil setelah pergantian tahun ajaran. Perubahan kelas tersimpan otomatis saat siswa memperbarui profilnya." />
       {/* Bagian tampilan: banner informasi sinkronisasi mandiri siswa. */}
-      <div className={s.infoBanner + " " + s.info_info} style={{ marginBottom: 24 }}><AdminIcon name="info-circle-linear" size={19} /><div><strong>Sinkronisasi Mandiri Siswa</strong><p>Admin tidak perlu mengubah data satu per satu. Siswa diminta memperbarui profil saat login ke akun masing-masing.</p></div></div>
+      <div className={s.infoBanner + " " + s.info_info} style={{ marginBottom: "var(--space-lg)" }}><AdminIcon name="info-circle-linear" size={19} /><div><strong>Sinkronisasi Mandiri Siswa</strong><p>Admin tidak perlu mengubah data satu per satu. Siswa diminta memperbarui profil saat login ke akun masing-masing.</p></div></div>
       {/* Bagian tampilan: statistik perhatian khusus, kelengkapan data, dan periode aktif. */}
       <div className={s.statGridThree}>
         <StatCard label="Perhatian Khusus" value="7 Siswa" detail="Siswa belum memperbarui konfirmasi kelas" icon="history-linear" tone="warning" />
@@ -39,7 +39,7 @@ export default function UpdateDataPage() {
           <table className={s.dataTable}>
             <thead><tr><th>Siswa</th><th>Tingkat Tercatat</th><th>Rombel Tercatat</th><th>Terdeteksi</th><th>Wali Kelas</th><th>Status</th></tr></thead>
             <tbody>{visible.map((row) => <tr key={row.nisn}>
-              <td><div style={{ display: "flex", alignItems: "center", gap: 8 }}><span className={s.classCode}>{row.initials}</span><span><span className={s.tableStrong}>{row.name}</span><span className={s.tableSub}>NISN: {row.nisn}</span></span></div></td>
+              <td><div style={{ display: "flex", alignItems: "center", gap: "var(--space-sm)" }}><span className={s.classCode}>{row.initials}</span><span><span className={s.tableStrong}>{row.name}</span><span className={s.tableSub}>NISN: {row.nisn}</span></span></div></td>
               <td><span className={s.levelTag}>{row.level}</span></td><td>{row.recorded}</td><td><StatusBadge tone={row.detected === "Sesuai" ? "success" : "warning"}>{row.detected}</StatusBadge></td><td>{row.wali}</td><td><StatusBadge tone={row.status === "Sudah Diperbarui" ? "success" : "warning"}>{row.status}</StatusBadge></td>
             </tr>)}</tbody>
           </table>

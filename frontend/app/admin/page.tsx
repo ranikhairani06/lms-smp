@@ -69,7 +69,7 @@ export default function AdminDashboardPage() {
             <div className={`${s.attentionItem} ${s.attentionDanger}`}>
               <span className={s.attentionIcon}><AdminIcon name="users-group-rounded-linear" size={19} color="#E03131" /></span>
               <div className={s.attentionText}><strong>2 rombel melebihi kapasitas</strong><small>Rombel 9C &amp; 9D terisi lebih dari 36 siswa</small></div>
-              <Link href="/admin/master-data/rombel" className={s.attentionButton} style={{ background: "#E03131" }}>Lihat</Link>
+              <Link href="/admin/master-data/rombel" className={s.attentionButton} style={{ background: "var(--color-error)" }}>Lihat</Link>
             </div>
             <div className={s.pagination}><span /> <Link href="/admin/laporan/aktivitas" className={s.textLink}>Buka Riwayat Lengkap <AdminIcon name="arrow-right-linear" size={13} /></Link></div>
           </Panel>

@@ -43,7 +43,7 @@ export default function LaporanNilaiPage() {
           <label className={s.filterItem}><span>Tingkat</span><select value={level} onChange={(e) => setLevel(e.target.value)}><option>Kelas VII</option><option>Kelas VIII</option><option>Kelas IX</option></select></label>
           <label className={s.filterItem}><span>Rombongan Belajar</span><select value={rombel} onChange={(e) => setRombel(e.target.value)}><option>Kelas 8A</option><option>Kelas 8B</option><option>Kelas 8C</option><option>Semua Rombel</option></select></label>
           <label className={s.filterItem}><span>Mata Pelajaran</span><select value={subject} onChange={(e) => setSubject(e.target.value)}><option>Semua Mapel</option><option>Informatika</option><option>Matematika</option><option>IPA Terpadu</option><option>Bahasa Indonesia</option></select></label>
-          <div style={{ display: "flex", alignItems: "end", gap: 4 }}><Button icon="filter-linear">Terapkan Filter</Button><Button variant="ghost" onClick={() => { setYear("2026/2027 Ganjil"); setLevel("Kelas VIII"); setRombel("Kelas 8A"); setSubject("Semua Mapel"); }}>Reset</Button></div>
+          <div style={{ display: "flex", alignItems: "end", gap: "var(--space-xs)" }}><Button icon="filter-linear">Terapkan Filter</Button><Button variant="ghost" onClick={() => { setYear("2026/2027 Ganjil"); setLevel("Kelas VIII"); setRombel("Kelas 8A"); setSubject("Semua Mapel"); }}>Reset</Button></div>
         </div>
       </Panel>
       {/* Bagian tampilan: empat indikator ketercapaian hasil belajar dan asesmen. */}
@@ -58,7 +58,7 @@ export default function LaporanNilaiPage() {
         <div className={s.panelTitle}><h2>Hasil Penilaian Siswa</h2><StatusBadge tone="info">KKTP 75.0</StatusBadge></div>
         <div className={s.tableWrap}><table className={s.dataTable}>
           <thead><tr><th>Nama Siswa</th><th>NISN</th><th>Kelas</th><th>Formatif</th><th>UTS</th><th>UAS</th><th>Nilai Akhir</th><th>Keterangan KKTP</th></tr></thead>
-          <tbody>{visibleGrades.map((row) => <tr key={row.nisn}><td><span className={s.tableStrong}>{row.name}</span></td><td>{row.nisn}</td><td>{row.class}</td><td>{row.formative}</td><td>{row.uts}</td><td>{row.uas}</td><td><strong style={{ color: Number(row.final) < 75 ? "#E03131" : "#1B1D23" }}>{row.final}</strong></td><td><StatusBadge tone={row.result === "Tuntas" ? "success" : "warning"}>{row.result}</StatusBadge></td></tr>)}</tbody>
+          <tbody>{visibleGrades.map((row) => <tr key={row.nisn}><td><span className={s.tableStrong}>{row.name}</span></td><td>{row.nisn}</td><td>{row.class}</td><td>{row.formative}</td><td>{row.uts}</td><td>{row.uas}</td><td><strong style={{ color: Number(row.final) < 75 ? "var(--color-error)" : "var(--color-text-primary)" }}>{row.final}</strong></td><td><StatusBadge tone={row.result === "Tuntas" ? "success" : "warning"}>{row.result}</StatusBadge></td></tr>)}</tbody>
         </table></div>
         <Pagination current={page} total={4} onChange={setPage} label="Menampilkan halaman 1 dari 144" />
       </Panel>
@@ -67,7 +67,7 @@ export default function LaporanNilaiPage() {
         <div className={s.panelTitle}><h2>Ringkasan Pembelajaran per Mata Pelajaran</h2></div>
         <div className={s.tableWrap}><table className={s.dataTable}>
           <thead><tr><th>Mata Pelajaran / Rombel</th><th>Guru Pengampu</th><th>Modul</th><th>Asesmen Aktif</th><th>Rata-rata Progres</th><th>Rata-rata Nilai</th><th>Keterangan KKTP</th></tr></thead>
-          <tbody>{subjects.filter((item) => subject === "Semua Mapel" || item.name === subject).map((row) => <tr key={row.name}><td><span className={s.tableStrong}>{row.name}</span><span className={s.tableSub}>{row.class}</span></td><td>{row.teacher}</td><td>{row.module}</td><td><StatusBadge tone="info">{row.assessments}</StatusBadge></td><td><div className={s.capacity}><div className={s.capacityBar}><span style={{ width: `${row.progress}%`, background: row.status === "Tuntas" ? "#3B5BDB" : "#E8A317" }} /></div><span className={s.tableSub}>{row.progress}%</span></div></td><td><strong>{row.average}</strong></td><td><StatusBadge tone={row.status === "Tuntas" ? "success" : "warning"}>{row.status}</StatusBadge></td></tr>)}</tbody>
+          <tbody>{subjects.filter((item) => subject === "Semua Mapel" || item.name === subject).map((row) => <tr key={row.name}><td><span className={s.tableStrong}>{row.name}</span><span className={s.tableSub}>{row.class}</span></td><td>{row.teacher}</td><td>{row.module}</td><td><StatusBadge tone="info">{row.assessments}</StatusBadge></td><td><div className={s.capacity}><div className={s.capacityBar}><span style={{ width: `${row.progress}%`, background: row.status === "Tuntas" ? "var(--color-primary)" : "var(--color-warning)" }} /></div><span className={s.tableSub}>{row.progress}%</span></div></td><td><strong>{row.average}</strong></td><td><StatusBadge tone={row.status === "Tuntas" ? "success" : "warning"}>{row.status}</StatusBadge></td></tr>)}</tbody>
         </table></div>
         <Pagination current={page} total={4} onChange={setPage} label="Menampilkan 1 sampai 6 dari 24 entri" />
       </Panel>

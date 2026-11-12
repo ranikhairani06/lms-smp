@@ -50,9 +50,9 @@ export default function RombelPage() {
             const over = row.filled > row.capacity;
             const percent = Math.min(100, Math.round((row.filled / row.capacity) * 100));
             return <tr key={row.name}>
-              <td><span className={s.tableStrong}>{row.name}</span>{over && <span className={s.tableSub} style={{ color: "#E03131" }}>⚠ Kapasitas Berlebihan</span>}</td><td><span className={s.levelTag}>{row.level}</span></td>
+              <td><span className={s.tableStrong}>{row.name}</span>{over && <span className={s.tableSub} style={{ color: "var(--color-error)" }}>⚠ Kapasitas Berlebihan</span>}</td><td><span className={s.levelTag}>{row.level}</span></td>
               <td>{row.wali}<span className={s.tableSub}>NIP {row.nip}</span></td><td>{row.room}</td>
-              <td><div className={s.capacity}><div className={s.capacityText}><span>{row.filled} / {row.capacity} Siswa</span><b style={{ color: over ? "#E03131" : "#3B5BDB" }}>{over ? `${Math.round((row.filled / row.capacity) * 100)}%` : percent === 100 ? "Penuh" : `${percent}%`}</b></div><div className={s.capacityBar}><span className={over ? s.capacityOver : ""} style={{ width: `${Math.min(100, (row.filled / row.capacity) * 100)}%` }} /></div></div></td>
+              <td><div className={s.capacity}><div className={s.capacityText}><span>{row.filled} / {row.capacity} Siswa</span><b style={{ color: over ? "var(--color-error)" : "var(--color-primary)" }}>{over ? `${Math.round((row.filled / row.capacity) * 100)}%` : percent === 100 ? "Penuh" : `${percent}%`}</b></div><div className={s.capacityBar}><span className={over ? s.capacityOver : ""} style={{ width: `${Math.min(100, (row.filled / row.capacity) * 100)}%` }} /></div></div></td>
               <td><div className={s.tableActions}><Button onClick={() => show("detail", row)}>Detail</Button><Button variant="ghost" onClick={() => show("edit", row)}>Edit</Button></div></td>
             </tr>;
           })}{filtered.length === 0 && <TableEmpty colSpan={6} />}</tbody>

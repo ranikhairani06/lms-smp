@@ -36,7 +36,7 @@ export default function LaporanAktivitasPage() {
           <label className={s.filterItem}><span><AdminIcon name="users-group-rounded-linear" size={12} /> Peran Pengguna</span><select value={role} onChange={(e) => setRole(e.target.value)}><option>Semua Peran</option><option>Super Admin</option><option>Guru</option><option>Orang Tua</option><option>Siswa</option></select></label>
           <label className={s.filterItem}><span><AdminIcon name="widget-2-linear" size={12} /> Modul Sistem</span><select value={module} onChange={(e) => setModule(e.target.value)}><option>Semua Modul</option><option>Manajemen Pengguna</option><option>Nilai</option><option>Profil</option><option>Autentikasi</option></select></label>
           <label className={s.filterItem}><span><AdminIcon name="check-circle-linear" size={12} /> Status</span><select value={status} onChange={(e) => setStatus(e.target.value)}><option>Semua Status</option><option>Berhasil</option><option>Gagal</option></select></label>
-          <div style={{ display: "flex", alignItems: "end", gap: 8 }}><Button icon="filter-linear">Terapkan Filter</Button><Button variant="ghost" onClick={() => { setRange("7 Hari Terakhir"); setRole("Semua Peran"); setModule("Semua Modul"); setStatus("Semua Status"); }}>Reset</Button></div>
+          <div style={{ display: "flex", alignItems: "end", gap: "var(--space-sm)" }}><Button icon="filter-linear">Terapkan Filter</Button><Button variant="ghost" onClick={() => { setRange("7 Hari Terakhir"); setRole("Semua Peran"); setModule("Semua Modul"); setStatus("Semua Status"); }}>Reset</Button></div>
         </div>
         {/* Bagian tampilan: tabel log aktivitas bersifat hanya-baca. */}
         <div className={s.panelTitle}><h2><AdminIcon name="history-linear" size={18} /> Tabel Riwayat Aktivitas</h2></div>
@@ -44,8 +44,8 @@ export default function LaporanAktivitasPage() {
           <table className={s.dataTable}>
             <thead><tr><th>Timestamp (WIB)</th><th>Pengguna &amp; Identitas</th><th>Peran</th><th>Deskripsi Aktivitas</th><th>Status</th></tr></thead>
             <tbody>{filtered.map((row, index) => <tr key={`${row.time}-${index}`}>
-              <td><span style={{ color: "#737A88" }}><AdminIcon name="clock-circle-linear" size={13} /> {row.time}</span></td>
-              <td><div style={{ display: "flex", alignItems: "center", gap: 8 }}><span className={s.classCode}>{row.initials}</span><span><span className={s.tableStrong}>{row.name}</span><span className={s.tableSub}>{row.identity}</span></span></div></td>
+              <td><span style={{ color: "var(--color-text-secondary)" }}><AdminIcon name="clock-circle-linear" size={13} /> {row.time}</span></td>
+              <td><div style={{ display: "flex", alignItems: "center", gap: "var(--space-sm)" }}><span className={s.classCode}>{row.initials}</span><span><span className={s.tableStrong}>{row.name}</span><span className={s.tableSub}>{row.identity}</span></span></div></td>
               <td><StatusBadge tone={row.role === "Super Admin" ? "primary" : row.role === "Guru" ? "info" : row.role === "Siswa" ? "success" : "warning"}>{row.role}</StatusBadge></td><td>{row.description}</td><td><StatusBadge tone={row.status === "Berhasil" ? "success" : "danger"}>● {row.status}</StatusBadge></td>
             </tr>)}</tbody>
           </table>
