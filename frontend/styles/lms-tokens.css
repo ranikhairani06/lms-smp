@@ -1,0 +1,145 @@
+/* Acuan: DESIGN (2).md. Token warna bersama untuk semua halaman LMS. */
+@font-face {
+  font-family: Poppins;
+  src: url("/fonts/poppins-latin-400-normal.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: Poppins;
+  src: url("/fonts/poppins-latin-500-normal.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: Poppins;
+  src: url("/fonts/poppins-latin-600-normal.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: Poppins;
+  src: url("/fonts/poppins-latin-700-normal.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+.lms-theme {
+  --lms-primary: #3b5bdb;
+  --lms-primary-light: #5b7cf0;
+  --lms-primary-dark: #1e3a8a;
+  --lms-primary-hover: #2f4fc4;
+  --lms-primary-soft: #e6eafb;
+  --lms-secondary: #ffc94d;
+  --lms-secondary-light: #ffdb85;
+  --lms-secondary-dark: #d9a400;
+  --lms-secondary-hover: var(--lms-secondary-dark);
+  --lms-secondary-soft: #fff6de;
+  --lms-info: #1c7ed6;
+  --lms-info-light: #4fa8ed;
+  --lms-info-dark: #145fa3;
+  --lms-info-soft: #eaf4fc;
+  --lms-success: #2f9e44;
+  --lms-success-light: #51bb68;
+  --lms-success-dark: #1f7a31;
+  --lms-success-hover: var(--lms-success-dark);
+  --lms-success-soft: #edf8ef;
+  --lms-warning: #e8a317;
+  --lms-warning-light: #f5c158;
+  --lms-warning-dark: #b87d0e;
+  --lms-warning-hover: var(--lms-warning-dark);
+  --lms-warning-soft: #fdf6e7;
+  --lms-error: #e03131;
+  --lms-error-light: #f16060;
+  --lms-error-dark: #a61e1e;
+  --lms-error-hover: var(--lms-error-dark);
+  --lms-error-soft: #fcecec;
+  --lms-text: #1b1d23;
+  --lms-text-secondary: #4a4e58;
+  --lms-disabled: #c4c8d2;
+  --lms-border: #c4c8d2;
+  --lms-background: #edeff3;
+  --lms-surface: #ffffff;
+  --lms-font: Poppins, Arial, sans-serif;
+  --lms-space-xs: 4px;
+  --lms-space-sm: 8px;
+  --lms-space-md: 16px;
+  --lms-space-lg: 24px;
+  --lms-space-xl: 32px;
+  --lms-space-2xl: 48px;
+  /* Radius dan tipografi mengikuti acuan DESIGN (2).md. */
+  --lms-radius-control: 8px;
+  --lms-radius-card: 16px;
+  --lms-radius-pill: 999px;
+  --lms-shadow: 0 2px 8px rgb(26 28 35 / 6%);
+  --lms-focus: 0 0 0 3px rgb(59 91 219 / 18%);
+  font-family: var(--lms-font);
+}
+
+@font-face {
+  font-family: Poppins;
+  src: url("/fonts/poppins-latin-800-normal.woff2") format("woff2");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+.lms-theme {
+  --lms-radius-button: 12px;
+  --lms-radius-xs: 4px;
+  --lms-radius-circle: 50%;
+  --lms-card-space: 24px;
+  --lms-shadow-2: 0 4px 16px rgb(27 29 35 / 10%);
+  --lms-shadow-3: 0 16px 48px rgb(27 29 35 / 18%);
+}
+.lms-theme {
+  --lms-display-size: 60px;
+  --lms-display-line: 53px;
+}
+.lms-theme {
+  --lms-h1-size: 44px;
+  --lms-h1-line: 58px;
+}
+.lms-theme {
+  --lms-h2-size: 36px;
+  --lms-h2-line: 46px;
+}
+.lms-theme {
+  --lms-h3-size: 28px;
+  --lms-h3-line: 38px;
+}
+.lms-theme {
+  --lms-h4-size: 24px;
+  --lms-h4-line: 32px;
+}
+.lms-theme {
+  --lms-h5-size: 20px;
+  --lms-h5-line: 26px;
+}
+.lms-theme {
+  --lms-p18-size: 18px;
+  --lms-p18-line: 27px;
+}
+.lms-theme {
+  --lms-p16-size: 16px;
+  --lms-p16-line: 24px;
+}
+.lms-theme {
+  --lms-p12-size: 12px;
+  --lms-p12-line: 18px;
+}
+.lms-theme {
+  --lms-l18-size: 18px;
+  --lms-l18-line: 23px;
+}
+.lms-theme {
+  --lms-l16-size: 16px;
+  --lms-l16-line: 20px;
+}
+.lms-theme {
+  --lms-l12-size: 12px;
+  --lms-l12-line: 14px;
+}
