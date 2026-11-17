@@ -1,11 +1,13 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import type { ReactNode } from "react";
 import type { AuthUser } from "@/lib/auth-types";
 import LogoutButton from "@/components/lms/LogoutButton";
+import AppShell from "@/components/lms/shell/AppShell";
+import shellStyles from "@/components/lms/shell/AppShell.module.css";
+import type { AppNavigationItem } from "@/components/lms/shell/types";
 import AdminIcon from "./AdminIcons";
 import s from "./AdminUI.module.css";
 
@@ -23,7 +25,7 @@ const reportLinks = [
   { label: "Laporan Nilai", href: "/admin/laporan/nilai" },
 ];
 
-export default function AdminShell({ children, user }: { children: ReactNode; user: AuthUser }) {
+export default function AdminShell({ children }: { children: ReactNode; user: AuthUser }) {
   const pathname = usePathname();
   const [noticeOpen, setNoticeOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -32,86 +34,77 @@ export default function AdminShell({ children, user }: { children: ReactNode; us
   const inReports = pathname.startsWith("/admin/laporan");
   const currentTitle = pathname === "/admin" ? "Dashboard" : inUsers ? "Manajemen Pengguna" : inMaster ? "Master Data" : inReports ? "Laporan" : pathname.includes("update-data") ? "Update Data" : "Profil";
 
- /* Ikon navigasi utama Sidebar Admin */
-  const navLink = (href: string, label: string, icon: string, active: boolean) => (
-    <Link href={href} className={`${s.navLink} ${active ? s.navActive : ""}`}>
-      <AdminIcon name={icon} size={24} />
-      <span>{label}</span>
-    </Link>
+  const navigation: AppNavigationItem[] = [
+    { label: "Dashboard", href: "/admin", icon: <AdminIcon name="home-2-linear" size={24} />, active: pathname === "/admin" },
+    {
+      label: "Manajemen Pengguna",
+      href: "/admin/pengguna/siswa",
+      icon: <AdminIcon name="users-group-rounded-linear" size={24} />,
+      active: inUsers,
+      children: userLinks.map((item) => ({ ...item, active: pathname === item.href })),
+    },
+    {
+      label: "Master Data",
+      href: "/admin/master-data/tahun-ajaran",
+      icon: <AdminIcon name="book-bookmark-linear" size={24} />,
+      active: inMaster,
+      children: masterLinks.map((item) => ({ ...item, active: pathname === item.href })),
+    },
+    { label: "Update Data", href: "/admin/update-data", icon: <AdminIcon name="clipboard-check-linear" size={24} />, active: pathname === "/admin/update-data" },
+    {
+      label: "Laporan",
+      href: "/admin/laporan/aktivitas",
+      icon: <AdminIcon name="smartphone-linear" size={24} />,
+      active: inReports,
+      children: reportLinks.map((item) => ({ ...item, active: pathname === item.href })),
+    },
+    { label: "Profil", href: "/admin/profil", icon: <AdminIcon name="user-circle-linear" size={24} />, active: pathname === "/admin/profil" },
+  ];
+
+  const mobileNavigation: AppNavigationItem[] = [
+    { label: "Beranda", href: "/admin", icon: <AdminIcon name="home-2-linear" size={18} />, active: pathname === "/admin" },
+    { label: "Pengguna", href: "/admin/pengguna/siswa", icon: <AdminIcon name="users-group-rounded-linear" size={18} />, active: inUsers },
+    { label: "Master", href: "/admin/master-data/tahun-ajaran", icon: <AdminIcon name="book-2-linear" size={18} />, active: inMaster },
+    { label: "Update", href: "/admin/update-data", icon: <AdminIcon name="clipboard-check-linear" size={18} />, active: pathname === "/admin/update-data" },
+    { label: "Laporan", href: "/admin/laporan/aktivitas", icon: <AdminIcon name="chart-square-linear" size={18} />, active: inReports },
+    { label: "Profil", href: "/admin/profil", icon: <AdminIcon name="user-circle-linear" size={18} />, active: pathname === "/admin/profil" },
+  ];
+
+  const rightSlot = (
+    <>
+      <div className={s.notificationWrap}>
+        <button className={s.notificationButton} onClick={() => setNoticeOpen((open) => !open)} aria-label="Notifikasi">
+          <AdminIcon name="bell-linear" size={19} /><span>3</span>
+        </button>
+        {noticeOpen && <div className={s.notificationPopover}><strong>Notifikasi</strong><p>8 data siswa memerlukan verifikasi NISN.</p><p>2 rombel melebihi kapasitas.</p><p>Semester Genap tersedia untuk dijadwalkan.</p></div>}
+      </div>
+      <span className={s.avatarSmall}>AB</span>
+      <strong className={s.adminName}>Admin Bayu</strong>
+    </>
   );
 
   return (
-    <div className={`${s.adminApp} ${sidebarCollapsed ? s.adminAppCollapsed : ""}`}>
-      {/* Bagian tampilan: topbar membentang di atas sidebar dan seluruh area konten. */}
-      <header className={s.topbar}>
-        <div className={s.topbarLeft}>
-          <button className={s.topbarMenu} type="button" onClick={() => setSidebarCollapsed((collapsed) => !collapsed)} aria-label={sidebarCollapsed ? "Perluas menu" : "Ciutkan menu"} aria-expanded={!sidebarCollapsed}>
-            <AdminIcon name="hamburger-menu-linear" size={19} />
-          </button>
-          <strong>{currentTitle}</strong>
-        </div>
-        <div className={s.topbarRight}>
-          <div className={s.notificationWrap}>
-            <button className={s.notificationButton} onClick={() => setNoticeOpen((open) => !open)} aria-label="Notifikasi">
-              <AdminIcon name="bell-linear" size={19} /><span>3</span>
-            </button>
-            {noticeOpen && <div className={s.notificationPopover}><strong>Notifikasi</strong><p>8 data siswa memerlukan verifikasi NISN.</p><p>2 rombel melebihi kapasitas.</p><p>Semester Genap tersedia untuk dijadwalkan.</p></div>}
-          </div>
-          {/* Identitas administrator sesuai desain UI/UX */}
-          <span className={s.avatarSmall}>AB</span>
-          <strong className={s.adminName}>Admin Bayu</strong>
-        </div>
-      </header>
-
-      {/* Bagian tampilan: sidebar dimulai di bawah topbar, sesuai frame desktop desain. */}
-      <aside className={s.sidebar}>
-        <Link href="/admin" className={s.brandBlock}>
-          <span className={s.brandMark}><AdminIcon name="square-academic-cap-bold-duotone" size={24} /></span>
-          <span><strong>EduSpace LMS</strong><small>Portal Admin</small></span>
-        </Link>
-        <nav className={s.nav} aria-label="Navigasi administrator">
-          {navLink("/admin", "Dashboard", "home-2-linear", pathname === "/admin")}
-          <div className={s.navGroup}>
-            <Link href="/admin/pengguna/siswa" className={`${s.navLink} ${inUsers ? s.navActive : ""}`}>
-              <AdminIcon name="users-group-rounded-linear" size={24}/><span>Manajemen Pengguna</span>
-            </Link>
-            {inUsers && <div className={s.subNav}>{userLinks.map((item) => <Link key={item.href} href={item.href} className={pathname === item.href ? s.subNavActive : ""}>{item.label}</Link>)}</div>}
-          </div>
-          <div className={s.navGroup}>
-            <Link href="/admin/master-data/tahun-ajaran" className={`${s.navLink} ${inMaster ? s.navActive : ""}`}>
-              <AdminIcon name="book-bookmark-linear" size={24} /><span>Master Data</span>
-            </Link>
-            {inMaster && <div className={s.subNav}>{masterLinks.map((item) => <Link key={item.href} href={item.href} className={pathname === item.href ? s.subNavActive : ""}>{item.label}</Link>)}</div>}
-          </div>
-          {navLink("/admin/update-data", "Update Data", "clipboard-check-linear", pathname === "/admin/update-data")}
-          <div className={s.navGroup}>
-            <Link href="/admin/laporan/aktivitas" className={`${s.navLink} ${inReports ? s.navActive : ""}`}>
-              <AdminIcon name="smartphone-linear" size={24} /><span>Laporan</span>
-            </Link>
-            {inReports && <div className={s.subNav}>{reportLinks.map((item) => <Link key={item.href} href={item.href} className={pathname === item.href ? s.subNavActive : ""}>{item.label}</Link>)}</div>}
-          </div>
-          {navLink("/admin/profil", "Profil", "user-circle-linear", pathname === "/admin/profil")}
-        </nav>
-        <div style={{ marginTop: "auto" }}>
-          <LogoutButton className={s.logoutLink}><AdminIcon name="logout-2-linear" size={24} />Logout</LogoutButton>
-        </div>
-      </aside>
-
-      {/* Bagian tampilan: halaman aktif dan footer berada di kolom utama kanan. */}
-      <main className={s.mainArea}>
-        <div className={s.mainContent}>{children}</div>
-        {/* Bagian tampilan: footer sistem sesuai design system. */}
-        <footer className={s.footer}>LMS SMP Terpadu • Sistem Administrasi &amp; Pembelajaran Terpadu</footer>
-        {/* Bagian tampilan: bottom navigation hanya terlihat pada layar mobile. */}
-        <nav className={s.bottomNav} aria-label="Navigasi admin mobile">
-          <Link href="/admin" className={pathname === "/admin" ? s.bottomNavActive : ""}><AdminIcon name="home-2-linear" size={18} /><span>Beranda</span></Link>
-          <Link href="/admin/pengguna/siswa" className={inUsers ? s.bottomNavActive : ""}><AdminIcon name="users-group-rounded-linear" size={18} /><span>Pengguna</span></Link>
-          <Link href="/admin/master-data/tahun-ajaran" className={inMaster ? s.bottomNavActive : ""}><AdminIcon name="book-2-linear" size={18} /><span>Master</span></Link>
-          <Link href="/admin/update-data" className={pathname === "/admin/update-data" ? s.bottomNavActive : ""}><AdminIcon name="clipboard-check-linear" size={18} /><span>Update</span></Link>
-          <Link href="/admin/laporan/aktivitas" className={inReports ? s.bottomNavActive : ""}><AdminIcon name="chart-square-linear" size={18} /><span>Laporan</span></Link>
-          <Link href="/admin/profil" className={pathname === "/admin/profil" ? s.bottomNavActive : ""}><AdminIcon name="user-circle-linear" size={18} /><span>Profil</span></Link>
-        </nav>
-      </main>
-    </div>
+    <AppShell
+      brand={{
+        href: "/admin",
+        icon: <AdminIcon name="square-academic-cap-bold-duotone" size={24} />,
+        title: "EduSpace LMS",
+        subtitle: "Portal Admin",
+      }}
+      navigation={navigation}
+      topbar={{ title: currentTitle, rightSlot }}
+      footer={<>LMS SMP Terpadu &bull; Sistem Administrasi &amp; Pembelajaran Terpadu</>}
+      mobileNavigation={mobileNavigation}
+      collapsed={sidebarCollapsed}
+      onToggleCollapse={() => setSidebarCollapsed((collapsed) => !collapsed)}
+      menuIcon={<AdminIcon name="hamburger-menu-linear" size={19} />}
+      navigationLabel="Navigasi administrator"
+      mobileNavigationLabel="Navigasi admin mobile"
+      mainClassName={s.mainArea}
+      className={pathname.startsWith("/admin/pengguna/guru") ? shellStyles.teacherDirectoryShell : ""}
+      logout={<LogoutButton><AdminIcon name="logout-2-linear" size={24} /><span className={shellStyles.logoutLabel}>Logout</span></LogoutButton>}
+    >
+      {children}
+    </AppShell>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import styles from "./AdminUI.module.css";
 import AdminIcon from "./AdminIcons";
 
@@ -48,6 +48,9 @@ export function Button({
   form,
   disabled = false,
   className = "",
+  tone,
+  style,
+  iconSize = 17,
 }: {
   children: ReactNode;
   variant?: "primary" | "secondary" | "outline" | "ghost" | "danger";
@@ -57,10 +60,13 @@ export function Button({
   form?: string;
   disabled?: boolean;
   className?: string;
+  tone?: "amber";
+  style?: CSSProperties;
+  iconSize?: number;
 }) {
   return (
-    <button type={type} form={form} disabled={disabled} onClick={onClick} className={`${styles.button} ${styles[`button_${variant}`]} ${className}`}>
-      {icon && <AdminIcon name={icon} size={17} />}
+    <button type={type} form={form} disabled={disabled} onClick={onClick} className={`${styles.button} ${styles[`button_${variant}`]} ${tone === "amber" ? styles.buttonAmber : ""} ${className}`} style={style}>
+      {icon && <AdminIcon name={icon} size={iconSize} />}
       {children}
     </button>
   );
@@ -73,15 +79,17 @@ export function StatCard({
   detail,
   icon,
   tone = "primary",
+  compact = false,
 }: {
   label: string;
   value: string;
   detail?: string;
   icon: string;
   tone?: Tone;
+  compact?: boolean;
 }) {
   return (
-    <div className={styles.statCard}>
+    <div className={`${styles.statCard} ${compact ? styles.statCardCompact : ""}`}>
 
       {/* Bagian atas: ikon, label, dan angka statistik */}
       <div className={styles.statHeader}>
@@ -111,9 +119,45 @@ export function StatCard({
   );
 }
 
+export function AdminStatRow({
+  items,
+  columns,
+}: {
+  items: { label: string; value: string; icon: string; tone: Tone }[];
+  columns: 3 | 4;
+}) {
+  const gridClass = columns === 4 ? styles.statGridFour : styles.statGridThree;
 
-export function StatusBadge({ children, tone = "neutral" }: { children: ReactNode; tone?: Tone }) {
-  return <span className={`${styles.statusBadge} ${styles[`badge_${tone}`]}`}>{children}</span>;
+  return (
+    <div className={`${gridClass} ${styles.adminStatRow}`}>
+      {items.map((item) => <StatCard key={item.label} {...item} compact />)}
+    </div>
+  );
+}
+
+export function AdminTableIconButton({
+  icon,
+  title,
+  ariaLabel,
+  onClick,
+  disabled = false,
+}: {
+  icon: string;
+  title: string;
+  ariaLabel: string;
+  onClick: () => void;
+  disabled?: boolean;
+}) {
+  return (
+    <button type="button" className={styles.iconButton} title={title} aria-label={ariaLabel} onClick={onClick} disabled={disabled}>
+      <AdminIcon name={icon} size={15} />
+    </button>
+  );
+}
+
+
+export function StatusBadge({ children, tone = "neutral", className = "" }: { children: ReactNode; tone?: Tone; className?: string }) {
+  return <span className={`${styles.statusBadge} ${styles[`badge_${tone}`]} ${className}`}>{children}</span>;
 }
 
 export function SearchField({
@@ -199,6 +243,8 @@ export function Modal({
   onClose,
   footer,
   width = "medium",
+  layout = "default",
+  className = "",
 }: {
   title: string;
   subtitle?: string;
@@ -206,17 +252,30 @@ export function Modal({
   onClose: () => void;
   footer?: ReactNode;
   width?: "medium" | "wide";
+  layout?: "default" | "studentForm";
+  className?: string;
 }) {
+  const studentLayout = layout === "studentForm";
   return (
     <div className={styles.modalBackdrop} role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
-      <section className={`${styles.modal} ${width === "wide" ? styles.modalWide : ""}`} role="dialog" aria-modal="true" aria-label={title}>
+      <section
+        className={`${styles.modal} ${width === "wide" ? styles.modalWide : ""} ${className}`}
+        style={studentLayout ? {
+          width: "min(700px, 100%)",
+          height: "calc(100vh - var(--space-2xl) - var(--space-2xl))",
+          maxHeight: "calc(100vh - var(--space-2xl) - var(--space-2xl))",
+        } : undefined}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+      >
         {/* Bagian tampilan: header modal dan tombol tutup. */}
         <header className={styles.modalHeader}>
-          <div><h2>{title}</h2>{subtitle && <p>{subtitle}</p>}</div>
+          <div><h2 style={studentLayout ? { fontSize: "var(--text-h4-size)", lineHeight: "var(--text-h4-line)", fontWeight: "var(--font-weight-bold)" } : undefined}>{title}</h2>{subtitle && <p>{subtitle}</p>}</div>
           <button className={styles.closeButton} onClick={onClose} aria-label="Tutup"><AdminIcon name="close-circle-linear" size={21} /></button>
         </header>
-        <div className={styles.modalContent}>{children}</div>
-        {footer && <footer className={styles.modalFooter}>{footer}</footer>}
+        <div className={styles.modalContent} style={studentLayout ? { flex: "1 1 auto" } : undefined}>{children}</div>
+        {footer && <footer className={styles.modalFooter} style={studentLayout ? { flexShrink: 0, justifyContent: "space-between", alignItems: "center", flexWrap: "wrap" } : undefined}>{footer}</footer>}
       </section>
     </div>
   );
@@ -230,6 +289,9 @@ export function Field({
   required = false,
   type = "text",
   hint,
+  valid,
+  validLabel,
+  className = "",
 }: {
   label: string;
   value: string;
@@ -238,18 +300,32 @@ export function Field({
   required?: boolean;
   type?: string;
   hint?: string;
+  valid?: boolean;
+  validLabel?: string;
+  className?: string;
 }) {
+  const validationEnabled = valid !== undefined || validLabel !== undefined;
   return (
-    <label className={styles.formField}>
-      <span>{label}{required && <b> *</b>}</span>
-      <input type={type} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} />
+    <label className={`${styles.formField} ${className}`}>
+      {validationEnabled ? (
+        <span className={styles.fieldLabelRow}>
+          <span>{label}{required && <b> *</b>}</span>
+          {valid && validLabel && <small className={styles.fieldValidLabel}><AdminIcon name="check-circle-bold" size={13} />{validLabel}</small>}
+        </span>
+      ) : <span>{label}{required && <b> *</b>}</span>}
+      {validationEnabled ? (
+        <span className={`${styles.fieldControlWrap} ${valid ? styles.fieldControlValid : ""}`}>
+          <input type={type} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} />
+          {valid && <AdminIcon name="check-circle-bold" size={14} />}
+        </span>
+      ) : <input type={type} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} />}
       {hint && <small>{hint}</small>}
     </label>
   );
 }
 
-export function InfoBanner({ children, tone = "info" }: { children: ReactNode; tone?: "info" | "success" | "warning" | "danger" }) {
-  const icon = tone === "success" ? "check-circle-linear" : tone === "warning" ? "danger-triangle-linear" : tone === "danger" ? "close-circle-linear" : "info-circle-linear";
+export function InfoBanner({ children, tone = "info" }: { children: ReactNode; tone?: "info" | "success" | "warning" | "danger" | "primary" }) {
+  const icon = tone === "primary" ? "info-circle-bold" : tone === "success" ? "check-circle-linear" : tone === "warning" ? "danger-triangle-linear" : tone === "danger" ? "close-circle-linear" : "info-circle-linear";
   return <div className={`${styles.infoBanner} ${styles[`info_${tone}`]}`}><AdminIcon name={icon} size={19} /><div>{children}</div></div>;
 }
 

@@ -62,12 +62,12 @@ export default function AdminDashboardPage() {
           <Panel>
             <div className={s.panelTitle}><div><h2>Data yang Perlu Ditindaklanjuti</h2><p>Penyimpangan data &amp; validasi administratif</p></div></div>
             <div className={`${s.attentionItem} ${s.attentionWarning}`}>
-              <span className={s.attentionIcon}><AdminIcon name="danger-triangle-linear" size={19} color="#B87D0E" /></span>
+              <span className={s.attentionIcon}><AdminIcon name="danger-triangle-linear" size={19} color="var(--color-warning-dark)" /></span>
               <div className={s.attentionText}><strong>8 data siswa belum terverifikasi</strong><small>NISN dan identitas siswa perlu divalidasi.</small></div>
               <Link href="/admin/pengguna/siswa" className={s.attentionButton}>Tinjau</Link>
             </div>
             <div className={`${s.attentionItem} ${s.attentionDanger}`}>
-              <span className={s.attentionIcon}><AdminIcon name="users-group-rounded-linear" size={19} color="#E03131" /></span>
+              <span className={s.attentionIcon}><AdminIcon name="users-group-rounded-linear" size={19} color="var(--color-error)" /></span>
               <div className={s.attentionText}><strong>2 rombel melebihi kapasitas</strong><small>Rombel 9C &amp; 9D terisi lebih dari 36 siswa</small></div>
               <Link href="/admin/master-data/rombel" className={s.attentionButton} style={{ background: "var(--color-error)" }}>Lihat</Link>
             </div>

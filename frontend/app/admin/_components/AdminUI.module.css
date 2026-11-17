@@ -128,16 +128,8 @@
   /* Membatasi tinggi area menu */
   min-height: 0;
 
-  /* Mengaktifkan scroll hanya pada menu */
-  overflow-y: auto;
-  overflow-x: hidden;
-
-  /* Ruang untuk scrollbar */
-  padding-right: var(--space-xs);
-
-  /* Tampilan scrollbar */
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-border) transparent;
+  /* Menu desktop tampil utuh; scroll dinyalakan hanya untuk layar pendek. */
+  overflow: visible;
 
   overscroll-behavior: contain;
 }
@@ -161,17 +153,19 @@
   border-radius: var(--radius-s);
   font-size: var(--text-l16-size);
   line-height: var(--text-l16-line);
-  font-weight: 400;
+  font-weight: var(--font-weight-regular);
   text-decoration: none;
   transition: background .15s ease, color .15s ease;
 }
 .navLink:hover { background: var(--color-background); }
-.navActive { color: var(--color-surface); background: var(--ad-primary); font-weight: 600; }
+.navActive { color: var(--color-surface); background: var(--ad-primary); font-weight: var(--font-weight-semibold); }
 .navActive:hover { background: var(--ad-primary-hover); }
 .navActive svg { color: var(--color-surface); }
 .subNav { display: flex; flex-direction: column; gap: var(--space-xs); margin: calc(var(--space-xs) * -1) 0 var(--space-xs) var(--space-xs); padding-left: var(--space-md); border-left: 1px solid var(--color-border); }
-.subNav a { padding: var(--space-sm) var(--space-sm); color: var(--ad-muted); border-radius: var(--radius-xs); font-size: var(--text-l12-size); line-height: var(--text-l12-line); text-decoration: none; }
-.subNav a:hover, .subNavActive { color: var(--ad-primary) !important; background: var(--color-primary-tint); font-weight: 600; }
+.subNav a { padding: var(--space-sm) var(--space-sm); color: var(--ad-muted); border-radius: var(--radius-xs); font-size: var(--text-l12-size); line-height: var(--text-l12-line); font-weight: var(--font-weight-regular); text-decoration: none; }
+.subNav a:hover, .subNavActive { color: var(--ad-primary) !important; background: var(--color-primary-tint); font-weight: var(--font-weight-semibold); }
+.subNav a.subNavActive { display: flex; align-items: center; justify-content: space-between; gap: var(--space-sm); }
+.subNav a.subNavActive::after { width: var(--space-xs); height: var(--space-xs); flex: 0 0 auto; margin-left: auto; background: var(--color-primary); border-radius: var(--radius-circle); content: ""; }
 .logoutLink { display: flex; align-items: center; gap: var(--space-sm); width: 100%; margin-top: auto; padding: var(--space-md) var(--space-sm) var(--space-xs); color: var(--ad-error); background: transparent; border: 0; border-top: 1px solid var(--color-border); font: inherit; font-size: var(--text-l12-size); text-align: left; cursor: pointer; line-height: var(--text-l12-line); }
 .adminAppCollapsed { grid-template-columns: 64px minmax(0, 1fr); }
 .adminAppCollapsed .sidebar { padding-left: var(--space-sm); padding-right: var(--space-sm); }
@@ -187,9 +181,9 @@
 .topbarMenu { width: 28px; height: 28px; display: grid; place-items: center; padding: 0; color: var(--ad-text); background: transparent; border: 0; border-radius: var(--radius-xs); cursor: pointer; }
 .topbarMenu:hover { color: var(--ad-primary); background: var(--ad-primary-tint); }
 .topbarLeft strong {
-  font-size: var(--text-p16-size);
-  line-height: var(--text-p16-line);
-  font-weight: 600;
+  font-size: var(--text-h5-size);
+  line-height: var(--text-h5-line);
+  font-weight: var(--font-weight-bold);
 }
 .topbarRight { gap: var(--space-sm); }
 .notificationWrap { position: relative; }
@@ -199,14 +193,14 @@
 .notificationPopover strong { display: block; margin-bottom: var(--space-sm); }
 .notificationPopover p { margin: 0; padding: var(--space-sm) 0; color: var(--ad-muted); border-top: 1px solid var(--color-background); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
 .avatarSmall { width: 34px; height: 34px; display: grid; place-items: center; color: var(--color-surface); background: var(--ad-primary); border-radius: var(--radius-s); font-size: var(--text-l12-size); font-weight: 600; line-height: var(--text-l12-line); }
-.adminName { font-size: var(--text-l16-size); font-weight: 600; line-height: var(--text-l16-line); }
+.adminName { font-size: var(--text-l16-size); font-weight: var(--font-weight-bold); line-height: var(--text-l16-line); }
 .mobileMenu { display: none; color: var(--ad-muted); background: transparent; border: 0; cursor: pointer; }
 .mainContent { flex: 1; min-width: 0; padding: var(--space-md) 0 var(--space-md); }
 .footer { margin: 0; padding: var(--space-md) 0 var(--space-xs); color: var(--color-text-secondary); border-top: 1px solid var(--ad-border); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
 
 .breadcrumb { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-sm); margin: var(--space-xs) 0 var(--space-md); color: var(--color-text-secondary); font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
 .breadcrumb span { display: inline-flex; align-items: center; gap: var(--space-sm); }
-.breadcrumbActive { color: var(--ad-text); font-weight: 600; }
+.breadcrumbActive { color: var(--ad-text); font-weight: var(--font-weight-semibold); }
 .pageHeading {
   display: flex;
   justify-content: space-between;
@@ -299,6 +293,8 @@
 .button_secondary { color: var(--ad-text); background: var(--ad-secondary); }
 .button_outline { color: var(--ad-primary); background: var(--color-surface); border-color: var(--ad-primary-light); }
 .button_outline:hover { background: var(--ad-primary-tint); }
+.button.button_outline.buttonAmber { color: var(--color-secondary-dark); background: var(--color-surface); border: var(--border-width-xs) solid var(--color-secondary); font-weight: var(--font-weight-semibold); }
+.button.button_outline.buttonAmber:hover { background: var(--color-secondary-tint); }
 .button_ghost { color: var(--ad-muted); background: transparent; border-color: transparent; }
 .button_danger { color: var(--color-surface); background: var(--ad-error); }
 
@@ -357,10 +353,32 @@
   line-height: var(--text-p12-line);
   text-align: left;
 }
+/* Ringkaskan kartu statistik guru sesuai tampilan direktori guru. */
+.guruStats { gap: var(--space-md); }
+.guruStats .statCard {
+  min-height: calc(var(--space-2xl) + var(--space-2xl) + var(--space-md) + var(--space-md));
+  padding: var(--space-md);
+}
+.guruStats .statHeader { align-items: center; }
+.guruStats .statDetail { display: none; }
 /* Mengatur tinggi dan posisi keterangan bawah kartu statistik */
 .dashboardStats .statCard {
-  min-height: 136px;
+  min-height: 188px;
   padding-bottom: var(--space-md);
+}
+
+/* Ukuran heading khusus dashboard administrator. */
+.mainArea:has(.dashboardStats) .pageTitle {
+  font-size: var(--text-h4-size);
+  line-height: var(--text-h4-line);
+}
+.mainArea:has(.dashboardStats) .pageDescription {
+  font-size: var(--text-p16-size);
+  line-height: var(--text-p16-line);
+}
+.dashboardStats .statIcon {
+  width: 40px;
+  height: 40px;
 }
 
 /* Dashboard: filter kelas dibuat ringkas dan sejajar seperti desain UI/UX. */
@@ -484,6 +502,8 @@
 .pageControls button.pageCurrent { color: var(--color-surface); background: var(--ad-primary); }
 
 .dashboardColumns { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(300px, .95fr); gap: var(--space-lg); align-items: start; }
+.dashboardColumns > section,
+.dashboardColumns > div > section { padding: var(--space-lg); }
 .dashboardColumns .panelTitle h2 { font-size: var(--text-p16-size); line-height: var(--text-p16-line); }
 .dashboardColumns > div { display: flex; flex-direction: column; gap: var(--space-lg); }
 .classList { display: flex; flex-direction: column; gap: var(--space-sm); }
@@ -531,11 +551,24 @@
 .distributionTile { padding: var(--space-sm) var(--space-sm); background: var(--color-primary-tint); border: 1px solid var(--color-border); border-radius: var(--radius-s); }
 .distributionTile small { display: flex; justify-content: space-between; color: var(--color-text-secondary); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
 .distributionTile strong { display: block; margin-top: var(--space-xs); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.dashboardColumns .classItem { min-height: 68px; }
+.dashboardColumns .classCode { width: 40px; height: 40px; }
+.dashboardColumns .distributionTile { padding: var(--space-md); }
+/* Warna legenda distribusi mengikuti warna tiap seri pada diagram. */
+.dashboardColumns .distributionTile:nth-child(1) small span::first-letter,
+.dashboardColumns .distributionTile:nth-child(1) small b { color: var(--color-primary); }
+.dashboardColumns .distributionTile:nth-child(2) small span::first-letter,
+.dashboardColumns .distributionTile:nth-child(2) small b { color: var(--color-primary-light); }
+.dashboardColumns .distributionTile:nth-child(3) small span::first-letter,
+.dashboardColumns .distributionTile:nth-child(3) small b { color: var(--color-warning-dark); }
+.dashboardColumns .distributionTile:nth-child(4) small span::first-letter,
+.dashboardColumns .distributionTile:nth-child(4) small b { color: var(--color-text-primary); }
 
 .infoBanner { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-md); padding: var(--space-md) var(--space-md); border: 1px solid; border-radius: var(--radius-s); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
 .infoBanner strong { display: block; margin-bottom: var(--space-xs); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
 .infoBanner p { margin: 0; font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
 .info_info { color: var(--color-info-dark); background: var(--ad-info-tint); border-color: var(--color-info-tint); }
+.info_primary { color: var(--color-primary-dark); background: var(--color-primary-tint); border-color: var(--color-primary-light); }
 .info_success { color: var(--color-success-dark); background: var(--ad-success-tint); border-color: var(--color-success-tint); }
 .info_warning { color: var(--color-warning-dark); background: var(--ad-warning-tint); border-color: var(--color-warning-tint); }
 .info_danger { color: var(--color-error-dark); background: var(--ad-error-tint); border-color: var(--color-error-light); }
@@ -557,6 +590,11 @@
 .formField textarea { min-height: 62px; resize: vertical; }
 .formField input:focus, .formField select:focus, .formField textarea:focus { border: 2px solid var(--ad-primary-light); padding: var(--space-sm) var(--space-sm); }
 .formField small { color: var(--color-text-secondary); font-size: var(--text-p12-size); font-weight: 400; line-height: var(--text-p12-line); }
+.fieldLabelRow { display: flex; align-items: center; justify-content: space-between; gap: var(--space-sm); }
+.teacherModal .fieldValidLabel { display: inline-flex; align-items: center; gap: var(--space-xs); color: var(--color-success-dark); font-size: var(--text-l12-size); font-weight: var(--font-weight-medium); line-height: var(--text-l12-line); white-space: nowrap; }
+.fieldControlWrap { position: relative; display: flex; align-items: center; }
+.fieldControlWrap > span, .fieldControlWrap > svg { position: absolute; right: var(--space-sm); color: var(--color-success); pointer-events: none; }
+.teacherModal .fieldControlValid input { border-color: var(--color-success); padding-right: var(--space-xl); }
 .formFull { grid-column: 1 / -1; }
 .formSectionTitle { display: flex; justify-content: space-between; align-items: center; margin: var(--space-md) 0 var(--space-sm); padding-top: var(--space-md); border-top: 1px solid var(--color-border); font-size: var(--text-l12-size); font-weight: 700; line-height: var(--text-l12-line); }
 .choiceRow { display: flex; flex-wrap: wrap; gap: var(--space-sm); padding: var(--space-sm); background: var(--color-primary-tint); border: 1px solid var(--color-border); border-radius: var(--radius-s); }
@@ -566,6 +604,74 @@
 .linkedStudent strong { display: block; font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
 .linkedStudent small { display: block; margin-top: var(--space-xs); color: var(--color-text-secondary); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
 .initialAvatar { width: 34px; height: 34px; display: grid; place-items: center; color: var(--color-surface); background: var(--ad-primary); border-radius: var(--radius-s); font-size: var(--text-l12-size); font-weight: 700; line-height: var(--text-l12-line); }
+
+/* Tata letak form modal guru; seluruh modifier hanya aktif pada modal guru. */
+.teacherModal .teacherFormGrid { grid-template-columns: minmax(0, 1fr); }
+.teacherModal .teacherModalField { min-width: 0; }
+.teacherModal .fieldControlValid input:focus { border-color: var(--color-success); }
+.teacherModal .teacherModalField select:invalid { color: var(--color-text-disabled); }
+.teacherEmailContact { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-md); }
+.teacherHomeroomPanel { display: flex; flex-direction: column; gap: var(--space-sm); padding: var(--space-md); background: var(--color-primary-tint); border: var(--border-width-xs) solid var(--color-primary-light); border-radius: var(--radius-m); }
+.teacherHomeroomHeader { display: flex; align-items: center; justify-content: space-between; gap: var(--space-sm); }
+.teacherHomeroomHeader strong { display: inline-flex; align-items: center; gap: var(--space-xs); color: var(--color-text-primary); font-size: var(--text-l12-size); font-weight: var(--font-weight-semibold); line-height: var(--text-l12-line); }
+.teacherHomeroomHeader strong svg { color: var(--color-primary); }
+.teacherHomeroomPanel .teacherModalField { width: 100%; }
+.teacherHomeroomPanel .teacherModalField select { background-color: var(--color-surface); }
+.teacherAllocationBadge { flex: 0 0 auto; }
+.teacherClassChoices { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-sm); }
+.teacherClassChoice { display: inline-flex; align-items: center; gap: var(--space-xs); padding: var(--space-xs) var(--space-sm); color: var(--color-text-secondary); background: var(--color-surface); border: var(--border-width-xs) solid var(--color-border); border-radius: var(--radius-s); font-size: var(--text-l12-size); font-weight: var(--font-weight-medium); line-height: var(--text-l12-line); cursor: pointer; }
+.teacherClassChoice input { position: absolute; width: var(--space-xs); height: var(--space-xs); opacity: 0; }
+.teacherClassChoiceSelected { color: var(--color-primary-dark); background: var(--color-primary-tint); border-color: var(--color-primary-light); }
+.teacherClassChoiceSelected svg { color: var(--color-primary); }
+.teacherAddClass { padding: var(--space-xs) var(--space-sm); color: var(--color-text-secondary); background: var(--color-surface); border: var(--border-width-xs) dashed var(--color-border); border-radius: var(--radius-s); font: inherit; font-size: var(--text-l12-size); line-height: var(--text-l12-line); cursor: pointer; }
+.teacherModalFooterSpacer { flex: 1 1 auto; }
+.teacherModalFooterActions { display: flex; align-items: center; justify-content: flex-end; gap: var(--space-sm); }
+.teacherModal .teacherCancelButton { color: var(--color-text-secondary); background: var(--color-surface); border-color: var(--color-border); }
+.teacherModal .teacherCancelButton:hover { color: var(--color-text-primary); background: var(--color-background); border-color: var(--color-border); }
+
+/* Tampilan desktop modal tambah siswa agar mengikuti komposisi desain Figma. */
+@media (min-width: 761px) {
+  .modal[aria-label="Tambah Siswa Baru"] {
+    height: calc(100vh - (var(--space-lg) * 2));
+  }
+
+  .modal[aria-label="Tambah Siswa Baru"] .modalHeader h2 {
+    font-size: var(--text-h4-size);
+    line-height: var(--text-h4-line);
+    font-weight: var(--font-weight-bold);
+  }
+
+  .modal[aria-label="Tambah Siswa Baru"] .infoBanner {
+    border-radius: var(--radius-m);
+  }
+
+  .modal[aria-label="Tambah Siswa Baru"] #student-form .formGrid > .formField:nth-child(-n + 3),
+  .modal[aria-label="Tambah Siswa Baru"] #student-form .formGrid > .formField:nth-child(6) {
+    grid-column: 1 / -1;
+  }
+
+  .modal[aria-label="Tambah Siswa Baru"] #student-form .formField input,
+  .modal[aria-label="Tambah Siswa Baru"] #student-form .formField select {
+    min-height: 40px;
+    border-radius: var(--radius-m);
+  }
+
+  .modal[aria-label="Tambah Siswa Baru"] #student-form .linkedStudent {
+    min-height: 74px;
+    padding: var(--space-md);
+    border-radius: var(--radius-m);
+  }
+
+  .modal[aria-label="Tambah Siswa Baru"] #student-form .linkedStudent strong {
+    font-size: var(--text-p16-size);
+    line-height: var(--text-p16-line);
+  }
+
+  .modal[aria-label="Tambah Siswa Baru"] #student-form .initialAvatar {
+    width: 40px;
+    height: 40px;
+  }
+}
 
 /* Master tahun ajaran dan rombel. */
 .yearHero { display: flex; justify-content: space-between; align-items: center; gap: var(--space-lg); margin-bottom: var(--space-lg); padding: var(--space-lg) var(--space-lg); color: var(--color-surface); background: linear-gradient(105deg, var(--color-primary), var(--color-primary-light)); border-radius: var(--radius-l); }
@@ -623,6 +729,17 @@
 /* Navigasi bawah hanya dipakai pada viewport mobile. */
 .bottomNav { display: none; }
 
+/* Scroll internal hanya menjadi fallback saat tinggi layar tidak cukup untuk menu. */
+@media (max-height: 799px) {
+  .nav {
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding-right: var(--space-xs);
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border) transparent;
+  }
+}
+
 @media (max-width: 1100px) {
   .adminApp { grid-template-columns: 192px minmax(0,1fr); }
   .statGrid, .statGridFour { grid-template-columns: repeat(2, minmax(0,1fr)); }
@@ -656,7 +773,89 @@
   .modal { max-height: calc(100vh - 20px); }
   .formGrid { grid-template-columns: 1fr; }
   .formFull { grid-column: auto; }
+  .teacherEmailContact { grid-template-columns: 1fr; }
 }
+
+/* Kerangka khusus direktori guru: cocokkan lebar sidebar dan jarak konten dengan Figma. */
+.adminApp:has(.teacherManagementPage):not(.adminAppCollapsed) {
+  grid-template-columns: 220px minmax(0, 1fr);
+  column-gap: var(--space-md);
+}
+.adminApp:has(.teacherManagementPage):not(.adminAppCollapsed) .sidebar {
+  padding-right: var(--space-md);
+  padding-left: var(--space-md);
+}
+.teacherManagementPage { display: contents; }
+.teacherManagementPage .pageTitle { font-size: var(--text-h4-size); line-height: var(--text-h4-line); }
+.teacherManagementPage .pageDescription { font-size: var(--text-p16-size); line-height: var(--text-p16-line); }
+
+/* Tabel guru: pertahankan lebar baca yang nyaman dan scroll horizontal di wadahnya. */
+.teacherTableWrap { min-width: 0; overflow-x: auto; padding: var(--space-sm); }
+.teacherTable { width: max-content; min-width: max(100%, 1500px); table-layout: auto; }
+.teacherTable th,
+.teacherTable td { padding: var(--space-md) var(--space-md); }
+.teacherTable th { padding: var(--space-md) var(--space-md); }
+.teacherTable th {
+  background: var(--color-surface);
+  border-bottom: var(--border-width-xs) solid var(--color-border);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: normal;
+}
+.teacherTable td { overflow-wrap: anywhere; }
+.teacherTable .teacherName {
+  display: block;
+  overflow: visible;
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
+  font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
+}
+.teacherTable .teacherNip,
+.teacherTable .teacherActivity { font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.teacherTable .teacherNip { white-space: nowrap; }
+.teacherBadge {
+  min-height: calc(var(--text-p12-line) + var(--space-sm));
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
+.teacherHomeroomTask { color: var(--color-primary-dark); background: var(--color-primary-tint); }
+.teacherTaskTag {
+  display: inline-block;
+  max-width: 100%;
+  min-height: calc(var(--text-p12-line) + var(--space-sm));
+  padding: var(--space-xs) var(--space-sm);
+  color: var(--color-text-primary);
+  background: var(--color-background);
+  border-radius: var(--radius-xs);
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
+  font-weight: var(--font-weight-medium);
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+.teacherClassList { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-xs); }
+.teacherClassChip {
+  display: inline-flex;
+  align-items: center;
+  min-height: calc(var(--text-p12-line) + var(--space-sm));
+  padding: var(--space-xs);
+  color: var(--color-text-primary);
+  background: var(--color-background);
+  border-radius: var(--radius-xs);
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
+.teacherStatus { border: var(--border-width-xs) solid currentColor; }
+.teacherStatusActive { color: var(--color-primary-dark); background: var(--color-primary-tint); border-color: var(--color-primary); }
+.teacherStatusError { color: var(--color-error-dark); background: var(--color-error-tint); border-color: var(--color-error); }
+.teacherStatusWarning { color: var(--color-warning-dark); background: var(--color-warning-tint); border-color: var(--color-warning); }
+
 @media (max-width: 420px) {
   .statGrid, .statGridThree, .statGridFour, .reportStats { grid-template-columns: 1fr; }
   .filterGrid { grid-template-columns: 1fr; }
@@ -721,4 +920,52 @@
   font-weight: 600;
   text-align: right;
   text-transform: none;
+}
+
+/* Compact stat cards for the three admin user directories. */
+.adminStatRow { gap: var(--space-md); }
+.statCardCompact {
+  min-height: calc(var(--space-2xl) + var(--space-2xl) + var(--space-md) + var(--space-md));
+  justify-content: flex-start;
+  padding: var(--space-md);
+}
+.statCardCompact .statHeader { align-items: center; }
+.statCardCompact .statDetail { display: none; }
+
+/* Directory tables share the teacher header and badge treatment without changing base tables. */
+.directoryTable th {
+  background: var(--color-surface);
+  border-bottom: var(--border-width-xs) solid var(--color-border);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: normal;
+}
+.directoryTable .directoryBadge {
+  min-height: calc(var(--text-p12-line) + var(--space-sm));
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
+.directoryTable .directoryStatusBadge { border-width: var(--border-width-xs); border-style: solid; }
+.directoryTable .directoryStatusBadge.badge_primary { border-color: var(--color-primary); }
+.directoryTable .directoryStatusBadge.badge_success { border-color: var(--color-success); }
+.directoryTable .directoryStatusBadge.badge_warning,
+.directoryTable .directoryStatusBadge.badge_amber { border-color: var(--color-warning); }
+.directoryTable .directoryStatusBadge.badge_danger { border-color: var(--color-error); }
+.directoryTable .directoryStatusBadge.badge_info { border-color: var(--color-info); }
+.directoryTable .directoryStatusBadge.badge_neutral { border-color: var(--color-text-secondary); }
+.directoryTable .directoryClassChip {
+  display: inline-flex;
+  align-items: center;
+  min-height: calc(var(--text-p12-line) + var(--space-sm));
+  padding: var(--space-xs);
+  color: var(--color-text-primary);
+  background: var(--color-background);
+  border-radius: var(--radius-xs);
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
 }

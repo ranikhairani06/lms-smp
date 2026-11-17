@@ -1,8 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import AdminIcon from "@/app/admin/_components/AdminIcons";
-import { Button, Field, InfoBanner, Modal, PageHeading, Pagination, SearchField, SelectField, StatCard, StatusBadge, TableEmpty, adminStyles as s } from "@/app/admin/_components/AdminUI";
+import AdminDirectoryToolbar from "@/app/admin/_components/AdminDirectoryToolbar";
+import useAdminDirectoryFilter from "@/app/admin/_components/useAdminDirectoryFilter";
+import { AdminStatRow, AdminTableIconButton, Button, Field, InfoBanner, Modal, PageHeading, Pagination, StatusBadge, TableEmpty, adminStyles as s } from "@/app/admin/_components/AdminUI";
 
 const parents = [
   { name: "Bambang Pratama, S.T.", relation: "Ayah Kandung", child: "Andi Pratama • 8B", phone: "0812-9844-1120", status: "Aktif", access: "15 Menit lalu" },
@@ -13,34 +15,47 @@ const parents = [
   { name: "Dedi Supriyadi", relation: "Ayah Kandung", child: "Bagas Pratama • 9A", phone: "0811-9988-3344", status: "Aktif", access: "5 Hari lalu" },
 ];
 
+const getParentSearchText = (parent: typeof parents[number]) => `${parent.name} ${parent.child} ${parent.phone}`;
+const matchesParentCategory = (parent: typeof parents[number], category: string) => category === "Semua Kategori" || parent.relation === category;
+
 export default function OrangTuaPage() {
-  const [keyword, setKeyword] = useState("");
-  const [category, setCategory] = useState("Semua Kategori");
   const [modal, setModal] = useState(false);
   const [page, setPage] = useState(1);
   const [form, setForm] = useState({ name: "", relation: "Ayah Kandung", phone: "", email: "", address: "", student: "Andi Pratama • 8B" });
-  const filtered = useMemo(() => parents.filter((parent) => `${parent.name} ${parent.child} ${parent.phone}`.toLowerCase().includes(keyword.toLowerCase()) && (category === "Semua Kategori" || parent.relation === category)), [keyword, category]);
+  const { keyword, setKeyword, category, setCategory, filtered } = useAdminDirectoryFilter({
+    items: parents,
+    getSearchText: getParentSearchText,
+    matchesCategory: matchesParentCategory,
+    initialCategory: "Semua Kategori",
+  });
 
   return (
     <>
       <PageHeading breadcrumbs={["LMS", "Manajemen Pengguna", "Manajemen Orang Tua (Wali)"]} title="Manajemen Orang Tua (Wali Murid)" description="Pengelolaan data akun wali murid terverifikasi, penautan akun siswa, dan nomor kontak darurat."
-        actions={<><Button variant="outline" icon="upload-linear" onClick={() => alert("Pilih file Excel/CSV untuk proses import.")}>Import Data (Excel/CSV)</Button><Button icon="user-plus-linear" onClick={() => setModal(true)}>Tambah Orang Tua/Wali</Button></>} />
+        actions={<><Button variant="outline" tone="amber" icon="upload-linear" onClick={() => alert("Pilih file Excel/CSV untuk proses import.")}>Import Data (Excel/CSV)</Button><Button icon="user-plus-linear" onClick={() => setModal(true)}>Tambah Orang Tua/Wali</Button></>} />
       {/* Bagian tampilan: ringkasan akun orang tua dan status penautan peserta didik. */}
-      <div className={s.statGridThree}>
-        <StatCard label="Total Akun Orang Tua / Wali" value="782" icon="users-group-rounded-linear" tone="primary" />
-        <StatCard label="Penautan Peserta Didik" value="94.6%" icon="link-linear" tone="warning" />
-        <StatCard label="Akun Aktif Bulan Ini" value="690" icon="check-circle-linear" tone="success" />
-      </div>
+      <AdminStatRow columns={3} items={[
+        { label: "Total Akun Orang Tua / Wali", value: "782", icon: "users-group-rounded-linear", tone: "primary" },
+        { label: "Penautan Peserta Didik", value: "94.6%", icon: "link-linear", tone: "warning" },
+        { label: "Akun Aktif Bulan Ini", value: "690", icon: "check-circle-linear", tone: "success" },
+      ]} />
       {/* Bagian tampilan: pencarian akun wali dan filter hubungan keluarga. */}
-      <div className={s.toolbar}><SearchField value={keyword} onChange={setKeyword} placeholder="Cari nama orang tua, siswa, atau nomor HP..." /><div className={s.toolbarSpacer} /><SelectField value={category} onChange={setCategory} options={["Semua Kategori", "Ayah Kandung", "Ibu Kandung", "Wali Murid"]} /></div>
+      <AdminDirectoryToolbar
+        keyword={keyword}
+        onKeywordChange={setKeyword}
+        searchPlaceholder="Cari nama orang tua, siswa, atau nomor HP..."
+        category={category}
+        onCategoryChange={setCategory}
+        categoryOptions={["Semua Kategori", "Ayah Kandung", "Ibu Kandung", "Wali Murid"]}
+      />
       {/* Bagian tampilan: direktori akun wali dan daftar siswa yang tertaut. */}
       <div className={s.tableWrap}>
-        <table className={s.dataTable}>
+        <table className={`${s.dataTable} ${s.directoryTable}`}>
           <thead><tr><th>Nama Orang Tua / Wali</th><th>Siswa Terhubung &amp; Kelas</th><th>Nomor HP</th><th>Status Akun</th><th>Terakhir Akses</th><th>Aksi</th></tr></thead>
           <tbody>{filtered.map((parent) => <tr key={parent.name}>
             <td><span className={s.tableStrong}>{parent.name}</span><span className={s.tableSub}>{parent.relation}</span></td>
-            <td><StatusBadge tone="primary"><AdminIcon name="graduation-cap-linear" size={12} /> {parent.child}</StatusBadge></td><td>{parent.phone}</td><td><StatusBadge tone="success">{parent.status}</StatusBadge></td><td>{parent.access}</td>
-            <td><div className={s.tableActions}><button className={s.iconButton} title="Detail" onClick={() => alert(`${parent.name}\n${parent.child}`)}><AdminIcon name="eye-linear" size={15} /></button><button className={s.iconButton} title="Edit" onClick={() => setModal(true)}><AdminIcon name="pen-linear" size={15} /></button><button className={s.iconButton} title="Riwayat" onClick={() => alert("Riwayat akses akun wali") }><AdminIcon name="history-linear" size={15} /></button></div></td>
+            <td><StatusBadge tone="primary" className={s.directoryBadge}><AdminIcon name="graduation-cap-linear" size={12} /> {parent.child}</StatusBadge></td><td>{parent.phone}</td><td><StatusBadge tone={parent.status === "Aktif" ? "primary" : "warning"} className={`${s.directoryBadge} ${s.directoryStatusBadge}`}>{parent.status}</StatusBadge></td><td>{parent.access}</td>
+            <td><div className={s.tableActions}><AdminTableIconButton icon="eye-linear" title="Detail" ariaLabel="Detail" onClick={() => alert(`${parent.name}\n${parent.child}`)} /><AdminTableIconButton icon="pen-linear" title="Edit" ariaLabel="Edit" onClick={() => setModal(true)} /><AdminTableIconButton icon="history-linear" title="Riwayat" ariaLabel="Riwayat" onClick={() => alert("Riwayat akses akun wali")} /></div></td>
           </tr>)}{filtered.length === 0 && <TableEmpty colSpan={6} />}</tbody>
         </table>
         <Pagination current={page} total={4} onChange={setPage} label={`Menampilkan 1-${filtered.length} dari 782 orang tua/wali`} />
