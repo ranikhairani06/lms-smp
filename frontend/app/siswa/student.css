@@ -1,32 +1,32 @@
+/* Siswa: shell aplikasi, navigasi, konten, formulir, asesmen, dan tampilan responsif. */
 .student-app {
-  --es-primary: #3b5bdb;
-  --es-primary-light: #5b7cf0;
-  --es-primary-dark: #1e3a8a;
-  --es-primary-hover: #2f4fc4;
-  --es-primary-tint: #e6eafb;
-  --es-secondary: #ffc94d;
-  --es-secondary-tint: #fff6de;
-  --es-info: #145fa3;
-  --es-info-tint: #eaf4fc;
-  --es-success: #1f7a31;
-  --es-success-tint: #edf8ef;
-  --es-warning: #b87d0e;
-  --es-warning-tint: #fdf6e7;
-  --es-error: #a61e1e;
-  --es-error-tint: #fcecec;
-  --es-text: #1b1d23;
-  --es-muted: #4a4e58;
-  --es-border: #c4c8d2;
-  --es-bg: #edeff3;
-  --es-surface: #fff;
-  --es-gap: 24px;
+  --es-primary: var(--color-primary);
+  --es-primary-light: var(--color-primary-light);
+  --es-primary-dark: var(--color-primary-dark);
+  --es-primary-hover: var(--color-primary-hover);
+  --es-primary-tint: var(--color-primary-tint);
+  --es-secondary: var(--color-secondary);
+  --es-secondary-tint: var(--color-secondary-tint);
+  --es-info: var(--color-info-dark);
+  --es-info-tint: var(--color-info-tint);
+  --es-success: var(--color-success-dark);
+  --es-success-tint: var(--color-success-tint);
+  --es-warning: var(--color-warning-dark);
+  --es-warning-tint: var(--color-warning-tint);
+  --es-error: var(--color-error-dark);
+  --es-error-tint: var(--color-error-tint);
+  --es-text: var(--color-text-primary);
+  --es-muted: var(--color-text-secondary);
+  --es-border: var(--color-border);
+  --es-bg: var(--color-background);
+  --es-surface: var(--color-surface);
+  --es-gap: var(--space-lg);
   min-height: 100vh;
   background: var(--es-bg);
   color: var(--es-text);
   font:
-    400 16px/24px "Poppins",
-    sans-serif;
-  padding: 16px;
+    400 var(--text-p16-size)/var(--text-p16-line) var(--font-family);
+  padding: var(--space-md);
   text-align: left;
 }
 .student-app *,
@@ -41,18 +41,18 @@
   margin: 0;
 }
 .student-app h1 {
-  font-size: 24px;
-  line-height: 32px;
+  font-size: var(--text-h4-size);
+  line-height: var(--text-h4-line);
   font-weight: 600;
 }
 .student-app h2 {
-  font-size: 20px;
-  line-height: 26px;
+  font-size: var(--text-h5-size);
+  line-height: var(--text-h5-line);
   font-weight: 600;
 }
 .student-app h3 {
-  font-size: 16px;
-  line-height: 24px;
+  font-size: var(--text-p16-size);
+  line-height: var(--text-p16-line);
   font-weight: 600;
 }
 .student-app a {
@@ -91,8 +91,8 @@
   vertical-align: middle;
 }
 .student-app .es-small {
-  font-size: 12px;
-  line-height: 18px;
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
 }
 .student-app .es-muted {
   color: var(--es-muted);
@@ -102,42 +102,43 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 24px;
-  background: white;
-  border-radius: 8px;
+  padding: var(--space-md) var(--space-lg);
+  background: var(--color-surface);
+  border-radius: var(--radius-s);
   position: sticky;
   top: 16px;
   z-index: 40;
 }
 .student-app .es-topbar > strong {
   display: flex;
-  gap: 16px;
+  gap: var(--space-md);
   align-items: center;
 }
 .student-app .es-top-actions {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: var(--space-md);
 }
 .student-app .es-user-chip {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  line-height: 18px;
+  gap: var(--space-sm);
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
 }
 .student-app .es-user-chip small {
   display: block;
   color: var(--es-muted);
-  font-size: 12px;
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
 }
 .student-app .es-avatar {
   width: 40px;
   height: 40px;
   display: grid;
   place-items: center;
-  border-radius: 12px;
-  color: white;
+  border-radius: var(--radius-m);
+  color: var(--color-surface);
   background: var(--es-primary);
   font-weight: 600;
 }
@@ -147,49 +148,50 @@
   bottom: 24px;
   left: 16px;
   width: 200px;
-  padding: 16px 8px;
-  background: #fff;
-  border-radius: 12px;
+  padding: var(--space-md) var(--space-sm);
+  background: var(--color-surface);
+  border-radius: var(--radius-m);
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: var(--space-lg);
 }
 .student-app .es-brand {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-sm);
   background: var(--es-primary);
-  color: white;
-  padding: 8px;
-  border-radius: 12px;
-  font-size: 12px;
-  line-height: 18px;
+  color: var(--color-surface);
+  padding: var(--space-sm);
+  border-radius: var(--radius-m);
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
 }
 .student-app .es-brand-mark {
   display: grid;
   place-items: center;
-  background: white;
+  background: var(--color-surface);
   color: var(--es-primary-dark);
-  padding: 8px;
-  border-radius: 8px;
+  padding: var(--space-sm);
+  border-radius: var(--radius-s);
 }
 .student-app .es-brand small {
   display: block;
-  font-size: 12px;
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
 }
 .student-app .es-sidebar nav {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-sm);
 }
 .student-app .es-nav-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px;
-  border-radius: 8px;
-  font-size: 12px;
-  line-height: 18px;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+  border-radius: var(--radius-s);
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
   color: var(--es-muted);
   min-height: 48px;
 }
@@ -199,30 +201,31 @@
 }
 .student-app .es-nav-item.is-active {
   background: var(--es-primary);
-  color: #fff;
+  color: var(--color-surface);
 }
 .student-app .es-logout {
   margin-top: auto;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-sm);
   color: var(--es-error);
   background: none;
   border: 0;
-  padding: 8px;
-  font-size: 12px;
+  padding: var(--space-sm);
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
 }
 .student-app .es-main {
-  margin-left: 224px;
-  padding-top: 24px;
+  margin-left: calc(var(--space-2xl) + var(--space-2xl) + var(--space-2xl) + var(--space-2xl) + var(--space-sm) + var(--space-lg));
+  padding-top: var(--space-lg);
 }
 .student-app .es-breadcrumb {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  line-height: 18px;
-  margin-bottom: 24px;
+  gap: var(--space-sm);
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+  margin-bottom: var(--space-lg);
   flex-wrap: wrap;
   color: var(--es-muted);
 }
@@ -235,84 +238,84 @@
 }
 .student-app .es-card {
   background: var(--es-surface);
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 1px 4px #1b1d2305;
+  border-radius: var(--radius-l);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-1);
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-md);
 }
 .student-app .es-card-head {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 16px;
+  gap: var(--space-md);
 }
 .student-app .es-card-head p {
-  margin-top: 4px;
+  margin-top: var(--space-xs);
 }
 .student-app .es-between {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: var(--space-md);
 }
 .student-app .es-page-heading h1 {
-  margin-bottom: 8px;
+  margin-bottom: var(--space-sm);
 }
 .student-app .es-page-heading p {
-  font-size: 12px;
-  line-height: 18px;
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
 }
 .student-app .es-stack {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: var(--space-lg);
   min-width: 0;
 }
 .student-app .es-stack-small {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-sm);
   align-items: flex-start;
 }
 .student-app .es-columns {
   display: grid;
   grid-template-columns: minmax(0, 2.4fr) minmax(280px, 1fr);
-  gap: 24px;
+  gap: var(--space-lg);
   align-items: start;
 }
 .student-app .es-course-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 24px;
+  gap: var(--space-lg);
 }
 .student-app .es-progress-grid,
 .student-app .es-form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 24px;
+  gap: var(--space-lg);
 }
 .student-app .es-stats {
   display: grid;
   grid-template-columns: repeat(var(--stat-count), minmax(0, 1fr));
-  gap: 24px;
+  gap: var(--space-lg);
 }
 .student-app .es-stats .es-card {
-  padding: 16px;
+  padding: var(--space-md);
 }
 .student-app .es-stat-value {
-  font-size: 20px;
-  line-height: 26px;
+  font-size: var(--text-h5-size);
+  line-height: var(--text-h5-line);
   text-align: center;
   overflow-wrap: anywhere;
 }
 .student-app .es-icon-tile {
   display: grid;
   place-items: center;
-  padding: 8px;
-  border-radius: 8px;
+  padding: var(--space-sm);
+  border-radius: var(--radius-s);
   color: var(--es-primary);
   background: var(--es-primary-tint);
   width: 40px;
@@ -322,18 +325,18 @@
 .student-app .es-hero {
   display: flex;
   align-items: center;
-  gap: 24px;
-  padding: 24px;
+  gap: var(--space-lg);
+  padding: var(--space-lg);
   background: var(--es-primary-dark);
-  border-radius: 16px;
-  color: #fff;
+  border-radius: var(--radius-l);
+  color: var(--color-surface);
 }
 .student-app .es-hero h2 {
-  margin-bottom: 8px;
+  margin-bottom: var(--space-sm);
 }
 .student-app .es-hero p {
-  font-size: 12px;
-  line-height: 18px;
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
 }
 .student-app .es-hero > .es-button {
   margin-left: auto;
@@ -342,34 +345,34 @@
   align-items: stretch;
 }
 .student-app .es-date {
-  border-radius: 8px;
-  padding: 8px 16px;
-  background: #ffffff20;
+  border-radius: var(--radius-s);
+  padding: var(--space-sm) var(--space-md);
+  background: color-mix(in srgb, var(--color-surface) 12%, transparent);
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 .student-app .es-date small {
-  font-size: 12px;
-  line-height: 18px;
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
 }
 .student-app .es-date strong {
-  font-size: 28px;
-  line-height: 38px;
+  font-size: var(--text-h3-size);
+  line-height: var(--text-h3-line);
 }
 .student-app .es-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--space-sm);
   background: var(--es-primary);
-  color: white;
+  color: var(--color-surface);
   border: 1px solid transparent;
-  border-radius: 12px;
-  padding: 8px 16px;
+  border-radius: var(--radius-m);
+  padding: var(--space-sm) var(--space-md);
   min-height: 40px;
-  font-size: 12px;
-  line-height: 18px;
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
   font-weight: 600;
   text-align: center;
 }
@@ -377,7 +380,7 @@
   background: var(--es-primary-hover);
 }
 .student-app .es-button-outline {
-  background: white;
+  background: var(--color-surface);
   color: var(--es-primary);
   border-color: var(--es-border);
 }
@@ -389,10 +392,10 @@
   color: var(--es-text);
 }
 .student-app .es-button-secondary:hover {
-  background: #ffdb85;
+  background: var(--color-secondary-light);
 }
 .student-app .es-button-light {
-  background: #fff;
+  background: var(--color-surface);
   color: var(--es-primary-dark);
 }
 .student-app .es-button-light:hover {
@@ -407,11 +410,11 @@
 .student-app .es-badge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  border-radius: 999px;
-  padding: 4px 8px;
-  font-size: 12px;
-  line-height: 18px;
+  gap: var(--space-xs);
+  border-radius: var(--radius-pill);
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
   font-weight: 500;
   white-space: normal;
   max-width: 100%;
@@ -443,51 +446,51 @@
 .student-app .es-progress {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-sm);
 }
 .student-app .es-track {
   height: 8px;
   background: var(--es-bg);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   overflow: hidden;
 }
 .student-app .es-track > span {
   display: block;
   height: 100%;
   background: var(--es-primary);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
 }
 .student-app .es-metrics {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 16px;
+  gap: var(--space-md);
 }
 .student-app .es-metrics > div {
   display: flex;
-  gap: 8px;
+  gap: var(--space-sm);
   align-items: center;
   background: var(--es-bg);
-  border-radius: 8px;
-  padding: 16px;
+  border-radius: var(--radius-s);
+  padding: var(--space-md);
   color: var(--es-primary-dark);
 }
 .student-app .es-metrics strong {
-  font-size: 20px;
-  line-height: 26px;
+  font-size: var(--text-h5-size);
+  line-height: var(--text-h5-line);
   color: var(--es-text);
 }
 .student-app .es-metrics small {
   display: block;
-  font-size: 12px;
-  line-height: 18px;
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
   color: var(--es-muted);
 }
 .student-app .es-course-row {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-sm);
   border-top: 1px solid var(--es-bg);
-  padding-top: 16px;
+  padding-top: var(--space-md);
 }
 .student-app .es-course-row.es-between {
   flex-direction: row;
@@ -496,47 +499,47 @@
   align-self: flex-start;
 }
 .student-app .es-soft {
-  background: #f3f4fc;
-  border-radius: 8px;
-  padding: 16px;
+  background: var(--color-background);
+  border-radius: var(--radius-s);
+  padding: var(--space-md);
 }
 .student-app .es-note {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
-  padding: 16px;
-  border-radius: 8px;
-  font-size: 12px;
-  line-height: 18px;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  border-radius: var(--radius-s);
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
 }
 .student-app .es-text-link {
   color: var(--es-primary);
   font-weight: 500;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-xs);
 }
 .student-app .es-with-icon {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-sm);
 }
 .student-app .es-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  border-radius: 8px;
-  padding: 8px;
-  background: white;
+  gap: var(--space-md);
+  border-radius: var(--radius-s);
+  padding: var(--space-sm);
+  background: var(--color-surface);
 }
 .student-app .es-search {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-sm);
   background: var(--es-bg);
-  border-radius: 8px;
-  padding: 8px;
+  border-radius: var(--radius-s);
+  padding: var(--space-sm);
   max-width: 480px;
   flex: 1;
 }
@@ -544,22 +547,23 @@
   border: 0;
   outline: none;
   background: transparent;
-  font-size: 12px;
-  line-height: 18px;
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
   color: var(--es-text);
 }
 .student-app select {
-  background: white;
+  background: var(--color-surface);
   border: 1px solid var(--es-border);
-  padding: 8px;
-  border-radius: 8px;
-  font-size: 12px;
+  padding: var(--space-sm);
+  border-radius: var(--radius-s);
+  font-size: var(--text-p12-size);
   max-width: 100%;
+  line-height: var(--text-p12-line);
 }
 .student-app .es-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-sm);
   flex-wrap: wrap;
 }
 .student-app .es-end {
@@ -569,9 +573,9 @@
   width: 40px;
   height: 40px;
   border: 0;
-  background: white;
+  background: var(--color-surface);
   color: var(--es-primary);
-  border-radius: 8px;
+  border-radius: var(--radius-s);
   display: grid;
   place-items: center;
   position: relative;
@@ -583,17 +587,18 @@
 .student-app .es-tabs {
   display: flex;
   justify-content: center;
-  gap: 24px;
+  gap: var(--space-lg);
   border-bottom: 1px solid var(--es-border);
 }
 .student-app .es-tabs button {
   background: none;
   border: 0;
   border-bottom: 2px solid transparent;
-  padding: 16px 8px;
+  padding: var(--space-md) var(--space-sm);
   color: var(--es-muted);
-  font-size: 12px;
+  font-size: var(--text-l12-size);
   font-weight: 600;
+  line-height: var(--text-l12-line);
 }
 .student-app .es-tabs button[aria-selected="true"] {
   color: var(--es-primary);
@@ -601,7 +606,7 @@
 }
 .student-app .es-featured {
   border: 2px solid var(--es-primary);
-  box-shadow: 0 4px 12px #3b5bdb0d;
+  box-shadow: var(--shadow-1);
 }
 .student-app .es-urgent {
   border: 1px solid var(--es-secondary);
@@ -610,9 +615,9 @@
 .student-app .es-attachment {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-sm);
   border-top: 1px solid var(--es-bg);
-  padding-top: 16px;
+  padding-top: var(--space-md);
 }
 .student-app .es-attachment > div {
   min-width: 0;
@@ -624,16 +629,16 @@
 .student-app .es-timeline {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-md);
   position: relative;
 }
 .student-app .es-timeline a {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 16px;
+  gap: var(--space-sm);
+  padding: var(--space-md);
   border: 1px solid var(--es-bg);
-  border-radius: 8px;
+  border-radius: var(--radius-s);
 }
 .student-app .es-timeline a > span:nth-child(2) {
   flex: 1;
@@ -641,8 +646,8 @@
 }
 .student-app .es-timeline a small {
   display: block;
-  font-size: 12px;
-  line-height: 18px;
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
 }
 .student-app .es-timeline .current {
   border-color: var(--es-primary);
@@ -656,7 +661,7 @@
   min-width: 0;
 }
 .student-app .es-module h3 {
-  margin: 8px 0;
+  margin: var(--space-sm) 0;
 }
 .student-app .es-align-start {
   align-self: start;
@@ -664,40 +669,42 @@
 .student-app .es-calendar {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 8px;
+  gap: var(--space-sm);
 }
 .student-app .es-calendar span {
-  padding: 8px;
+  padding: var(--space-sm);
   background: var(--es-bg);
-  border-radius: 8px;
-  font-size: 12px;
+  border-radius: var(--radius-s);
+  font-size: var(--text-l12-size);
   text-align: center;
+  line-height: var(--text-l12-line);
 }
 .student-app .es-calendar .active {
   background: var(--es-secondary);
 }
 .student-app .es-resource-tabs {
   flex-wrap: wrap;
-  gap: 16px;
-  padding: 16px;
+  gap: var(--space-md);
+  padding: var(--space-md);
 }
 .student-app .es-resource-tabs span {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 12px;
+  gap: var(--space-sm);
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
 }
 .student-app .es-video-empty {
   min-height: 280px;
-  background: #151b2c;
-  border-radius: 8px;
-  color: white;
+  background: var(--color-text-primary);
+  border-radius: var(--radius-s);
+  color: var(--color-surface);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 16px;
-  padding: 24px;
+  gap: var(--space-md);
+  padding: var(--space-lg);
   text-align: center;
 }
 .student-app .es-video-empty > .es-icon {
@@ -706,25 +713,26 @@
 .student-app .es-field {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  font-size: 12px;
-  line-height: 18px;
+  gap: var(--space-sm);
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
   font-weight: 500;
 }
 .student-app .es-field input,
 .student-app .es-field textarea {
   border: 1px solid var(--es-border);
-  border-radius: 8px;
-  padding: 8px 16px;
+  border-radius: var(--radius-s);
+  padding: var(--space-sm) var(--space-md);
   color: var(--es-text);
-  background: white;
-  font-size: 16px;
-  line-height: 24px;
+  background: var(--color-surface);
+  font-size: var(--text-p16-size);
+  line-height: var(--text-p16-line);
 }
 .student-app .es-field input[readonly] {
-  background: #f3f4fc;
+  background: var(--color-background);
   border-color: transparent;
-  font-size: 12px;
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
 }
 .student-app .es-field textarea {
   min-height: 104px;
@@ -733,25 +741,27 @@
 .student-app .es-upload {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-md);
   align-items: center;
   border: 1px dashed var(--es-border);
-  padding: 32px;
-  border-radius: 12px;
+  padding: var(--space-xl);
+  border-radius: var(--radius-m);
   text-align: center;
   color: var(--es-primary);
 }
 .student-app .es-upload input {
-  font-size: 12px;
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
 }
 .student-app form {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: var(--space-lg);
 }
 .student-app .es-error-text {
   color: var(--es-error);
-  font-size: 12px;
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
 }
 .student-app .es-table-wrap {
   overflow-x: auto;
@@ -760,18 +770,18 @@
   width: 100%;
   border-collapse: collapse;
   min-width: 720px;
-  font-size: 12px;
-  line-height: 18px;
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
 }
 .student-app th {
   background: var(--es-bg);
   color: var(--es-muted);
   text-align: left;
   font-weight: 500;
-  padding: 16px;
+  padding: var(--space-md);
 }
 .student-app td {
-  padding: 16px;
+  padding: var(--space-md);
   border-bottom: 1px solid var(--es-bg);
   vertical-align: middle;
 }
@@ -779,26 +789,27 @@
   min-width: 120px;
 }
 .student-app .es-pagination {
-  padding-top: 16px;
+  padding-top: var(--space-md);
 }
 .student-app .es-profile-header {
   display: flex;
-  gap: 24px;
+  gap: var(--space-lg);
   align-items: center;
 }
 .student-app .es-avatar-large {
   width: 80px;
   height: 80px;
-  border-radius: 16px;
-  font-size: 28px;
+  border-radius: var(--radius-l);
+  font-size: var(--text-h3-size);
+  line-height: var(--text-h3-line);
 }
 .student-app .es-profile-header > .es-badge {
   margin-left: auto;
 }
 .student-app .es-question {
-  font-size: 18px;
-  line-height: 27px;
-  margin: 16px 0;
+  font-size: var(--text-p18-size);
+  line-height: var(--text-p18-line);
+  margin: var(--space-md) 0;
 }
 .student-app .es-options {
   border: 0;
@@ -806,15 +817,15 @@
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-md);
 }
 .student-app .es-options label {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 16px;
+  gap: var(--space-md);
+  padding: var(--space-md);
   border: 1px solid var(--es-border);
-  border-radius: 8px;
+  border-radius: var(--radius-s);
   cursor: pointer;
 }
 .student-app .es-options label.is-selected {
@@ -831,24 +842,24 @@
 }
 .student-app .es-quiz-controls {
   border-top: 1px solid var(--es-bg);
-  padding-top: 24px;
+  padding-top: var(--space-lg);
   flex-wrap: wrap;
 }
 .student-app .es-question-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 8px;
+  gap: var(--space-sm);
 }
 .student-app .es-question-grid button {
   height: 40px;
   border: 1px solid var(--es-border);
   background: var(--es-bg);
-  border-radius: 8px;
+  border-radius: var(--radius-s);
   color: var(--es-text);
 }
 .student-app .es-question-grid .answered {
   background: var(--es-primary);
-  color: white;
+  color: var(--color-surface);
   border-color: var(--es-primary);
 }
 .student-app .es-question-grid .marked {
@@ -863,43 +874,43 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 16px;
-  padding: 24px;
+  gap: var(--space-md);
+  padding: var(--space-lg);
   background: var(--es-primary-tint);
-  border-radius: 12px;
+  border-radius: var(--radius-m);
 }
 .student-app .es-score strong {
   display: block;
-  font-size: 36px;
-  line-height: 46px;
+  font-size: var(--text-h2-size);
+  line-height: var(--text-h2-line);
   color: var(--es-primary);
 }
 .student-app .es-score small {
-  font-size: 12px;
-  line-height: 18px;
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
 }
 .student-app .es-review {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-md);
   border: 1px solid var(--es-bg);
-  padding: 16px;
-  border-radius: 12px;
+  padding: var(--space-md);
+  border-radius: var(--radius-m);
 }
 .student-app .es-review-option {
   display: flex;
   justify-content: space-between;
-  gap: 16px;
-  padding: 8px;
-  border-radius: 8px;
-  font-size: 12px;
-  line-height: 18px;
+  gap: var(--space-md);
+  padding: var(--space-sm);
+  border-radius: var(--radius-s);
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
 }
 .student-app .es-footer {
-  font-size: 12px;
-  line-height: 18px;
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
   color: var(--es-muted);
-  padding: 32px 0 16px;
+  padding: var(--space-xl) 0 var(--space-md);
 }
 .student-app .es-bottom-nav {
   display: none;
@@ -907,7 +918,7 @@
 .student-app .es-dot {
   width: 8px;
   height: 8px;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   background: var(--es-primary);
   position: absolute;
   right: 8px;
@@ -921,16 +932,16 @@
   right: 0;
   top: 48px;
   width: 280px;
-  background: white;
-  padding: 16px;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px #1b1d231a;
+  background: var(--color-surface);
+  padding: var(--space-md);
+  border-radius: var(--radius-m);
+  box-shadow: var(--shadow-2);
   border: 1px solid var(--es-border);
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  font-size: 12px;
-  line-height: 18px;
+  gap: var(--space-md);
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
 }
 .student-app .es-dropdown a:hover {
   color: var(--es-primary);
@@ -938,24 +949,24 @@
 .student-app .es-modal-overlay {
   position: fixed;
   inset: 0;
-  background: #1b1d2377;
+  background: color-mix(in srgb, var(--color-text-primary) 47%, transparent);
   z-index: 100;
   display: grid;
   place-items: center;
-  padding: 24px;
+  padding: var(--space-lg);
 }
 .student-app .es-modal {
   width: 100%;
   max-width: 480px;
-  box-shadow: 0 16px 48px #1b1d2333;
+  box-shadow: var(--shadow-3);
 }
 .student-app .es-skip {
   position: fixed;
   top: -100px;
   left: 24px;
   z-index: 120;
-  background: #fff;
-  padding: 16px;
+  background: var(--color-surface);
+  padding: var(--space-md);
 }
 .student-app .es-skip:focus {
   top: 16px;
@@ -969,7 +980,7 @@
 }
 @media (min-width: 1800px) {
   .student-app .es-main {
-    margin-right: 24px;
+    margin-right: var(--space-lg);
   }
 }
 @media (max-width: 1200px) {
@@ -989,7 +1000,7 @@
     width: 176px;
   }
   .student-app .es-main {
-    margin-left: 200px;
+    margin-left: calc(var(--space-2xl) + var(--space-2xl) + var(--space-2xl) + var(--space-2xl) + var(--space-sm));
   }
 }
 @media (max-width: 960px) {
@@ -1012,21 +1023,22 @@
     flex-wrap: wrap;
   }
   .student-app .es-module > .es-button {
-    margin-left: 48px;
+    margin-left: var(--space-2xl);
   }
 }
 @media (max-width: 640px) {
   .student-app {
-    padding: 16px 16px 104px;
+    padding: var(--space-md) var(--space-md) var(--space-2xl);
   }
   .student-app .es-topbar {
-    padding: 8px 16px;
+    padding: var(--space-sm) var(--space-md);
     height: 64px;
-    gap: 8px;
+    gap: var(--space-sm);
   }
   .student-app .es-topbar > strong {
-    font-size: 12px;
-    gap: 8px;
+    font-size: var(--text-l12-size);
+    gap: var(--space-sm);
+    line-height: var(--text-l12-line);
   }
   .student-app .es-topbar > strong > .es-icon {
     display: none;
@@ -1039,23 +1051,23 @@
   }
   .student-app .es-main {
     margin-left: 0;
-    padding-top: 24px;
+    padding-top: var(--space-lg);
   }
   .student-app .es-breadcrumb {
-    margin-bottom: 24px;
+    margin-bottom: var(--space-lg);
   }
   .student-app .es-card {
-    padding: 16px;
+    padding: var(--space-md);
   }
   .student-app .es-stats,
   .student-app .es-course-grid,
   .student-app .es-progress-grid,
   .student-app .es-form-grid {
     grid-template-columns: 1fr;
-    gap: 24px;
+    gap: var(--space-lg);
   }
   .student-app .es-stats .es-card {
-    gap: 8px;
+    gap: var(--space-sm);
   }
   .student-app .es-stat-value {
     text-align: left;
@@ -1069,26 +1081,26 @@
     flex-direction: column;
   }
   .student-app .es-hero {
-    padding: 16px;
-    gap: 16px;
+    padding: var(--space-md);
+    gap: var(--space-md);
   }
   .student-app .es-hero h1 {
-    font-size: 20px;
-    line-height: 26px;
+    font-size: var(--text-h5-size);
+    line-height: var(--text-h5-line);
   }
   .student-app .es-hero > .es-button {
     width: 100%;
   }
   .student-app .es-toolbar {
     flex-wrap: wrap;
-    padding: 8px;
+    padding: var(--space-sm);
   }
   .student-app .es-search {
     max-width: none;
     min-width: 100%;
   }
   .student-app .es-tabs {
-    gap: 8px;
+    gap: var(--space-sm);
     justify-content: flex-start;
     overflow: auto;
   }
@@ -1102,19 +1114,19 @@
     right: 0;
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
-    background: white;
+    background: var(--color-surface);
     border-top: 1px solid var(--es-border);
-    padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+    padding: var(--space-sm) var(--space-sm) calc(var(--space-sm) + env(safe-area-inset-bottom));
     z-index: 30;
-    gap: 4px;
+    gap: var(--space-xs);
   }
   .student-app .es-bottom-nav .es-nav-item {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    font-size: 12px;
-    line-height: 14px;
-    padding: 8px 4px;
+    gap: var(--space-xs);
+    font-size: var(--text-l12-size);
+    line-height: var(--text-l12-line);
+    padding: var(--space-sm) var(--space-xs);
     text-align: center;
     min-width: 0;
   }
@@ -1127,32 +1139,33 @@
   }
   .student-app .es-bottom-nav .es-nav-item:nth-child(3) span::after {
     content: "Progres";
-    font-size: 12px;
+    font-size: var(--text-l12-size);
+    line-height: var(--text-l12-line);
   }
   .student-app .es-timeline a {
     flex-wrap: wrap;
-    padding: 8px;
+    padding: var(--space-sm);
   }
   .student-app .es-attachment {
     flex-wrap: wrap;
   }
   .student-app .es-attachment > .es-button {
-    margin-left: 48px;
+    margin-left: var(--space-2xl);
   }
   .student-app .es-metrics > div {
-    padding: 8px;
+    padding: var(--space-sm);
   }
   .student-app .es-quiz-controls .es-button {
     flex: 1;
   }
   .student-app .es-footer {
-    padding-bottom: 24px;
+    padding-bottom: var(--space-lg);
   }
   .student-app .es-score {
-    padding: 16px;
+    padding: var(--space-md);
   }
   .student-app .es-profile-header {
-    gap: 16px;
+    gap: var(--space-md);
   }
   .student-app .es-profile-header > .es-badge {
     margin-left: 0;

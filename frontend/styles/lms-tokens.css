@@ -1,145 +1,109 @@
 /* Acuan: DESIGN (2).md. Token warna bersama untuk semua halaman LMS. */
-@font-face {
-  font-family: Poppins;
-  src: url("/fonts/poppins-latin-400-normal.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: Poppins;
-  src: url("/fonts/poppins-latin-500-normal.woff2") format("woff2");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: Poppins;
-  src: url("/fonts/poppins-latin-600-normal.woff2") format("woff2");
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: Poppins;
-  src: url("/fonts/poppins-latin-700-normal.woff2") format("woff2");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
 .lms-theme {
-  --lms-primary: #3b5bdb;
-  --lms-primary-light: #5b7cf0;
-  --lms-primary-dark: #1e3a8a;
-  --lms-primary-hover: #2f4fc4;
-  --lms-primary-soft: #e6eafb;
-  --lms-secondary: #ffc94d;
-  --lms-secondary-light: #ffdb85;
-  --lms-secondary-dark: #d9a400;
-  --lms-secondary-hover: var(--lms-secondary-dark);
-  --lms-secondary-soft: #fff6de;
-  --lms-info: #1c7ed6;
-  --lms-info-light: #4fa8ed;
-  --lms-info-dark: #145fa3;
-  --lms-info-soft: #eaf4fc;
-  --lms-success: #2f9e44;
-  --lms-success-light: #51bb68;
-  --lms-success-dark: #1f7a31;
-  --lms-success-hover: var(--lms-success-dark);
-  --lms-success-soft: #edf8ef;
-  --lms-warning: #e8a317;
-  --lms-warning-light: #f5c158;
-  --lms-warning-dark: #b87d0e;
-  --lms-warning-hover: var(--lms-warning-dark);
-  --lms-warning-soft: #fdf6e7;
-  --lms-error: #e03131;
-  --lms-error-light: #f16060;
-  --lms-error-dark: #a61e1e;
-  --lms-error-hover: var(--lms-error-dark);
-  --lms-error-soft: #fcecec;
-  --lms-text: #1b1d23;
-  --lms-text-secondary: #4a4e58;
-  --lms-disabled: #c4c8d2;
-  --lms-border: #c4c8d2;
-  --lms-background: #edeff3;
-  --lms-surface: #ffffff;
-  --lms-font: Poppins, Arial, sans-serif;
-  --lms-space-xs: 4px;
-  --lms-space-sm: 8px;
-  --lms-space-md: 16px;
-  --lms-space-lg: 24px;
-  --lms-space-xl: 32px;
-  --lms-space-2xl: 48px;
+  --lms-primary: var(--color-primary);
+  --lms-primary-light: var(--color-primary-light);
+  --lms-primary-dark: var(--color-primary-dark);
+  --lms-primary-hover: var(--color-primary-hover);
+  --lms-primary-soft: var(--color-primary-tint);
+  --lms-secondary: var(--color-secondary);
+  --lms-secondary-light: var(--color-secondary-light);
+  --lms-secondary-dark: var(--color-secondary-dark);
+  --lms-secondary-hover: var(--color-secondary-dark);
+  --lms-secondary-soft: var(--color-secondary-tint);
+  --lms-info: var(--color-info);
+  --lms-info-light: var(--color-info-light);
+  --lms-info-dark: var(--color-info-dark);
+  --lms-info-soft: var(--color-info-tint);
+  --lms-success: var(--color-success);
+  --lms-success-light: var(--color-success-light);
+  --lms-success-dark: var(--color-success-dark);
+  --lms-success-hover: var(--color-success-dark);
+  --lms-success-soft: var(--color-success-tint);
+  --lms-warning: var(--color-warning);
+  --lms-warning-light: var(--color-warning-light);
+  --lms-warning-dark: var(--color-warning-dark);
+  --lms-warning-hover: var(--color-warning-dark);
+  --lms-warning-soft: var(--color-warning-tint);
+  --lms-error: var(--color-error);
+  --lms-error-light: var(--color-error-light);
+  --lms-error-dark: var(--color-error-dark);
+  --lms-error-hover: var(--color-error-dark);
+  --lms-error-soft: var(--color-error-tint);
+  --lms-text: var(--color-text-primary);
+  --lms-text-secondary: var(--color-text-secondary);
+  --lms-disabled: var(--color-text-disabled);
+  --lms-border: var(--color-border);
+  --lms-background: var(--color-background);
+  --lms-surface: var(--color-surface);
+  --lms-font: var(--font-family);
+  --lms-space-xs: var(--space-xs);
+  --lms-space-sm: var(--space-sm);
+  --lms-space-md: var(--space-md);
+  --lms-space-lg: var(--space-lg);
+  --lms-space-xl: var(--space-xl);
+  --lms-space-2xl: var(--space-2xl);
   /* Radius dan tipografi mengikuti acuan DESIGN (2).md. */
-  --lms-radius-control: 8px;
-  --lms-radius-card: 16px;
-  --lms-radius-pill: 999px;
-  --lms-shadow: 0 2px 8px rgb(26 28 35 / 6%);
-  --lms-focus: 0 0 0 3px rgb(59 91 219 / 18%);
+  --lms-radius-control: var(--radius-s);
+  --lms-radius-card: var(--radius-l);
+  --lms-radius-pill: var(--radius-pill);
+  --lms-shadow: var(--shadow-1);
+  --lms-focus: 0 0 0 var(--border-width-m) var(--color-primary);
   font-family: var(--lms-font);
 }
 
-@font-face {
-  font-family: Poppins;
-  src: url("/fonts/poppins-latin-800-normal.woff2") format("woff2");
-  font-weight: 800;
-  font-style: normal;
-  font-display: swap;
+.lms-theme {
+  --lms-radius-button: var(--radius-m);
+  --lms-radius-xs: var(--radius-xs);
+  --lms-radius-circle: var(--radius-circle);
+  --lms-card-space: var(--space-lg);
+  --lms-shadow-2: var(--shadow-2);
+  --lms-shadow-3: var(--shadow-3);
 }
 .lms-theme {
-  --lms-radius-button: 12px;
-  --lms-radius-xs: 4px;
-  --lms-radius-circle: 50%;
-  --lms-card-space: 24px;
-  --lms-shadow-2: 0 4px 16px rgb(27 29 35 / 10%);
-  --lms-shadow-3: 0 16px 48px rgb(27 29 35 / 18%);
+  --lms-display-size: var(--text-display-size);
+  --lms-display-line: var(--text-display-line);
 }
 .lms-theme {
-  --lms-display-size: 60px;
-  --lms-display-line: 53px;
+  --lms-h1-size: var(--text-h1-size);
+  --lms-h1-line: var(--text-h1-line);
 }
 .lms-theme {
-  --lms-h1-size: 44px;
-  --lms-h1-line: 58px;
+  --lms-h2-size: var(--text-h2-size);
+  --lms-h2-line: var(--text-h2-line);
 }
 .lms-theme {
-  --lms-h2-size: 36px;
-  --lms-h2-line: 46px;
+  --lms-h3-size: var(--text-h3-size);
+  --lms-h3-line: var(--text-h3-line);
 }
 .lms-theme {
-  --lms-h3-size: 28px;
-  --lms-h3-line: 38px;
+  --lms-h4-size: var(--text-h4-size);
+  --lms-h4-line: var(--text-h4-line);
 }
 .lms-theme {
-  --lms-h4-size: 24px;
-  --lms-h4-line: 32px;
+  --lms-h5-size: var(--text-h5-size);
+  --lms-h5-line: var(--text-h5-line);
 }
 .lms-theme {
-  --lms-h5-size: 20px;
-  --lms-h5-line: 26px;
+  --lms-p18-size: var(--text-p18-size);
+  --lms-p18-line: var(--text-p18-line);
 }
 .lms-theme {
-  --lms-p18-size: 18px;
-  --lms-p18-line: 27px;
+  --lms-p16-size: var(--text-p16-size);
+  --lms-p16-line: var(--text-p16-line);
 }
 .lms-theme {
-  --lms-p16-size: 16px;
-  --lms-p16-line: 24px;
+  --lms-p12-size: var(--text-p12-size);
+  --lms-p12-line: var(--text-p12-line);
 }
 .lms-theme {
-  --lms-p12-size: 12px;
-  --lms-p12-line: 18px;
+  --lms-l18-size: var(--text-l18-size);
+  --lms-l18-line: var(--text-l18-line);
 }
 .lms-theme {
-  --lms-l18-size: 18px;
-  --lms-l18-line: 23px;
+  --lms-l16-size: var(--text-l16-size);
+  --lms-l16-line: var(--text-l16-line);
 }
 .lms-theme {
-  --lms-l16-size: 16px;
-  --lms-l16-line: 20px;
-}
-.lms-theme {
-  --lms-l12-size: 12px;
-  --lms-l12-line: 14px;
+  --lms-l12-size: var(--text-l12-size);
+  --lms-l12-line: var(--text-l12-line);
 }

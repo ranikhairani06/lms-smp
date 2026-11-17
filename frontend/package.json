@@ -11,10 +11,11 @@
   "dependencies": {
     "@fontsource/poppins": "^5.3.0",
     "@iconify-json/solar": "^1.2.13",
-    "@iconify/react": "^6.0.2",
+    "@iconify/react": "^6.0.4",
     "next": "16.3.4",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

@@ -1,171 +1,2435 @@
-.teacher-app { min-height:100vh; padding:16px; background:var(--lms-background); color:var(--lms-text); font:400 16px/24px Poppins,sans-serif; }
-.teacher-app *, .teacher-app *::before, .teacher-app *::after { box-sizing:border-box; }
-.teacher-app h1,.teacher-app h2,.teacher-app h3,.teacher-app p { margin:0; }
-.teacher-app h1 { font-size:24px; line-height:32px; font-weight:700; }
-.teacher-app h2 { font-size:20px; line-height:26px; font-weight:600; }
-.teacher-app h3 { font-size:16px; line-height:24px; font-weight:600; }
-.teacher-app a { color:inherit; text-decoration:none; }
-.teacher-app button,.teacher-app input,.teacher-app select,.teacher-app textarea { font:inherit; }
-.teacher-app button,.teacher-app select { cursor:pointer; }
-.teacher-app button:disabled { opacity:.5; cursor:not-allowed; }
-.teacher-app :focus-visible { outline:2px solid var(--lms-primary); outline-offset:4px; }
-.teacher-app svg { flex-shrink:0; }
-.teacher-app small,.tg-small { font-size:12px; line-height:18px; color:var(--lms-text-secondary); }
-.tg-label { font-size:12px; line-height:18px; font-weight:600; text-transform:uppercase; color:var(--lms-text-secondary); }
-.tg-topbar { position:sticky; top:16px; z-index:30; display:flex; align-items:center; justify-content:space-between; height:64px; padding:16px 24px; background:white; border-radius:12px; gap:16px; }
-.tg-inline,.tg-actions { display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
-.tg-actions { justify-content:flex-end; }
-.tg-between { display:flex; align-items:center; justify-content:space-between; gap:16px; }
-.tg-icon-button { border:0; display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; color:var(--lms-text-secondary); background:var(--lms-background); border-radius:12px; position:relative; }
-.tg-dot { position:absolute; right:8px; top:8px; width:8px; height:8px; border-radius:50%; background:var(--lms-primary); }
-.tg-user { display:flex; align-items:center; gap:8px; font-size:12px; line-height:18px; }
-.tg-user small,.tg-user strong,.tg-brand small { display:block; }
-.tg-avatar { width:40px; height:40px; flex-shrink:0; background:var(--lms-primary); color:white; display:grid; place-items:center; border-radius:12px; font-weight:600; }
-.tg-sidebar { position:fixed; top:104px; bottom:24px; left:16px; width:232px; border-radius:16px; padding:16px; background:white; display:flex; flex-direction:column; gap:24px; border:1px solid #e2e5ed; }
-.tg-sidebar>* { flex-shrink:0; }
-.tg-brand { display:flex; gap:12px; align-items:center; background:var(--lms-primary); color:white!important; border-radius:12px; padding:16px; font-size:16px; line-height:24px; }
-.tg-brand>span { display:grid; place-items:center; background:white; color:var(--lms-text); width:40px; height:40px; border-radius:8px; flex-shrink:0; }
-.tg-brand small { margin-top:4px; color:var(--lms-primary-soft); font-size:12px; line-height:18px; font-weight:600; }
-.tg-sidebar nav { display:flex; flex-direction:column; gap:8px; }
-.tg-sidebar nav a { display:flex; align-items:center; min-height:48px; gap:12px; padding:12px; border-radius:8px; color:var(--lms-text-secondary); font-size:16px; line-height:24px; font-weight:400; }
-.tg-sidebar nav a[aria-current],.tg-sidebar nav a:hover { background:var(--lms-primary-soft); color:var(--lms-primary-dark); }
-.tg-sidebar nav a[aria-current] { background:var(--lms-primary); color:white; font-weight:600; }
-.tg-logout { display:flex; align-items:center; gap:16px; margin-top:auto; border:0; border-top:1px solid #e2e5ed; padding:24px 16px 8px; background:transparent; color:var(--lms-error-dark); }
-.tg-sidebar .tg-logout { min-height:48px; gap:12px; padding:20px 12px 12px; font-size:16px; line-height:24px; text-align:left; }
-.tg-main { margin-left:256px; min-width:0; }
-.tg-breadcrumb { min-height:64px; display:flex; align-items:center; gap:8px; font-size:12px; line-height:18px; }
-.tg-breadcrumb svg { width:16px; height:16px; }
-.tg-breadcrumb { flex-wrap:wrap; padding:16px 0; }
-.tg-crumb { display:inline-flex; align-items:center; gap:8px; }
-.tg-crumb a[aria-current] { font-weight:600; }
-.tg-preview-label { margin-left:auto; color:var(--lms-text-secondary); border:1px solid var(--lms-border); border-radius:999px; padding:4px 8px; }
-.tg-page,.tg-stack { display:flex; flex-direction:column; gap:24px; min-width:0; }
-.tg-card { min-width:0; padding:24px; background:white; border:1px solid #e2e5ed; border-radius:16px; box-shadow:0 2px 3px rgb(27 29 35 / 4%); }
-.tg-card-heading { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:24px; }
-.tg-card-heading p,.tg-heading p { margin-top:8px; color:var(--lms-text-secondary); }
-.tg-heading { display:flex; justify-content:space-between; align-items:center; gap:24px; }
-.tg-heading>div { min-width:0; }
-.tg-heading .tg-button { flex-shrink:0; }
-.tg-grid-2 { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; }
-.tg-grid-3 { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; }
-.tg-columns { display:grid; grid-template-columns:minmax(0,1.8fr) minmax(280px,1fr); gap:24px; align-items:start; }
-.tg-columns>* { min-width:0; }
-.tg-export-columns { display:grid; grid-template-columns:minmax(280px,1fr) minmax(0,1.6fr); gap:24px; align-items:start; }
-.tg-stats { display:grid; gap:16px; }
-.tg-stat { display:flex; flex-direction:column; gap:16px; }
-.tg-stat .tg-label { text-align:right; }
-.tg-icon-tile { display:grid; place-items:center; width:40px; height:40px; border-radius:12px; flex-shrink:0; color:var(--lms-primary); background:var(--lms-primary-soft); }
-.tg-stat-value { font-size:24px; line-height:32px; font-weight:700; overflow-wrap:anywhere; }
-.tg-stat-value small { font-weight:400; }
-.tg-stat-warning { background:var(--lms-warning-soft); border-color:var(--lms-secondary); }
-.tg-stat-warning .tg-icon-tile { background:var(--lms-secondary); color:var(--lms-text); }
-.tg-badge { display:inline-flex; align-items:center; justify-content:center; gap:4px; border-radius:999px; padding:4px 8px; font-size:12px; line-height:18px; font-weight:500; max-width:100%; }
-.tg-badge svg { width:16px; height:16px; }
-.tg-primary { color:var(--lms-primary-dark); background:var(--lms-primary-soft); }
-.tg-info { color:var(--lms-info-dark); background:var(--lms-info-soft); }
-.tg-success { color:var(--lms-success-dark); background:var(--lms-success-soft); }
-.tg-warning { color:var(--lms-warning-dark); background:var(--lms-warning-soft); }
-.tg-error { color:var(--lms-error-dark); background:var(--lms-error-soft); }
-.tg-muted { color:var(--lms-text-secondary); background:var(--lms-background); }
-.tg-button { display:inline-flex; align-items:center; justify-content:center; gap:8px; border:1px solid transparent; border-radius:12px; padding:8px 16px; min-height:40px; font-size:12px!important; line-height:18px!important; font-weight:600; text-align:center; }
-.tg-button-primary { background:var(--lms-primary); color:white!important; }
-.tg-button-primary:hover { background:var(--lms-primary-hover); }
-.tg-button-outline { border-color:var(--lms-border); background:white; color:var(--lms-primary-dark)!important; }
-.tg-button-outline:hover { background:var(--lms-primary-soft); }
-.tg-button-danger { border-color:var(--lms-error); background:white; color:var(--lms-error-dark); }
-.tg-button-ghost { background:transparent; color:var(--lms-primary)!important; }
-.tg-button svg { width:20px; height:20px; }
-.tg-link { color:var(--lms-primary)!important; font-size:12px; line-height:18px; font-weight:600; }
-.tg-full { width:100%; }
-.tg-progress { background:transparent; display:grid; gap:8px; min-width:0; }
-.tg-track { height:8px; background:var(--lms-primary-soft); border-radius:999px; overflow:hidden; }
-.tg-track span { display:block; height:100%; background:var(--lms-primary); border-radius:inherit; }
-.tg-progress.tg-success .tg-track span { background:var(--lms-success); }
-.tg-progress.tg-warning .tg-track span { background:var(--lms-warning); }
-.tg-subcard { border:1px solid var(--lms-border); border-radius:12px; padding:16px; display:flex; flex-direction:column; gap:16px; min-width:0; }
-.tg-subcard p { color:var(--lms-text-secondary); }
-.tg-subcard+.tg-subcard { margin-top:16px; }
-.tg-soft { background:var(--lms-info-soft); border-color:transparent; }
-.tg-row { display:flex; align-items:center; gap:16px; }
-.tg-row>div { flex:1; min-width:0; }
-.tg-row h3 { margin-bottom:4px; }
-.tg-row>.tg-actions { flex:0 0 auto; }
-.tg-divider { border-top:1px solid #e2e5ed; padding-top:16px; margin-top:16px; }
-.tg-metrics { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); background:var(--lms-info-soft); padding:16px; border-radius:12px; gap:16px; }
-.tg-metrics strong { display:block; font-size:12px; line-height:18px; margin-top:4px; }
-.tg-toolbar { display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
-.tg-toolbar>.tg-search { flex:1; }
-.tg-search { display:flex; align-items:center; gap:8px; min-width:200px; padding:8px 16px; min-height:48px; background:var(--lms-background); border:1px solid transparent; border-radius:8px; }
-.tg-search input { width:100%; min-width:0; border:0!important; padding:0!important; outline:none; background:transparent!important; }
-.tg-search:focus-within { border-color:var(--lms-primary); }
-.teacher-app select,.teacher-app input:not([type=checkbox]):not([type=radio]),.teacher-app textarea { color:var(--lms-text); background:var(--lms-background); border:1px solid var(--lms-border); border-radius:8px; padding:8px 16px; min-height:40px; max-width:100%; font-size:16px; line-height:24px; }
-.teacher-app input[type=checkbox],.teacher-app input[type=radio] { accent-color:var(--lms-primary); width:16px; height:16px; flex-shrink:0; }
-.teacher-app input[type=file] { font-size:12px!important; }
-.teacher-app textarea { width:100%; min-height:120px; resize:vertical; }
-.tg-tabs { display:flex; justify-content:center; gap:24px; overflow-x:auto; }
-.tg-tabs a { padding:8px 0 16px; white-space:nowrap; border-bottom:2px solid transparent; font-weight:600; }
-.tg-tabs a[aria-current] { color:var(--lms-primary); border-color:var(--lms-primary); }
-.tg-table-wrap { overflow-x:auto; width:100%; border-radius:8px; }
-.teacher-app table { border-collapse:collapse; width:100%; min-width:680px; text-align:left; font-size:12px; line-height:18px; }
-.teacher-app th { padding:16px; background:var(--lms-info-soft); text-transform:uppercase; font-weight:600; color:var(--lms-text-secondary); }
-.teacher-app td { padding:16px; border-bottom:1px solid #e2e5ed; vertical-align:middle; }
-.teacher-app td strong { display:block; }
-.teacher-app td .tg-badge { white-space:nowrap; }
-.teacher-app td .tg-actions { justify-content:flex-start; gap:8px; flex-wrap:nowrap; }
-.teacher-app td .tg-progress { min-width:112px; }
-.teacher-app tr.is-warning { background:var(--lms-warning-soft); }
-.teacher-app tr.is-active { background:var(--lms-primary-soft); }
-.tg-table-foot { display:flex; justify-content:space-between; align-items:center; gap:16px; padding-top:24px; font-size:12px; line-height:18px; }
-.tg-pages { display:flex; align-items:center; gap:8px; }
-.tg-pages button { border:1px solid var(--lms-border); min-width:40px; height:40px; border-radius:8px; background:white; }
-.tg-pages button[aria-current] { background:var(--lms-primary); color:white; }
-.tg-empty { display:flex; align-items:center; flex-direction:column; gap:16px; padding:48px 24px; text-align:center; }
-.tg-empty>svg { width:40px; height:40px; color:var(--lms-primary); }
-.tg-notice { display:flex; gap:16px; padding:16px; border-radius:12px; font-size:12px; line-height:18px; }
-.tg-notice h3 { font-size:16px; line-height:24px; margin-bottom:8px; }
-.tg-chart { display:flex; align-items:flex-end; gap:8px; padding-top:24px; height:192px; border-bottom:1px solid var(--lms-border); }
-.tg-chart>div { flex:1; display:flex; flex-direction:column; gap:8px; text-align:center; }
-.tg-chart>div>span { background:var(--lms-primary); min-height:4px; border-radius:4px 4px 0 0; }
-.tg-chart>div:first-child>span { background:var(--lms-error); }
-.tg-chart>div:last-child>span { background:var(--lms-success); }
-.tg-chart small { white-space:nowrap; }
-.tg-field { display:flex; flex-direction:column; gap:8px; min-width:0; }
-.tg-field>span,.tg-field>label { font-weight:500; }
-.teacher-app .tg-search input { min-height:24px!important; }
-.tg-check-row>.tg-badge { flex:0 0 auto; }
-.tg-field small { font-weight:400; }
-.tg-form-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; }
-.tg-field-wide { grid-column:1 / -1; }
-.tg-form-actions { border-top:1px solid var(--lms-border); padding-top:24px; display:flex; justify-content:space-between; gap:16px; }
-.tg-check-row { display:flex; align-items:center; gap:16px; padding:16px; background:var(--lms-background); border-radius:12px; }
-.tg-check-row>span { flex:1; }
-.tg-dropzone { border:1px dashed var(--lms-primary); border-radius:12px; padding:24px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:16px; background:var(--lms-primary-soft); }
-.tg-editor { min-height:360px!important; background:white!important; }
-.tg-code { background:var(--lms-background); padding:16px; border-radius:8px; font-family:monospace; white-space:pre-wrap; overflow-wrap:anywhere; }
-.tg-document { background:white; border:1px solid var(--lms-border); padding:32px; min-height:400px; display:flex; flex-direction:column; gap:24px; box-shadow:0 4px 16px rgb(27 29 35 / 6%); }
-.tg-document-view { background:#e6e6ef; padding:24px; border-radius:12px; }
-.tg-grade-input { width:80px; text-align:center; background:white!important; }
-.tg-grade-total { font-size:36px; line-height:46px; font-weight:700; }
-.tg-score { color:var(--lms-primary); font-weight:700; }
-.tg-profile-avatar { width:96px; height:96px; font-size:28px; line-height:38px; border-radius:16px; background:var(--lms-primary-soft); color:var(--lms-primary); }
-.tg-readonly { background:var(--lms-info-soft); padding:16px; border-radius:8px; overflow-wrap:anywhere; min-height:48px; }
-.tg-footer { margin-top:32px; padding:24px 0 8px; border-top:1px solid var(--lms-border); color:var(--lms-text-secondary); font-size:12px; line-height:18px; }
-.tg-mobile-nav,.tg-mobile-logout { display:none; }
-.tg-skip { position:fixed; top:-100px; left:24px; background:white; padding:16px; z-index:100; }
-.tg-skip:focus { top:16px; }
-.tg-dialog { margin:auto; padding:24px; border:1px solid var(--lms-border); border-radius:16px; width:min(560px,calc(100% - 32px)); color:var(--lms-text); background:white; box-shadow:var(--lms-shadow-3); }
-.tg-dialog::backdrop { background:rgb(27 29 35 / 45%); }
-.tg-dialog>p,.tg-dialog>.tg-actions { margin-top:24px; }
-.tg-file-picker { position:relative; cursor:pointer; }
-.tg-file-picker input { position:absolute; inset:0; opacity:0; width:100%; cursor:pointer; }
-.tg-file-picker:focus-within { outline:2px solid var(--lms-primary); outline-offset:4px; }
-.tg-collapsed .tg-sidebar { display:none; }
-.tg-collapsed .tg-main { margin-left:0; }
-/* Keep every navigation action visible on shorter laptop screens. */
-@media (max-height:700px) { .tg-sidebar { gap:16px; } .tg-brand { padding:12px; } .tg-sidebar nav a { min-height:40px; padding:8px 12px; } .tg-sidebar .tg-logout { padding:12px; } }
-@media (max-width:1200px) { .tg-columns { grid-template-columns:minmax(0,1.4fr) minmax(260px,1fr); } .tg-stats { grid-template-columns:repeat(2,minmax(0,1fr))!important; } .tg-heading { align-items:flex-start; flex-wrap:wrap; } .tg-grid-3 { grid-template-columns:repeat(2,minmax(0,1fr)); } .tg-metrics { gap:8px; } }
-@media (max-width:1050px) { .tg-columns { grid-template-columns:1fr; } .tg-grid-2 { grid-template-columns:1fr; } .tg-row { flex-wrap:wrap; } }
-@media (max-width:1050px) { .tg-export-columns { grid-template-columns:1fr; } }
-@media (max-width:820px), (max-height:560px) { .teacher-app { padding:16px 16px 96px; } .tg-sidebar,.tg-menu-toggle { display:none; } .tg-main { margin-left:0; } .tg-mobile-nav { display:flex; position:fixed; bottom:0; left:0; right:0; justify-content:space-around; background:white; border-top:1px solid var(--lms-border); padding:8px 4px max(8px,env(safe-area-inset-bottom)); z-index:20; } .tg-mobile-nav a { display:flex; flex:1; flex-direction:column; align-items:center; gap:4px; font-size:12px; line-height:18px; padding:4px; } .tg-mobile-nav a[aria-current] { color:var(--lms-primary); background:var(--lms-primary-soft); border-radius:8px; } .tg-mobile-logout { display:flex; margin-top:16px; padding:8px 0; border:0; } .tg-grid-2 { grid-template-columns:repeat(2,minmax(0,1fr)); } }
-@media (max-width:640px) { .tg-topbar { padding:16px; } .tg-user>span:last-child { display:none; } .tg-topbar>.tg-inline { gap:8px; flex-wrap:nowrap; } .tg-topbar strong { font-size:16px; } .tg-card { padding:16px; } .tg-page,.tg-stack { gap:16px; } .tg-grid-2,.tg-grid-3,.tg-form-grid { grid-template-columns:1fr; gap:16px; } .tg-stats { gap:8px; } .tg-stat { gap:8px; } .tg-stat .tg-between { align-items:flex-start; flex-direction:column; gap:8px; } .tg-stat .tg-label { text-align:left; } .tg-stat-value { font-size:24px; line-height:32px; } .tg-heading { gap:16px; } .tg-heading p { font-size:16px; line-height:24px; } .tg-tabs { justify-content:flex-start; gap:16px; font-size:12px; line-height:18px; } .tg-card-heading { align-items:flex-start; flex-wrap:wrap; margin-bottom:16px; } .tg-toolbar>* { width:100%; } .tg-search { min-width:0; } .tg-between { gap:8px; flex-wrap:wrap; } .tg-metrics { gap:8px; padding:16px; } .tg-form-actions { flex-direction:column; } .tg-form-actions .tg-actions>* { flex:1; } .tg-document-view,.tg-document { padding:16px; } .tg-table-foot { flex-wrap:wrap; } .tg-profile-avatar { width:80px; height:80px; } .tg-breadcrumb { flex-wrap:wrap; padding:16px 0; } .tg-breadcrumb .tg-preview-label { font-size:12px; } }
-@media (max-width:640px) { .tg-stats { grid-template-columns:1fr!important; } .tg-stat .tg-between { flex-direction:row; align-items:center; } .tg-stat .tg-label { text-align:right; } }
+/* ==========================================================================
+   Portal Guru (teacher.css)
+   Semua nilai warna, font, radius, bayangan, dan spasi memakai token dari
+   globals.css (--color-*, --text-*, --radius-*, --shadow-*, --space-*) atau
+   variabel --lms-* yang sudah menjadi alias token tersebut.
+ 
+   Catatan:
+   - Beberapa deklarasi memakai !important dengan sengaja: untuk menimpa
+     style inline di TSX atau selector bawaan yang lebih spesifik. Jangan dihapus
+     tanpa mengecek halaman guru satu per satu.
+   - Ukuran tetap (lebar sidebar, tinggi top bar) dipusatkan di variabel --tg-*
+     pada .teacher-app supaya tidak tersebar sebagai angka mentah.
+   ========================================================================== */
+ 
+ 
+/* ==========================================================================
+   1. DASAR
+   ========================================================================== */
+.teacher-app {
+  --tg-sidebar-width: 232px;
+  --tg-topbar-height: 64px;
+  min-height: 100vh;
+  padding: var(--space-md);
+  background: var(--lms-background);
+  color: var(--lms-text);
+  font: var(--font-weight-regular) var(--text-p16-size)/var(--text-p16-line) var(--font-family);
+}
+ 
+.teacher-app *,
+.teacher-app *::before,
+.teacher-app *::after {
+  box-sizing: border-box;
+}
+ 
+.teacher-app h1,
+.teacher-app h2,
+.teacher-app h3,
+.teacher-app p {
+  margin: 0;
+}
+ 
+/* Judul halaman */
+.teacher-app h1 {
+  font-size: var(--text-h4-size);
+  line-height: var(--text-h4-line);
+  font-weight: var(--font-weight-bold);
+}
+ 
+/* Judul kartu (Figma: Paragraf p18 Bold) */
+.teacher-app h2 {
+  font-size: var(--text-p18-size);
+  line-height: var(--text-p18-line);
+  font-weight: var(--font-weight-bold);
+}
+ 
+.teacher-app h3 {
+  font-size: var(--text-p16-size);
+  line-height: var(--text-p16-line);
+  font-weight: var(--font-weight-semibold);
+}
+ 
+.teacher-app a {
+  color: inherit;
+  text-decoration: none;
+}
+ 
+.teacher-app button,
+.teacher-app input,
+.teacher-app select,
+.teacher-app textarea {
+  font: inherit;
+}
+ 
+.teacher-app button,
+.teacher-app select {
+  cursor: pointer;
+}
+ 
+.teacher-app button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+ 
+.teacher-app :focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--space-xs);
+}
+ 
+.teacher-app svg {
+  flex-shrink: 0;
+}
+ 
+.teacher-app small,
+.tg-small {
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
+  color: var(--lms-text-secondary);
+}
+ 
+.tg-label {
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  color: var(--lms-text-secondary);
+}
+ 
+ 
+/* ==========================================================================
+   2. TOP BAR, UTILITAS BARIS, AVATAR
+   ========================================================================== */
+.tg-topbar {
+  position: sticky;
+  top: var(--space-md);
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--tg-topbar-height);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--color-surface);
+  border-radius: var(--radius-m);
+  gap: var(--space-md);
+}
+ 
+.tg-inline,
+.tg-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+ 
+.tg-actions {
+  justify-content: flex-end;
+}
+ 
+.tg-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+ 
+/* Tombol ikon (mis. lonceng notifikasi) */
+.tg-icon-button {
+  border: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  color: var(--lms-text-secondary);
+  background: var(--lms-background);
+  border-radius: var(--radius-m);
+  position: relative;
+}
+ 
+/* Titik penanda notifikasi */
+.tg-dot {
+  position: absolute;
+  right: var(--space-sm);
+  top: var(--space-sm);
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-circle);
+  background: var(--lms-primary);
+}
+ 
+/* Chip pengguna di top bar */
+.tg-user {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
+}
+ 
+.tg-user small,
+.tg-user strong,
+.tg-brand small {
+  display: block;
+}
+ 
+.tg-avatar {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  background: var(--lms-primary);
+  color: var(--color-surface);
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-m);
+  font-weight: var(--font-weight-semibold);
+}
+ 
+ 
+/* ==========================================================================
+   3. SIDEBAR
+   ========================================================================== */
+.tg-sidebar {
+  position: fixed;
+  top: calc(var(--space-md) + var(--tg-topbar-height) + var(--space-lg));
+  bottom: var(--space-lg);
+  left: var(--space-md);
+  width: var(--tg-sidebar-width);
+  border-radius: var(--radius-l);
+  padding: var(--space-md);
+  background: var(--color-surface);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  border: var(--border-width-xs) solid var(--color-border);
+}
+ 
+.tg-sidebar > * {
+  flex-shrink: 0;
+}
+ 
+/* Kartu logo "EduSpace LMS / Portal Guru" */
+.tg-brand {
+  display: flex;
+  gap: var(--space-md);
+  align-items: center;
+  background: var(--lms-primary);
+  color: var(--color-surface) !important;
+  border-radius: var(--radius-m);
+  padding: var(--space-md);
+  font-size: var(--text-l16-size);
+  line-height: var(--text-l16-line);
+}
+ 
+.tg-brand > span {
+  display: grid;
+  place-items: center;
+  background: var(--color-surface);
+  color: var(--lms-text);
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-s);
+  flex-shrink: 0;
+}
+ 
+.tg-brand small {
+  margin-top: var(--space-xs);
+  color: var(--lms-primary-soft);
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+  font-weight: var(--font-weight-semibold);
+}
+ 
+.tg-sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+ 
+.tg-sidebar nav a {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  border-radius: var(--radius-s);
+  color: var(--lms-text-secondary);
+  font-size: var(--text-l16-size);
+  line-height: var(--text-l16-line);
+  font-weight: var(--font-weight-regular);
+}
+ 
+.tg-sidebar nav a[aria-current],
+.tg-sidebar nav a:hover {
+  background: var(--lms-primary-soft);
+  color: var(--lms-primary-dark);
+}
+ 
+/* Item menu aktif: isi indigo, teks putih */
+.tg-sidebar nav a[aria-current] {
+  background: var(--lms-primary);
+  color: var(--color-surface);
+  font-weight: var(--font-weight-semibold);
+}
+ 
+/* Tombol keluar di bagian bawah sidebar (dua aturan sengaja dipisah, lihat media query mobile) */
+.tg-logout {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin-top: auto;
+  border: 0;
+  border-top: var(--border-width-xs) solid var(--color-border);
+  padding: var(--space-lg) var(--space-md) var(--space-sm);
+  background: transparent;
+  color: var(--lms-error-dark);
+}
+ 
+.tg-sidebar .tg-logout {
+  min-height: 48px;
+  gap: var(--space-md);
+  padding: var(--space-lg) var(--space-md) var(--space-md);
+  font-size: var(--text-l16-size);
+  line-height: var(--text-l16-line);
+  text-align: left;
+}
+ 
+ 
+/* ==========================================================================
+   4. KERANGKA UTAMA DAN BREADCRUMB
+   ========================================================================== */
+.tg-main {
+  margin-left: calc(var(--tg-sidebar-width) + var(--space-lg));
+  min-width: 0;
+}
+ 
+.tg-breadcrumb {
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  padding: var(--space-md) 0;
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+}
+ 
+.tg-breadcrumb svg {
+  width: 16px;
+  height: 16px;
+}
+ 
+.tg-crumb {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+ 
+.tg-crumb a[aria-current] {
+  font-weight: var(--font-weight-semibold);
+}
+ 
+.tg-preview-label {
+  margin-left: auto;
+  color: var(--lms-text-secondary);
+  border: var(--border-width-xs) solid var(--lms-border);
+  border-radius: var(--radius-pill);
+  padding: var(--space-xs) var(--space-sm);
+}
+ 
+ 
+/* ==========================================================================
+   5. KARTU, HEADING, GRID
+   ========================================================================== */
+.tg-page,
+.tg-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  min-width: 0;
+}
+ 
+/* Kartu: putih, radius L, border XS, bayangan level 1 */
+.tg-card {
+  min-width: 0;
+  padding: var(--space-lg);
+  background: var(--color-surface);
+  border: var(--border-width-xs) solid var(--color-border);
+  border-radius: var(--radius-l);
+  box-shadow: var(--shadow-1);
+}
+ 
+.tg-card-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+ 
+.tg-card-heading p,
+.tg-heading p {
+  margin-top: var(--space-sm);
+  color: var(--lms-text-secondary);
+}
+ 
+.tg-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-lg);
+}
+ 
+.tg-heading > div {
+  min-width: 0;
+}
+ 
+.tg-heading .tg-button {
+  flex-shrink: 0;
+}
+ 
+.tg-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-lg);
+}
+ 
+.tg-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-lg);
+}
+ 
+.tg-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1.8fr) minmax(280px, 1fr);
+  gap: var(--space-lg);
+  align-items: start;
+}
+ 
+.tg-columns > * {
+  min-width: 0;
+}
+ 
+.tg-export-columns {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) minmax(0, 1.6fr);
+  gap: var(--space-lg);
+  align-items: start;
+}
+ 
+ 
+/* ==========================================================================
+   6. KARTU STATISTIK DAN BADGE
+   ========================================================================== */
+.tg-stats {
+  display: grid;
+  gap: var(--space-md);
+}
+ 
+.tg-stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+ 
+.tg-stat .tg-label {
+  text-align: right;
+}
+ 
+.tg-icon-tile {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-m);
+  flex-shrink: 0;
+  color: var(--lms-primary);
+  background: var(--lms-primary-soft);
+}
+ 
+.tg-stat-value {
+  font-size: var(--text-h4-size);
+  line-height: var(--text-h4-line);
+  font-weight: var(--font-weight-bold);
+  overflow-wrap: anywhere;
+}
+ 
+.tg-stat-value small {
+  font-weight: var(--font-weight-regular);
+}
+ 
+/* Kartu statistik "Perlu Dinilai" (amber): teks gelap di atas amber */
+.tg-stat-warning {
+  background: var(--lms-warning-soft);
+  border-color: var(--lms-secondary);
+}
+ 
+.tg-stat-warning .tg-icon-tile {
+  background: var(--lms-secondary);
+  color: var(--lms-text);
+}
+ 
+/* Badge: pill, latar tint, teks varian dark */
+.tg-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  border-radius: var(--radius-pill);
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+  font-weight: var(--font-weight-medium);
+  max-width: 100%;
+}
+ 
+.tg-badge svg {
+  width: 16px;
+  height: 16px;
+}
+ 
+.tg-primary { color: var(--lms-primary-dark); background: var(--lms-primary-soft); }
+.tg-info    { color: var(--lms-info-dark);    background: var(--lms-info-soft); }
+.tg-success { color: var(--lms-success-dark); background: var(--lms-success-soft); }
+.tg-warning { color: var(--lms-warning-dark); background: var(--lms-warning-soft); }
+.tg-error   { color: var(--lms-error-dark);   background: var(--lms-error-soft); }
+.tg-muted   { color: var(--lms-text-secondary); background: var(--lms-background); }
+ 
+ 
+/* ==========================================================================
+   7. TOMBOL DAN TAUTAN
+   (!important: menimpa .teacher-app a { color: inherit } dan gaya bawaan)
+   ========================================================================== */
+.tg-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  border: var(--border-width-xs) solid transparent;
+  border-radius: var(--radius-m);
+  padding: var(--space-sm) var(--space-md);
+  min-height: 40px;
+  font-size: var(--text-l12-size) !important;
+  line-height: var(--text-l12-line) !important;
+  font-weight: var(--font-weight-semibold);
+  text-align: center;
+}
+ 
+.tg-button-primary {
+  background: var(--lms-primary);
+  color: var(--color-surface) !important;
+}
+ 
+.tg-button-primary:hover {
+  background: var(--lms-primary-hover);
+}
+ 
+.tg-button-outline {
+  border-color: var(--lms-border);
+  background: var(--color-surface);
+  color: var(--lms-primary-dark) !important;
+}
+ 
+.tg-button-outline:hover {
+  background: var(--lms-primary-soft);
+}
+ 
+.tg-button-danger {
+  border-color: var(--lms-error);
+  background: var(--color-surface);
+  color: var(--lms-error-dark);
+}
+ 
+.tg-button-ghost {
+  background: transparent;
+  color: var(--lms-primary) !important;
+}
+ 
+.tg-button svg {
+  width: 20px;
+  height: 20px;
+}
+ 
+.tg-link {
+  color: var(--lms-primary) !important;
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+  font-weight: var(--font-weight-semibold);
+}
+ 
+.tg-full {
+  width: 100%;
+}
+ 
+ 
+/* ==========================================================================
+   8. PROGRESS, SUBCARD, BARIS, METRIK
+   ========================================================================== */
+.tg-progress {
+  background: transparent;
+  display: grid;
+  gap: var(--space-sm);
+  min-width: 0;
+}
+ 
+.tg-track {
+  height: 8px;
+  background: var(--lms-primary-soft);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+ 
+.tg-track span {
+  display: block;
+  height: 100%;
+  background: var(--lms-primary);
+  border-radius: inherit;
+}
+ 
+.tg-progress.tg-success .tg-track span { background: var(--lms-success); }
+.tg-progress.tg-warning .tg-track span { background: var(--lms-warning); }
+ 
+.tg-subcard {
+  border: var(--border-width-xs) solid var(--lms-border);
+  border-radius: var(--radius-m);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  min-width: 0;
+}
+ 
+.tg-subcard p {
+  color: var(--lms-text-secondary);
+}
+ 
+.tg-subcard + .tg-subcard {
+  margin-top: var(--space-md);
+}
+ 
+.tg-soft {
+  background: var(--lms-info-soft);
+  border-color: transparent;
+}
+ 
+.tg-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+ 
+.tg-row > div {
+  flex: 1;
+  min-width: 0;
+}
+ 
+.tg-row h3 {
+  margin-bottom: var(--space-xs);
+}
+ 
+.tg-row > .tg-actions {
+  flex: 0 0 auto;
+}
+ 
+.tg-divider {
+  border-top: var(--border-width-xs) solid var(--color-border);
+  padding-top: var(--space-md);
+  margin-top: var(--space-md);
+}
+ 
+.tg-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  background: var(--lms-info-soft);
+  padding: var(--space-md);
+  border-radius: var(--radius-m);
+  gap: var(--space-md);
+}
+ 
+.tg-metrics strong {
+  display: block;
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
+  margin-top: var(--space-xs);
+}
+ 
+ 
+/* ==========================================================================
+   9. TOOLBAR, PENCARIAN, FORM
+   ========================================================================== */
+.tg-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+ 
+.tg-toolbar > .tg-search {
+  flex: 1;
+}
+ 
+.tg-search {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-width: 200px;
+  padding: var(--space-sm) var(--space-md);
+  min-height: 48px;
+  background: var(--lms-background);
+  border: var(--border-width-xs) solid transparent;
+  border-radius: var(--radius-s);
+}
+ 
+.tg-search input {
+  width: 100%;
+  min-width: 0;
+  border: 0 !important;
+  padding: 0 !important;
+  outline: none;
+  background: transparent !important;
+}
+ 
+.tg-search:focus-within {
+  border-color: var(--lms-primary);
+}
+ 
+/* Input, select, textarea: radius S, border XS */
+.teacher-app select,
+.teacher-app input:not([type=checkbox]):not([type=radio]),
+.teacher-app textarea {
+  color: var(--lms-text);
+  background: var(--lms-background);
+  border: var(--border-width-xs) solid var(--lms-border);
+  border-radius: var(--radius-s);
+  padding: var(--space-sm) var(--space-md);
+  min-height: 40px;
+  max-width: 100%;
+  font-size: var(--text-p16-size);
+  line-height: var(--text-p16-line);
+}
+ 
+.teacher-app input[type=checkbox],
+.teacher-app input[type=radio] {
+  accent-color: var(--lms-primary);
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+ 
+.teacher-app input[type=file] {
+  font-size: var(--text-p12-size) !important;
+}
+ 
+.teacher-app textarea {
+  width: 100%;
+  min-height: 120px;
+  resize: vertical;
+}
+ 
+.teacher-app .tg-search input {
+  min-height: 24px !important;
+}
+ 
+.tg-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  min-width: 0;
+}
+ 
+.tg-field > span,
+.tg-field > label {
+  font-weight: var(--font-weight-medium);
+}
+ 
+.tg-field small {
+  font-weight: var(--font-weight-regular);
+}
+ 
+.tg-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-lg);
+}
+ 
+.tg-field-wide {
+  grid-column: 1 / -1;
+}
+ 
+.tg-form-actions {
+  border-top: var(--border-width-xs) solid var(--lms-border);
+  padding-top: var(--space-lg);
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+ 
+.tg-check-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  background: var(--lms-background);
+  border-radius: var(--radius-m);
+}
+ 
+.tg-check-row > span {
+  flex: 1;
+}
+ 
+.tg-check-row > .tg-badge {
+  flex: 0 0 auto;
+}
+ 
+.tg-dropzone {
+  border: var(--border-width-xs) dashed var(--lms-primary);
+  border-radius: var(--radius-m);
+  padding: var(--space-lg);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  background: var(--lms-primary-soft);
+}
+ 
+.tg-file-picker {
+  position: relative;
+  cursor: pointer;
+}
+ 
+.tg-file-picker input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  width: 100%;
+  cursor: pointer;
+}
+ 
+.tg-file-picker:focus-within {
+  outline: var(--focus-ring);
+  outline-offset: var(--space-xs);
+}
+ 
+.tg-editor {
+  min-height: 360px !important;
+  background: var(--color-surface) !important;
+}
+ 
+.tg-code {
+  background: var(--lms-background);
+  padding: var(--space-md);
+  border-radius: var(--radius-s);
+  font-family: var(--font-family);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+ 
+ 
+/* ==========================================================================
+   10. TAB DAN TABEL
+   ========================================================================== */
+.tg-tabs {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-lg);
+  overflow-x: auto;
+}
+ 
+.tg-tabs a {
+  padding: var(--space-sm) 0 var(--space-md);
+  white-space: nowrap;
+  border-bottom: var(--border-width-m) solid transparent;
+  font-weight: var(--font-weight-semibold);
+}
+ 
+.tg-tabs a[aria-current] {
+  color: var(--lms-primary);
+  border-color: var(--lms-primary);
+}
+ 
+.tg-table-wrap {
+  overflow-x: auto;
+  width: 100%;
+  border-radius: var(--radius-s);
+}
+ 
+.teacher-app table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 680px;
+  text-align: left;
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
+}
+ 
+.teacher-app th {
+  padding: var(--space-md);
+  background: var(--lms-info-soft);
+  text-transform: uppercase;
+  font-weight: var(--font-weight-semibold);
+  color: var(--lms-text-secondary);
+}
+ 
+.teacher-app td {
+  padding: var(--space-md);
+  border-bottom: var(--border-width-xs) solid var(--color-border);
+  vertical-align: middle;
+}
+ 
+.teacher-app td strong {
+  display: block;
+}
+ 
+.teacher-app td .tg-badge {
+  white-space: nowrap;
+}
+ 
+.teacher-app td .tg-actions {
+  justify-content: flex-start;
+  gap: var(--space-sm);
+  flex-wrap: nowrap;
+}
+ 
+.teacher-app td .tg-progress {
+  min-width: 112px;
+}
+ 
+.teacher-app tr.is-warning { background: var(--lms-warning-soft); }
+.teacher-app tr.is-active  { background: var(--lms-primary-soft); }
+ 
+.tg-table-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-md);
+  padding-top: var(--space-lg);
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
+}
+ 
+.tg-pages {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+ 
+.tg-pages button {
+  border: var(--border-width-xs) solid var(--lms-border);
+  min-width: 40px;
+  height: 40px;
+  border-radius: var(--radius-s);
+  background: var(--color-surface);
+}
+ 
+.tg-pages button[aria-current] {
+  background: var(--lms-primary);
+  color: var(--color-surface);
+}
+ 
+ 
+/* ==========================================================================
+   11. KONDISI KOSONG, PEMBERITAHUAN, GRAFIK
+   ========================================================================== */
+.tg-empty {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: var(--space-2xl) var(--space-lg);
+  text-align: center;
+}
+ 
+.tg-empty > svg {
+  width: 40px;
+  height: 40px;
+  color: var(--lms-primary);
+}
+ 
+.tg-notice {
+  display: flex;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  border-radius: var(--radius-m);
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
+}
+ 
+.tg-notice h3 {
+  font-size: var(--text-h5-size);
+  line-height: var(--text-h5-line);
+  margin-bottom: var(--space-sm);
+}
+ 
+.tg-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-sm);
+  padding-top: var(--space-lg);
+  height: 192px;
+  border-bottom: var(--border-width-xs) solid var(--lms-border);
+}
+ 
+.tg-chart > div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  text-align: center;
+}
+ 
+.tg-chart > div > span {
+  background: var(--lms-primary);
+  min-height: 4px;
+  border-radius: var(--radius-xs) var(--radius-xs) 0 0;
+}
+ 
+.tg-chart > div:first-child > span { background: var(--lms-error); }
+.tg-chart > div:last-child > span  { background: var(--lms-success); }
+ 
+.tg-chart small {
+  white-space: nowrap;
+}
+ 
+ 
+/* ==========================================================================
+   12. DOKUMEN, NILAI, PROFIL, FOOTER
+   ========================================================================== */
+.tg-document {
+  background: var(--color-surface);
+  border: var(--border-width-xs) solid var(--lms-border);
+  padding: var(--space-xl);
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  box-shadow: var(--shadow-1);
+}
+ 
+.tg-document-view {
+  background: var(--color-background);
+  padding: var(--space-lg);
+  border-radius: var(--radius-m);
+}
+ 
+.tg-grade-input {
+  width: 80px;
+  text-align: center;
+  background: var(--color-surface) !important;
+}
+ 
+.tg-grade-total {
+  font-size: var(--text-h2-size);
+  line-height: var(--text-h2-line);
+  font-weight: var(--font-weight-bold);
+}
+ 
+.tg-score {
+  color: var(--lms-primary);
+  font-weight: var(--font-weight-bold);
+}
+
+/* Ringkasan mata pelajaran: tab, kartu statistik, silabus, tugas, dan panel nilai */
+.tg-subject-summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.tg-subject-summary > .tg-heading {
+  margin-bottom: 0;
+}
+
+.tg-subject-summary > .tg-heading .tg-button {
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+  padding: var(--space-sm) var(--space-md);
+}
+
+.tg-subject-summary > .tg-tabs {
+  justify-content: center;
+  gap: var(--space-lg);
+  margin-top: 0;
+}
+
+.tg-subject-summary > .tg-tabs a {
+  padding: var(--space-xs) 0 var(--space-sm);
+  color: var(--lms-text-secondary);
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+  font-weight: var(--font-weight-semibold);
+}
+
+.tg-subject-summary > .tg-tabs a[aria-current] {
+  color: var(--lms-primary);
+}
+
+.tg-subject-summary > .tg-stats {
+  gap: var(--space-md);
+}
+
+.tg-subject-summary > .tg-stats .tg-stat {
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  border-color: transparent;
+  box-shadow: var(--shadow-1);
+}
+
+.tg-subject-summary > .tg-stats .tg-stat .tg-between {
+  justify-content: flex-start;
+}
+
+.tg-subject-summary > .tg-stats .tg-stat .tg-label {
+  text-align: left;
+}
+
+.tg-subject-summary > .tg-stats .tg-stat:nth-child(1) .tg-icon-tile {
+  color: var(--color-primary);
+  background: var(--color-primary-tint);
+}
+
+.tg-subject-summary > .tg-stats .tg-stat:nth-child(2) .tg-icon-tile {
+  color: var(--color-info);
+  background: var(--color-info-tint);
+}
+
+.tg-subject-summary > .tg-stats .tg-stat:nth-child(3) .tg-icon-tile {
+  color: var(--color-warning);
+  background: var(--color-warning-tint);
+}
+
+.tg-subject-summary > .tg-stats .tg-stat:nth-child(4) .tg-icon-tile {
+  color: var(--color-success);
+  background: var(--color-success-tint);
+}
+
+.tg-subject-summary > .tg-stats .tg-stat-value {
+  font-size: var(--text-p16-size);
+  line-height: var(--text-p16-line);
+}
+
+.tg-subject-summary > .tg-stats .tg-stat-value small {
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
+}
+
+.tg-subject-summary .tg-summary-trend {
+  display: inline-flex;
+  padding: var(--space-xs);
+  border-radius: var(--radius-pill);
+  color: var(--color-success-dark);
+  background: var(--color-success-tint);
+}
+
+.tg-subject-summary .tg-columns {
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+}
+
+.tg-subject-summary .tg-card-heading {
+  margin-bottom: var(--space-lg);
+}
+
+.tg-subject-summary .tg-table-wrap {
+  border-radius: 0;
+}
+
+.tg-subject-summary table {
+  min-width: 600px;
+}
+
+.tg-subject-summary th,
+.tg-subject-summary td {
+  padding: var(--space-md);
+}
+
+.tg-subject-summary td:nth-child(1),
+.tg-subject-summary th:nth-child(1),
+.tg-subject-summary td:nth-child(4),
+.tg-subject-summary th:nth-child(4),
+.tg-subject-summary td:nth-child(5),
+.tg-subject-summary th:nth-child(5) {
+  white-space: nowrap;
+}
+
+.tg-subject-summary td:nth-child(2) {
+  min-width: 150px;
+}
+
+.tg-subject-summary td:nth-child(3) {
+  color: var(--lms-text-secondary);
+}
+
+.tg-subject-summary td .tg-button {
+  white-space: nowrap;
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+}
+
+.tg-subject-summary td .tg-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  white-space: nowrap;
+}
+
+.tg-subject-summary td .tg-link svg {
+  width: var(--space-md);
+  height: var(--space-md);
+}
+
+.tg-subject-summary .tg-summary-task {
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+  padding: var(--space-md);
+  border: var(--border-width-xs) solid var(--lms-border);
+  border-radius: var(--radius-l);
+  background: var(--color-surface);
+}
+
+.tg-subject-summary .tg-summary-task > .tg-between {
+  padding-bottom: var(--space-sm);
+  border-bottom: var(--border-width-xs) solid var(--lms-border);
+}
+
+.tg-subject-summary .tg-summary-task > .tg-subcard {
+  padding: var(--space-md);
+  border-color: transparent;
+  gap: var(--space-sm);
+}
+
+.tg-subject-summary .tg-summary-deadline {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  color: var(--lms-error);
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+  font-weight: var(--font-weight-semibold);
+}
+
+.tg-subject-summary .tg-summary-deadline svg {
+  width: var(--space-md);
+  height: var(--space-md);
+}
+
+.tg-subject-summary .tg-summary-task > .tg-button {
+  width: 100%;
+}
+
+.tg-subject-summary .tg-summary-collection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding-top: var(--space-sm);
+  border-top: var(--border-width-xs) solid var(--lms-border);
+}
+
+.tg-subject-summary .tg-summary-collection > .tg-between {
+  gap: var(--space-sm);
+}
+
+.tg-subject-summary .tg-summary-collection > .tg-between strong {
+  color: var(--lms-text);
+  white-space: nowrap;
+}
+
+.tg-subject-summary .tg-summary-collection .tg-track {
+  height: var(--space-sm);
+  background: var(--color-border);
+}
+
+.tg-subject-summary .tg-summary-collection .tg-track span {
+  background: var(--lms-primary);
+}
+
+.tg-subject-summary .tg-summary-collection > .tg-between:last-child strong {
+  color: var(--lms-primary);
+  font-size: var(--text-l16-size);
+  line-height: var(--text-l16-line);
+}
+
+.tg-subject-summary .tg-grade-total {
+  display: block;
+  font-size: var(--text-h2-size);
+  line-height: var(--text-h2-line);
+  border-bottom: var(--border-width-xs) solid var(--lms-border);
+  padding-bottom: var(--space-md);
+}
+
+.tg-subject-summary .tg-grade-total small {
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
+  font-weight: var(--font-weight-regular);
+}
+
+.tg-subject-summary .tg-summary-chart-label {
+  margin-top: var(--space-md);
+}
+
+.tg-subject-summary > .tg-columns > aside > .tg-card:first-child .tg-card-heading h2 {
+  font-size: var(--text-p16-size);
+  line-height: var(--text-p16-line);
+}
+
+.tg-subject-summary > .tg-columns > aside > .tg-card:first-child .tg-card-heading > .tg-badge {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.tg-subject-summary .tg-chart {
+  height: 112px;
+  padding-top: var(--space-sm);
+}
+
+.tg-subject-summary .tg-chart > div {
+  gap: var(--space-xs);
+}
+
+.tg-subject-summary .tg-chart > div > span {
+  min-height: var(--space-xs);
+}
+
+.tg-subject-summary .tg-summary-groups {
+  gap: var(--space-sm);
+}
+
+.tg-subject-summary .tg-summary-groups h3 {
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+  text-transform: uppercase;
+  color: var(--lms-text-secondary);
+}
+
+.tg-subject-summary .tg-summary-groups .tg-progress {
+  gap: var(--space-xs);
+}
+
+.tg-subject-summary .tg-summary-groups .tg-progress > .tg-between {
+  gap: var(--space-sm);
+}
+
+.tg-subject-summary .tg-summary-groups .tg-progress > .tg-between span {
+  color: var(--lms-text);
+  font-weight: var(--font-weight-semibold);
+}
+
+.tg-subject-summary .tg-summary-groups .tg-progress > .tg-between strong {
+  color: var(--lms-text);
+}
+
+.tg-subject-summary .tg-summary-groups .tg-track {
+  height: var(--space-xs);
+}
+
+/* Kartu modul terbaru dan tombol unggah bahan ajar */
+.tg-subject-summary .tg-summary-module {
+  display: grid;
+  grid-template-columns: var(--space-xl) minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  align-items: center;
+  gap: var(--space-xs) var(--space-sm);
+  border-color: transparent;
+}
+
+.tg-subject-summary .tg-summary-module::before {
+  content: "▤";
+  grid-column: 1;
+  grid-row: 1 / 3;
+  display: grid;
+  place-items: center;
+  width: var(--space-xl);
+  height: var(--space-xl);
+  border-radius: var(--radius-m);
+  color: var(--color-error);
+  background: var(--color-error-tint);
+  font-size: var(--text-l16-size);
+  line-height: var(--text-l16-line);
+}
+
+.tg-subject-summary .tg-summary-module > div:first-child {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+}
+
+.tg-subject-summary .tg-summary-module h3 {
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
+  font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
+}
+
+.tg-subject-summary > .tg-columns > aside > .tg-card:last-child .tg-card-heading h2 {
+  font-size: var(--text-p16-size);
+  line-height: var(--text-p16-line);
+}
+
+.tg-subject-summary .tg-summary-module > .tg-between {
+  display: flex;
+  grid-column: 2;
+  grid-row: 2;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.tg-subject-summary .tg-summary-module > .tg-between > .tg-badge {
+  justify-self: start;
+  white-space: nowrap;
+}
+
+.tg-subject-summary .tg-summary-module > .tg-between > .tg-badge::before {
+  content: "✓";
+  display: inline-grid;
+  place-items: center;
+  width: var(--space-md);
+  height: var(--space-md);
+  flex-shrink: 0;
+  border: var(--border-width-xs) solid currentColor;
+  border-radius: var(--radius-circle);
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
+}
+
+.tg-subject-summary .tg-summary-module .tg-button {
+  margin-left: auto;
+  max-width: 100%;
+  white-space: nowrap;
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+  border-color: var(--color-primary-tint);
+  color: var(--lms-primary) !important;
+  background: var(--color-surface);
+}
+
+.tg-subject-summary .tg-summary-upload {
+  margin-top: var(--space-md);
+  padding-top: 0;
+  border-top: 0;
+}
+
+.tg-subject-summary .tg-summary-upload .tg-button {
+  width: 100%;
+  border-style: dashed;
+  border-color: var(--lms-primary);
+  color: var(--lms-primary) !important;
+  background: var(--lms-primary-soft);
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+}
+
+/* Susunan final kartu modul: ikon tetap, teks fleksibel, status dan aksi sejajar */
+.tg-subject-summary .tg-summary-module {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  min-width: 0;
+  padding: var(--space-md);
+  border-radius: var(--radius-l);
+}
+
+.tg-subject-summary .tg-summary-module::before {
+  content: none;
+}
+
+.tg-subject-summary .tg-summary-file-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 var(--space-2xl);
+  width: var(--space-2xl);
+  height: var(--space-2xl);
+  border-radius: var(--radius-m);
+  color: var(--color-error);
+  background: var(--color-error-tint);
+}
+
+.tg-subject-summary .tg-summary-file-icon svg {
+  width: var(--space-lg);
+  height: var(--space-lg);
+}
+
+.tg-subject-summary .tg-summary-module-copy {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.tg-subject-summary .tg-summary-module-copy h3 {
+  margin: 0;
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
+  font-weight: var(--font-weight-semibold);
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.tg-subject-summary .tg-summary-module-copy > p {
+  margin-top: var(--space-xs);
+}
+
+.tg-subject-summary .tg-summary-module-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-xs);
+  min-width: 0;
+  margin-top: var(--space-sm);
+}
+
+.tg-subject-summary .tg-summary-read-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  flex: 1 1 auto;
+  min-width: 0;
+  color: var(--color-success-dark);
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+  font-weight: var(--font-weight-semibold);
+}
+
+.tg-subject-summary .tg-summary-read-status svg {
+  flex: 0 0 var(--space-lg);
+  width: var(--space-lg);
+  height: var(--space-lg);
+  color: var(--color-success);
+}
+
+.tg-subject-summary .tg-summary-read-label {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.tg-subject-summary .tg-summary-module-actions .tg-button {
+  flex: 0 0 auto;
+  margin-left: 0;
+  max-width: none;
+  white-space: nowrap;
+  min-height: var(--space-xl);
+  padding: var(--space-xs);
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+  border-color: var(--color-primary-tint);
+  color: var(--lms-primary) !important;
+  background: var(--color-surface);
+}
+
+.tg-subject-summary .tg-summary-module-actions .tg-button svg {
+  width: var(--space-md);
+  height: var(--space-md);
+}
+
+.tg-subject-summary .tg-summary-upload .tg-button {
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+}
+
+ 
+.tg-profile-avatar {
+  width: 96px;
+  height: 96px;
+  font-size: var(--text-h3-size);
+  line-height: var(--text-h3-line);
+  border-radius: var(--radius-l);
+  background: var(--lms-primary-soft);
+  color: var(--lms-primary);
+}
+ 
+.tg-readonly {
+  background: var(--lms-info-soft);
+  padding: var(--space-md);
+  border-radius: var(--radius-s);
+  overflow-wrap: anywhere;
+  min-height: 48px;
+}
+ 
+.tg-footer {
+  margin-top: var(--space-xl);
+  padding: var(--space-lg) 0 var(--space-sm);
+  border-top: var(--border-width-xs) solid var(--lms-border);
+  color: var(--lms-text-secondary);
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
+}
+ 
+ 
+/* ==========================================================================
+   13. NAVIGASI MOBILE, AKSESIBILITAS, DIALOG, SIDEBAR LIPAT
+   ========================================================================== */
+.tg-mobile-nav,
+.tg-mobile-logout {
+  display: none;
+}
+ 
+/* Tautan "lewati ke konten" */
+.tg-skip {
+  position: fixed;
+  top: -100px;
+  left: var(--space-lg);
+  background: var(--color-surface);
+  padding: var(--space-md);
+  z-index: 100;
+}
+ 
+.tg-skip:focus {
+  top: var(--space-md);
+}
+ 
+/* Dialog: radius L, bayangan level 3 */
+.tg-dialog {
+  margin: auto;
+  padding: var(--space-lg);
+  border: var(--border-width-xs) solid var(--lms-border);
+  border-radius: var(--radius-l);
+  width: min(560px, calc(100% - var(--space-xl)));
+  color: var(--lms-text);
+  background: var(--color-surface);
+  box-shadow: var(--lms-shadow-3);
+}
+ 
+.tg-dialog::backdrop {
+  background: color-mix(in srgb, var(--color-text-primary) 45%, transparent);
+}
+ 
+.tg-dialog > p,
+.tg-dialog > .tg-actions {
+  margin-top: var(--space-lg);
+}
+ 
+.tg-collapsed .tg-sidebar {
+  display: none;
+}
+ 
+.tg-collapsed .tg-main {
+  margin-left: 0;
+}
+ 
+ 
+/* ==========================================================================
+   14. RESPONSIF
+   ========================================================================== */
+ 
+/* Layar pendek: semua aksi navigasi tetap terlihat */
+@media (max-height: 700px) {
+  .tg-sidebar { gap: var(--space-md); }
+  .tg-brand { padding: var(--space-md); }
+  .tg-sidebar nav a { min-height: 40px; padding: var(--space-sm) var(--space-md); }
+  .tg-sidebar .tg-logout { padding: var(--space-md); }
+}
+
+/* Dashboard guru: penyelarasan kartu, statistik, asesmen, jadwal, dan ujian dengan desain Figma. */
+.tg-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  min-width: 0;
+}
+
+.tg-dashboard > .tg-heading {
+  padding: var(--space-lg);
+  min-height: 96px;
+}
+
+.tg-dashboard > .tg-heading h1 {
+  font-size: var(--text-h5-size);
+  line-height: var(--text-h5-line);
+}
+
+.tg-dashboard > .tg-heading p {
+  font-size: var(--text-p16-size);
+  line-height: var(--text-p16-line);
+}
+
+.tg-dashboard > .tg-heading .tg-badge {
+  white-space: nowrap;
+}
+
+.tg-dashboard .tg-stats {
+  gap: var(--space-md);
+}
+
+.tg-dashboard .tg-stat {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: var(--space-md);
+  row-gap: var(--space-xs);
+  min-height: 76px;
+  padding: var(--space-md);
+  background: var(--lms-info-soft);
+}
+
+.tg-dashboard .tg-stat .tg-between {
+  display: contents;
+}
+
+.tg-dashboard .tg-stat .tg-icon-tile {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  width: 36px;
+  height: 36px;
+  border: var(--border-width-xs) solid var(--lms-primary);
+  background: transparent;
+}
+
+.tg-dashboard .tg-stat .tg-label,
+.tg-dashboard .tg-stat .tg-stat-value,
+.tg-dashboard .tg-stat > .tg-small {
+  grid-column: 2;
+  justify-self: end;
+  margin: 0;
+  text-align: right;
+}
+
+.tg-dashboard .tg-stat .tg-label {
+  grid-row: 2;
+  text-transform: none;
+}
+
+.tg-dashboard .tg-stat .tg-stat-value {
+  grid-row: 1;
+  font-size: var(--text-h4-size);
+  line-height: var(--text-h4-line);
+}
+
+.tg-dashboard .tg-stat > .tg-small {
+  display: none;
+}
+
+.tg-dashboard .tg-stat-warning {
+  background: var(--lms-warning-soft);
+  border-color: var(--lms-secondary);
+}
+
+.tg-dashboard .tg-stat-warning .tg-icon-tile {
+  color: var(--lms-warning-dark);
+  border-color: var(--lms-secondary);
+  background: var(--lms-secondary-soft);
+}
+
+.tg-dashboard .tg-stat:nth-child(2) .tg-icon-tile {
+  color: var(--lms-info);
+  border-color: var(--lms-info);
+}
+
+.tg-dashboard .tg-stat-warning .tg-stat-value {
+  color: var(--lms-warning-dark);
+}
+
+.tg-dashboard .tg-columns {
+  grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+  gap: var(--space-lg);
+}
+
+.tg-dashboard .tg-card-heading {
+  margin-bottom: var(--space-md);
+  padding-bottom: var(--space-md);
+  border-bottom: var(--border-width-xs) solid var(--lms-border);
+}
+
+.tg-dashboard .tg-card-heading h2 {
+  font-size: var(--text-p18-size);
+  line-height: var(--text-p18-line);
+}
+
+.tg-dashboard .tg-card-heading h2 svg {
+  width: 24px;
+  height: 24px;
+  color: var(--lms-primary);
+}
+
+.tg-dashboard .tg-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  text-decoration: none;
+}
+
+.tg-dashboard .tg-link svg {
+  width: 20px;
+  height: 20px;
+}
+
+.tg-dashboard .tg-assessment {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  column-gap: var(--space-md);
+  row-gap: var(--space-md);
+}
+
+.tg-dashboard .tg-assessment-heading {
+  grid-column: 1 / -1;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.tg-dashboard .tg-assessment-title {
+  align-items: center;
+}
+
+/* Kartu Kuis Logika 7A: aksen amber untuk tile kelas dan progres. */
+.tg-dashboard .tg-assessment:nth-child(3) .tg-class-tile {
+  color: var(--lms-warning-dark);
+  background: var(--lms-warning-soft);
+}
+
+.tg-dashboard .tg-class-tile,
+.tg-dashboard .tg-pending-icon,
+.tg-dashboard .tg-exam-icon {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-m);
+  color: var(--lms-primary);
+  background: var(--lms-primary-soft);
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+  font-weight: var(--font-weight-bold);
+}
+
+.tg-dashboard .tg-assessment h3,
+.tg-dashboard .tg-pending h3,
+.tg-dashboard .tg-schedule h3,
+.tg-dashboard .tg-exam h3 {
+  font-size: var(--text-l16-size);
+  line-height: var(--text-l16-line);
+}
+
+.tg-dashboard .tg-schedule h3 {
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+}
+
+.tg-dashboard .tg-assessment .tg-small,
+.tg-dashboard .tg-pending .tg-small,
+.tg-dashboard .tg-schedule .tg-small,
+.tg-dashboard .tg-exam .tg-small {
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+}
+
+.tg-dashboard .tg-assessment .tg-badge {
+  flex-shrink: 0;
+  border: var(--border-width-xs) solid currentColor;
+}
+
+.tg-dashboard .tg-assessment .tg-progress {
+  grid-column: 1;
+  gap: var(--space-xs);
+}
+
+.tg-dashboard .tg-assessment .tg-track {
+  height: 8px;
+  background: var(--lms-border);
+}
+
+.tg-dashboard .tg-assessment:nth-child(3) .tg-track span {
+  background: var(--lms-secondary);
+}
+
+.tg-dashboard .tg-assessment-actions {
+  justify-content: flex-end;
+  grid-column: 2;
+  flex-wrap: nowrap;
+  margin: 0;
+}
+
+.tg-dashboard .tg-assessment-actions .tg-button-danger {
+  padding-inline: var(--space-sm);
+}
+
+.tg-dashboard .tg-pending {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.tg-dashboard .tg-pending-icon {
+  width: 44px;
+  height: 44px;
+  border: var(--border-width-xs) solid var(--lms-primary);
+}
+
+.tg-dashboard .tg-pending-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.tg-dashboard .tg-pending-icon-1 {
+  color: var(--lms-warning-dark);
+  border-color: var(--lms-secondary);
+  background: var(--lms-warning-soft);
+}
+
+.tg-dashboard .tg-pending-copy {
+  min-width: 0;
+}
+
+.tg-dashboard .tg-pending-copy .tg-small,
+.tg-dashboard .tg-schedule .tg-small span,
+.tg-dashboard .tg-exam .tg-small span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.tg-dashboard .tg-pending-copy .tg-small {
+  margin-top: var(--space-xs);
+}
+
+.tg-dashboard .tg-pending-copy .tg-small svg,
+.tg-dashboard .tg-schedule .tg-small svg,
+.tg-dashboard .tg-exam .tg-small svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+}
+
+.tg-dashboard .tg-schedule {
+  gap: var(--space-xs);
+  padding: var(--space-md);
+  text-decoration: none;
+}
+
+.tg-dashboard .tg-schedule + .tg-schedule {
+  margin-top: var(--space-sm);
+}
+
+.tg-dashboard .tg-schedule:nth-of-type(2) .tg-badge {
+  color: var(--lms-warning-dark);
+  background: var(--lms-warning-soft);
+}
+
+.tg-dashboard aside .tg-card {
+  padding: var(--space-lg);
+}
+
+.tg-dashboard aside .tg-card-heading h2 {
+  font-size: var(--text-p18-size);
+  line-height: var(--text-p18-line);
+}
+
+.tg-dashboard .tg-schedule .tg-between + .tg-between {
+  padding-top: var(--space-sm);
+  border-top: var(--border-width-xs) solid var(--lms-border);
+}
+
+.tg-dashboard .tg-schedule .tg-between:first-child {
+  flex-wrap: nowrap;
+  gap: var(--space-sm);
+}
+
+.tg-dashboard .tg-schedule .tg-between:first-child h3 {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.tg-dashboard .tg-schedule .tg-badge {
+  flex: 0 0 auto;
+  border-radius: var(--radius-xs);
+  white-space: nowrap;
+}
+
+.tg-dashboard .tg-exam {
+  gap: var(--space-sm);
+}
+
+.tg-dashboard .tg-exam h3 {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.tg-dashboard .tg-exam-icon {
+  width: 36px;
+  height: 36px;
+  color: var(--color-surface);
+  background: var(--lms-primary);
+}
+
+.tg-dashboard .tg-exam .tg-small {
+  display: grid;
+  gap: var(--space-xs);
+}
+
+.tg-dashboard .tg-exam-classes {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-xs);
+  color: var(--lms-text-secondary);
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+}
+
+.tg-dashboard .tg-exam-classes > div {
+  display: flex;
+  gap: var(--space-xs);
+}
+
+.tg-dashboard .tg-exam-classes .tg-badge {
+  border: var(--border-width-xs) solid var(--lms-border);
+  border-radius: var(--radius-xs);
+  color: var(--lms-text);
+  background: var(--color-surface);
+}
+
+.tg-dashboard .tg-divider .tg-button {
+  width: 100%;
+}
+
+/* Top bar dashboard guru: badge notifikasi dan identitas guru pada rute /guru. */
+.tg-dashboard-shell .tg-topbar .tg-notification {
+  overflow: visible;
+  background: var(--lms-info-soft);
+}
+
+.tg-dashboard-shell .tg-notification-count {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding-inline: var(--space-xs);
+  border: var(--border-width-xs) solid var(--color-surface);
+  border-radius: var(--radius-pill);
+  color: var(--color-surface);
+  background: var(--lms-primary);
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+  font-weight: var(--font-weight-semibold);
+}
+
+.tg-dashboard-shell .tg-user strong {
+  font-size: var(--text-l16-size);
+  line-height: var(--text-l16-line);
+  font-weight: var(--font-weight-semibold);
+}
+
+.tg-dashboard-shell .tg-user small {
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+}
+
+@media (max-width: 1200px) {
+  .tg-dashboard .tg-columns {
+    grid-template-columns: minmax(0, 1.4fr) minmax(260px, 1fr);
+  }
+}
+
+@media (max-width: 1050px) {
+  .tg-dashboard .tg-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .tg-dashboard .tg-schedule {
+    padding-block: var(--space-sm);
+  }
+
+  .tg-dashboard .tg-schedule .tg-between:first-child h3 {
+    font-size: var(--text-l12-size);
+    line-height: var(--text-l12-line);
+  }
+}
+
+@media (max-width: 600px) {
+  .tg-dashboard .tg-stats {
+    grid-template-columns: 1fr !important;
+  }
+
+  .tg-dashboard .tg-pending {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .tg-dashboard .tg-pending > .tg-button {
+    grid-column: 1 / -1;
+  }
+
+  .tg-dashboard .tg-assessment-heading {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .tg-dashboard .tg-assessment .tg-progress,
+  .tg-dashboard .tg-assessment-actions {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .tg-dashboard .tg-assessment-actions {
+    justify-content: flex-start;
+  }
+}
+ 
+@media (max-width: 1200px) {
+  .tg-columns { grid-template-columns: minmax(0, 1.4fr) minmax(260px, 1fr); }
+  .tg-stats { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .tg-heading { align-items: flex-start; flex-wrap: wrap; }
+  .tg-grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tg-metrics { gap: var(--space-sm); }
+}
+ 
+@media (max-width: 1050px) {
+  .tg-columns { grid-template-columns: 1fr; }
+  .tg-grid-2 { grid-template-columns: 1fr; }
+  .tg-row { flex-wrap: wrap; }
+  .tg-export-columns { grid-template-columns: 1fr; }
+}
+ 
+/* Tablet dan HP: sidebar diganti navigasi bawah */
+@media (max-width: 820px), (max-height: 560px) {
+  .teacher-app {
+    padding: var(--space-md) var(--space-md) var(--space-2xl);
+  }
+ 
+  .tg-sidebar,
+  .tg-menu-toggle {
+    display: none;
+  }
+ 
+  .tg-main {
+    margin-left: 0;
+  }
+ 
+  .tg-mobile-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    justify-content: space-around;
+    background: var(--color-surface);
+    border-top: var(--border-width-xs) solid var(--lms-border);
+    padding: var(--space-sm) var(--space-xs) max(var(--space-sm), env(safe-area-inset-bottom));
+    z-index: 20;
+  }
+ 
+  .tg-mobile-nav a {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: var(--text-l12-size);
+    line-height: var(--text-l12-line);
+    padding: var(--space-xs);
+  }
+ 
+  .tg-mobile-nav a[aria-current] {
+    color: var(--lms-primary);
+    background: var(--lms-primary-soft);
+    border-radius: var(--radius-s);
+  }
+ 
+  .tg-mobile-logout {
+    display: flex;
+    margin-top: var(--space-md);
+    padding: var(--space-sm) 0;
+    border: 0;
+  }
+ 
+  .tg-grid-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+ 
+@media (max-width: 640px) {
+  .tg-topbar { padding: var(--space-md); }
+  .tg-user > span:last-child { display: none; }
+  .tg-topbar > .tg-inline { gap: var(--space-sm); flex-wrap: nowrap; }
+  .tg-topbar strong { font-size: var(--text-l16-size); }
+  .tg-card { padding: var(--space-md); }
+  .tg-page,
+  .tg-stack { gap: var(--space-md); }
+ 
+  .tg-grid-2,
+  .tg-grid-3,
+  .tg-form-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+ 
+  .tg-stats {
+    grid-template-columns: 1fr !important;
+    gap: var(--space-sm);
+  }
+ 
+  .tg-stat { gap: var(--space-sm); }
+  .tg-heading { gap: var(--space-md); }
+ 
+  .tg-heading p {
+    font-size: var(--text-p16-size);
+    line-height: var(--text-p16-line);
+  }
+ 
+  .tg-tabs {
+    justify-content: flex-start;
+    gap: var(--space-md);
+    font-size: var(--text-l12-size);
+    line-height: var(--text-l12-line);
+  }
+ 
+  .tg-card-heading {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    margin-bottom: var(--space-md);
+  }
+ 
+  .tg-toolbar > * { width: 100%; }
+  .tg-search { min-width: 0; }
+  .tg-between { gap: var(--space-sm); flex-wrap: wrap; }
+  .tg-metrics { gap: var(--space-sm); padding: var(--space-md); }
+  .tg-form-actions { flex-direction: column; }
+  .tg-form-actions .tg-actions > * { flex: 1; }
+  .tg-document-view,
+  .tg-document { padding: var(--space-md); }
+  .tg-table-foot { flex-wrap: wrap; }
+  .tg-profile-avatar { width: 80px; height: 80px; }
+  .tg-breadcrumb .tg-preview-label { font-size: var(--text-l12-size); }
+}
+
+/* Halaman daftar mata pelajaran guru: ringkasan, filter, dan kartu mapel Figma. */
+.tg-subject-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  min-width: 0;
+}
+
+.tg-subject-list > .tg-heading h1 {
+  font-size: var(--text-h4-size);
+  line-height: var(--text-h4-line);
+}
+
+.tg-subject-list > .tg-heading .tg-badge {
+  white-space: nowrap;
+}
+
+.tg-subject-list > .tg-stats {
+  gap: var(--space-md);
+}
+
+.tg-subject-list .tg-stat {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-content: start;
+  column-gap: var(--space-md);
+  row-gap: var(--space-xs);
+  min-height: 188px;
+  padding: var(--space-md);
+}
+
+.tg-subject-list .tg-stat .tg-between {
+  display: contents;
+}
+
+.tg-subject-list .tg-stat .tg-icon-tile {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.tg-subject-list .tg-stat .tg-label {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: center;
+  text-align: right;
+}
+
+.tg-subject-list .tg-stat-value {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-xs);
+  text-align: right;
+}
+
+.tg-subject-list .tg-subject-stat-number {
+  font-size: var(--text-h4-size);
+  line-height: var(--text-h4-line);
+}
+
+.tg-subject-list .tg-subject-stat-title {
+  font-size: var(--text-h5-size);
+  line-height: var(--text-h5-line);
+  font-weight: var(--font-weight-bold);
+}
+
+.tg-subject-list .tg-stat > .tg-small {
+  grid-column: 1 / -1;
+  display: block;
+  margin: 0;
+  padding-top: var(--space-sm);
+  border-top: var(--border-width-xs) solid var(--lms-border);
+}
+
+.tg-subject-list .tg-stat:nth-child(2) .tg-icon-tile {
+  color: var(--lms-info);
+  background: var(--lms-info-soft);
+}
+
+.tg-subject-list .tg-stat:nth-child(3) .tg-icon-tile {
+  color: var(--lms-success);
+  background: var(--lms-success-soft);
+}
+
+.tg-subject-list .tg-stat:nth-child(3) > .tg-small {
+  color: var(--lms-success-dark);
+}
+
+.tg-subject-list .tg-subject-filters {
+  padding: var(--space-sm);
+}
+
+.tg-subject-list .tg-subject-filters .tg-toolbar {
+  flex-wrap: nowrap;
+}
+
+.tg-subject-list .tg-subject-filters .tg-search {
+  flex: 0 1 320px;
+  min-height: 40px;
+}
+
+.tg-subject-list .tg-subject-filters select {
+  width: 152px;
+  margin-left: auto;
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+}
+
+.tg-subject-list .tg-subject-cards {
+  gap: var(--space-lg);
+}
+
+.tg-subject-list .tg-subject-card {
+  min-height: 314px;
+  padding: var(--space-lg);
+}
+
+.tg-subject-list .tg-subject-card > .tg-stack {
+  height: 100%;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.tg-subject-list .tg-subject-intro {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-lg);
+}
+
+.tg-subject-list .tg-subject-intro > .tg-badge {
+  border-radius: var(--radius-s);
+}
+
+.tg-subject-list .tg-subject-title h3 {
+  font-size: var(--text-l16-size);
+  line-height: var(--text-l16-line);
+  font-weight: var(--font-weight-bold);
+}
+
+.tg-subject-list .tg-subject-title p {
+  margin-top: var(--space-xs);
+}
+
+.tg-subject-list .tg-subject-classes {
+  gap: var(--space-sm);
+}
+
+.tg-subject-list .tg-subject-classes > .tg-inline {
+  gap: var(--space-xs);
+}
+
+.tg-subject-list .tg-subject-group .tg-badge {
+  border-radius: var(--radius-xs);
+}
+
+.tg-subject-list .tg-subject-updated {
+  margin-top: auto;
+}
+
+.tg-subject-list .tg-subject-updated > small {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.tg-subject-list .tg-subject-updated > small svg {
+  width: 20px;
+  height: 20px;
+  color: var(--lms-success);
+}
+
+.tg-subject-list .tg-subject-updated .tg-button {
+  white-space: nowrap;
+}
+
+.tg-subject-list .tg-subject-card-math .tg-subject-intro > .tg-badge,
+.tg-subject-list .tg-subject-card-math .tg-subject-classes > .tg-badge {
+  border: var(--border-width-xs) solid var(--lms-secondary);
+  color: var(--lms-warning-dark);
+  background: transparent;
+}
+
+.tg-subject-list .tg-subject-card-math .tg-subject-title {
+  width: 100%;
+  padding-top: var(--space-md);
+  border-top: var(--border-width-xs) solid var(--lms-primary-soft);
+}
+
+.tg-subject-list .tg-subject-card-math .tg-track span {
+  background: var(--lms-secondary);
+}
+
+@media (max-width: 640px) {
+  .tg-subject-list .tg-subject-filters .tg-toolbar {
+    flex-wrap: wrap;
+  }
+
+  .tg-subject-list .tg-subject-filters .tg-search,
+  .tg-subject-list .tg-subject-filters select {
+    width: 100%;
+    max-width: none;
+  }
+
+  .tg-subject-list .tg-subject-filters select {
+    margin-left: 0;
+  }
+
+  .tg-subject-list .tg-subject-card {
+    min-height: 0;
+  }
+
+  .tg-subject-list .tg-subject-updated {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+}
+
+/* Lonceng dashboard pada top bar bersama AppShell. */
+.tg-dashboard-shell .tg-notification {
+  overflow: visible;
+  background: var(--lms-info-soft);
+}

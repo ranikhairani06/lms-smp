@@ -1,11 +1,5 @@
-import WelcomeCard from "../components/WelcomeCard";
+import { redirect } from "next/navigation";
 
 export default function Home() {
-  return (
-    <main>
-      <h1>LMS SMP 2 Temanggung</h1>
-
-      <WelcomeCard nama="Rani" />
-    </main>
-  );
+  redirect("/login");
 }
