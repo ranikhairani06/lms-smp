@@ -175,7 +175,7 @@
 .adminAppCollapsed .navLink span, .adminAppCollapsed .subNav { display: none; }
 .adminAppCollapsed .logoutLink { justify-content: center; padding-left: var(--space-xs); padding-right: var(--space-xs); font-size: 0; }
 .adminAppCollapsed .logoutLink svg { flex: 0 0 auto; }
-.mainArea { grid-column: 2; grid-row: 2; min-width: 0; min-height: calc(100vh - 112px); display: flex; flex-direction: column; }
+.mainArea { grid-column: 2; grid-row: 2; min-width: 0; min-height: calc(100vh - 112px); display: flex; flex-direction: column; font-family: var(--font-family); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
 .topbar { grid-column: 1 / -1; grid-row: 1; position: sticky; top: 16px; z-index: 30; display: flex; justify-content: space-between; align-items: center; width: 100%; min-height: 64px; padding: 0 var(--space-lg); color: var(--ad-text); background: var(--ad-surface); border: var(--border-width-xs) solid var(--color-border); border-radius: var(--radius-m); box-shadow: var(--shadow-1); }
 .topbarLeft, .topbarRight { display: flex; align-items: center; gap: var(--space-md); }
 .topbarMenu { width: 28px; height: 28px; display: grid; place-items: center; padding: 0; color: var(--ad-text); background: transparent; border: 0; border-radius: var(--radius-xs); cursor: pointer; }
@@ -187,12 +187,12 @@
 }
 .topbarRight { gap: var(--space-sm); }
 .notificationWrap { position: relative; }
-.notificationButton { position: relative; width: 36px; height: 36px; display: grid; place-items: center; color: var(--ad-muted); background: var(--ad-info-tint); border: 0; border-radius: var(--radius-s); cursor: pointer; }
+.notificationButton { position: relative; width: 40px; height: 40px; display: grid; place-items: center; color: var(--ad-muted); background: var(--ad-info-tint); border: 0; border-radius: var(--radius-s); cursor: pointer; }
 .notificationButton span { position: absolute; top: -4px; right: -3px; min-width: 17px; height: 17px; display: grid; place-items: center; color: var(--color-surface); background: var(--ad-primary); border-radius: var(--radius-circle); font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
 .notificationPopover { position: absolute; top: 44px; right: 0; width: 275px; padding: var(--space-md); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-m); box-shadow: var(--shadow-2); }
 .notificationPopover strong { display: block; margin-bottom: var(--space-sm); }
 .notificationPopover p { margin: 0; padding: var(--space-sm) 0; color: var(--ad-muted); border-top: 1px solid var(--color-background); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
-.avatarSmall { width: 34px; height: 34px; display: grid; place-items: center; color: var(--color-surface); background: var(--ad-primary); border-radius: var(--radius-s); font-size: var(--text-l12-size); font-weight: 600; line-height: var(--text-l12-line); }
+.avatarSmall { width: 40px; height: 40px; display: grid; place-items: center; color: var(--color-surface); background: var(--ad-primary); border-radius: var(--radius-s); font-size: var(--text-l12-size); font-weight: 600; line-height: var(--text-l12-line); }
 .adminName { font-size: var(--text-l16-size); font-weight: var(--font-weight-bold); line-height: var(--text-l16-line); }
 .mobileMenu { display: none; color: var(--ad-muted); background: transparent; border: 0; cursor: pointer; }
 .mainContent { flex: 1; min-width: 0; padding: var(--space-md) 0 var(--space-md); }
@@ -590,6 +590,13 @@
 .formField textarea { min-height: 62px; resize: vertical; }
 .formField input:focus, .formField select:focus, .formField textarea:focus { border: 2px solid var(--ad-primary-light); padding: var(--space-sm) var(--space-sm); }
 .formField small { color: var(--color-text-secondary); font-size: var(--text-p12-size); font-weight: 400; line-height: var(--text-p12-line); }
+/* Border dan pesan validasi hanya aktif pada field yang menerima prop error. */
+.formFieldInvalid input, .formFieldInvalid select, .formFieldInvalid textarea,
+.formFieldInvalid input:focus, .formFieldInvalid select:focus, .formFieldInvalid textarea:focus { border-color: var(--color-error) !important; }
+.formField .fieldError { display: flex; align-items: flex-start; gap: var(--space-xs); color: var(--color-error-dark); }
+.fieldError svg { flex: 0 0 var(--space-md); width: var(--space-md); height: var(--space-md); }
+.formFieldInvalid .searchField { border-color: var(--color-error); }
+.formFieldInvalid .choicePill, .teacherModal .formFieldInvalid .teacherClassChoice { border-color: var(--color-error); }
 .fieldLabelRow { display: flex; align-items: center; justify-content: space-between; gap: var(--space-sm); }
 .teacherModal .fieldValidLabel { display: inline-flex; align-items: center; gap: var(--space-xs); color: var(--color-success-dark); font-size: var(--text-l12-size); font-weight: var(--font-weight-medium); line-height: var(--text-l12-line); white-space: nowrap; }
 .fieldControlWrap { position: relative; display: flex; align-items: center; }

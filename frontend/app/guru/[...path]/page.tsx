@@ -7,8 +7,8 @@ import { Submissions, Grading, AssessmentAnalysis } from "../_components/assessm
 import { ClassList, ClassDetail, Gradebook, StudentProgress } from "../_components/classes";
 import { ResultsExport, Notifications, TeacherProfile } from "../_components/account-screens";
 
-export default async function TeacherRoute({ params }: { params: Promise<{ path: string[] }> }) {
-  const { path } = await params;
+export default async function TeacherRoute({ params, searchParams }: { params: Promise<{ path: string[] }>; searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
+  const [{ path }, query] = await Promise.all([params, searchParams]);
   const user = await requireUser("teacher");
   const [section, id, area, item, action, studentId] = path;
   const routeKey = path.join("/");
@@ -30,7 +30,7 @@ export default async function TeacherRoute({ params }: { params: Promise<{ path:
     }
     if (area === "asesmen") {
       if (path.length === 3) return <AssessmentList key={routeKey} subject={subject} />;
-      if (item === "baru" && path.length === 4) return <AssessmentEditor key={routeKey} subject={subject} />;
+      if (item === "baru" && path.length === 4) return <AssessmentEditor key={routeKey} subject={subject} kind={query.jenis === "tugas" ? "tugas" : "kuis"} />;
       if (action === "edit" && path.length === 5) return <AssessmentEditor key={routeKey} subject={subject} editId={item} />;
       if (["tugas-01", "kuis-01"].includes(item)) {
         if (action === "pengumpulan" && path.length === 5) return <Submissions key={routeKey} subject={subject} assessment={item} />;

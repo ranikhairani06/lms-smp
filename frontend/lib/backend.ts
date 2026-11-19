@@ -55,8 +55,14 @@ export const currentUser = cache(async (): Promise<AuthUser | null> => {
 });
 
 export async function requireUser(role?: Role, allowPasswordChange = false) {
+  const token = await sessionToken();
   const user = await currentUser();
-  if (!user) redirect(role ? `/login?role=${role}` : "/login");
+  if (!user) {
+    if (token) {
+      redirect(role ? `/login?role=${role}&reason=session-expired` : "/login?reason=session-expired");
+    }
+    redirect(role ? `/login?role=${role}` : "/login");
+  }
   if (role && user.role !== role) redirect(`/login?role=${role}&reason=role-mismatch`);
   if (user.role !== "admin" && user.must_change_password && !allowPasswordChange) redirect("/password-update");
   return user;

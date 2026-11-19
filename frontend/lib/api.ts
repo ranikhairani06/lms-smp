@@ -1,10 +1,18 @@
 export async function apiRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const response = await fetch(`/api/${path}`, {
-    ...options,
-    headers: { "Content-Type": "application/json", ...options.headers },
-    credentials: "same-origin",
-    cache: "no-store",
-  });
+  let response: Response;
+  try {
+    response = await fetch(`/api/${path}`, {
+      ...options,
+      headers: { "Content-Type": "application/json", ...options.headers },
+      credentials: "same-origin",
+      cache: "no-store",
+    });
+  } catch {
+    throw new ApiError(
+      "Tidak dapat terhubung ke server. Periksa koneksi internet Anda lalu coba lagi.",
+      503,
+    );
+  }
   const data = response.status === 204 ? null : await response.json().catch(() => null);
   if (!response.ok) {
     const validation = data?.errors ? Object.values(data.errors).flat().join(" ") : "";

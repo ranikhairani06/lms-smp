@@ -1,0 +1,86 @@
+/* Susunan banner error bersama untuk semua role. */
+.errorState {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  border: var(--border-width-xs) solid var(--color-error);
+  border-radius: var(--radius-m);
+  background: var(--color-error-tint);
+  color: var(--color-error-dark);
+}
+
+.errorIcon {
+  flex: 0 0 var(--space-lg);
+  width: var(--space-lg);
+  height: var(--space-lg);
+  margin-top: var(--space-xs);
+}
+
+/* Konten, deskripsi, dan aksi dalam state bersama. */
+.stateContent {
+  min-width: 0;
+}
+
+.description {
+  margin-top: var(--space-sm);
+  color: var(--color-text-secondary);
+}
+
+.errorState .description {
+  color: var(--color-error-dark);
+}
+
+.stateActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+}
+
+/* Empty state dan loading tetap dapat dipakai di area konten yang berbeda. */
+.emptyState,
+.loadingState {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  border-radius: var(--radius-m);
+  background: var(--color-surface);
+}
+
+.emptyState {
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}
+
+.emptyIcon {
+  width: var(--space-xl);
+  height: var(--space-xl);
+  color: var(--color-text-secondary);
+}
+
+/* Indikator loading memakai token warna dan gerak yang menghormati preferensi sistem. */
+.spinner {
+  flex: 0 0 var(--space-lg);
+  width: var(--space-lg);
+  height: var(--space-lg);
+  border: var(--border-width-m) solid var(--color-primary-tint);
+  border-top-color: var(--color-primary);
+  border-radius: var(--radius-circle);
+  animation: state-spin 900ms linear infinite;
+}
+
+@keyframes state-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 1800ms;
+  }
+}

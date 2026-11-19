@@ -24,17 +24,26 @@ const roles = ["Admin", "Siswa", "Guru", "Orang Tua"] as const;
 const apiRoles = { Admin: "admin", Siswa: "student", Guru: "teacher", "Orang Tua": "parent" } as const;
 const roleIcons: IconName[] = ["database", "student", "user", "parents"];
 
-export default function LoginForm({ initialRole = "student", roleMismatch = false }: { initialRole?: Role; roleMismatch?: boolean }) {
+export default function LoginForm({ initialRole = "student", roleMismatch = false, sessionExpired = false }: { initialRole?: Role; roleMismatch?: boolean; sessionExpired?: boolean }) {
   const router = useRouter();
   const requestedRole = roles.find((item) => apiRoles[item] === initialRole) ?? "Siswa";
   const [role, setRole] = useState<(typeof roles)[number]>(requestedRole);
   const [visible, setVisible] = useState(false);
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
+  const [touched, setTouched] = useState({ username: false, password: false });
+  const [submitted, setSubmitted] = useState(false);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+
+  const usernameError = (touched.username || submitted) && !username.trim();
+  const passwordError = (touched.password || submitted) && !password;
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (pending) return;
+    setSubmitted(true);
+    if (!username.trim() || !password) return;
     const fields = new FormData(event.currentTarget);
     setMessage("");
     setPending(true);
@@ -78,8 +87,13 @@ export default function LoginForm({ initialRole = "student", roleMismatch = fals
                 Sesi yang aktif menggunakan role lain. Untuk membuka portal {requestedRole}, masuk dengan akun {requestedRole}.
               </p>
             )}
+            {sessionExpired && (
+              <p className={styles.sessionMessage} role="status">
+                Sesi Anda telah berakhir. Silakan masuk kembali.
+              </p>
+            )}
 
-            <form className={styles.form} onSubmit={submit}>
+            <form className={styles.form} onSubmit={submit} noValidate>
               <div className={styles.field}>
                 <label htmlFor="username">Username {role === "Siswa" ? "(NISN)" : role === "Guru" ? "(NIP)" : ""}</label>
 
@@ -89,12 +103,26 @@ export default function LoginForm({ initialRole = "student", roleMismatch = fals
                     id="username"
                     name="username"
                     type="text"
+                    value={username}
+                    onChange={(event) => {
+                      setUsername(event.target.value);
+                      setMessage("");
+                    }}
+                    onBlur={() => setTouched((current) => ({ ...current, username: true }))}
                     placeholder={role === "Siswa" ? "Masukkan NISN siswa" : role === "Guru" ? "Masukkan NIP guru" : "Masukkan username akun"}
                     autoComplete="username"
-                    required
-                    aria-describedby="username-help"
+                    aria-invalid={usernameError}
+                    aria-describedby={usernameError ? "username-help username-error" : "username-help"}
+                    className={usernameError ? styles.invalidInput : undefined}
                   />
                 </div>
+
+                {usernameError && (
+                  <p className={styles.fieldError} id="username-error">
+                    <Icon name="info" />
+                    Username wajib diisi
+                  </p>
+                )}
 
                 <p className={styles.help} id="username-help">
                   {role === "Siswa" ? "Gunakan 10 digit NISN siswa." : role === "Guru" ? "Gunakan NIP yang terdaftar di sekolah." : "Gunakan username yang diberikan operator sekolah."}
@@ -110,9 +138,17 @@ export default function LoginForm({ initialRole = "student", roleMismatch = fals
                     id="password"
                     name="password"
                     type={visible ? "text" : "password"}
+                    value={password}
+                    onChange={(event) => {
+                      setPassword(event.target.value);
+                      setMessage("");
+                    }}
+                    onBlur={() => setTouched((current) => ({ ...current, password: true }))}
                     placeholder="Masukkan password"
                     autoComplete="current-password"
-                    required
+                    aria-invalid={passwordError}
+                    aria-describedby={passwordError ? "password-error" : undefined}
+                    className={passwordError ? styles.invalidInput : undefined}
                   />
 
                   <button
@@ -127,6 +163,12 @@ export default function LoginForm({ initialRole = "student", roleMismatch = fals
                     <Icon name="eye" />
                   </button>
                 </div>
+                {passwordError && (
+                  <p className={styles.fieldError} id="password-error">
+                    <Icon name="info" />
+                    Kata sandi wajib diisi
+                  </p>
+                )}
               </div>
 
               <fieldset className={styles.roles}>
@@ -159,15 +201,16 @@ export default function LoginForm({ initialRole = "student", roleMismatch = fals
                 <span>Ingat saya</span>
               </label>
 
-              <button type="submit" className={styles.submit} disabled={pending}>
-                {pending ? "Memeriksa akun..." : "Masuk ke Sistem"}
-              </button>
-
               {message && (
-                <p className={styles.message} role="status">
+                <p className={styles.serverError} role="alert">
+                  <Icon name="info" />
                   {message}
                 </p>
               )}
+
+              <button type="submit" className={styles.submit} disabled={pending}>
+                {pending ? "Memeriksa akun..." : "Masuk ke Sistem"}
+              </button>
 
               <aside className={styles.notice}>
                 <h2>Informasi Akun &amp; Kata Sandi</h2>

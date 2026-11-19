@@ -122,6 +122,11 @@
   border: 2px solid var(--color-primary);
 }
 
+.inputWrap:has(.invalidInput),
+.inputWrap:has(.invalidInput):focus-within {
+  border: var(--border-width-m) solid var(--color-error);
+}
+
 .inputWrap > svg {
   width: 20px;
   height: 20px;
@@ -272,6 +277,48 @@
 .message {
   margin: 0;
   color: var(--color-info-dark);
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
+}
+
+/* Pesan sesi dan validasi login menggunakan warna semantik dari token global. */
+.sessionMessage {
+  margin: 0 0 var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-s);
+  background: var(--color-info-tint);
+  color: var(--color-info-dark);
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
+}
+
+.fieldError {
+  margin: var(--space-xs) 0 0;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-xs);
+  color: var(--color-error-dark);
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
+}
+
+.fieldError svg,
+.serverError svg {
+  width: var(--space-md);
+  height: var(--space-md);
+  flex: 0 0 var(--space-md);
+}
+
+.serverError {
+  margin: 0;
+  padding: var(--space-sm) var(--space-md);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  border: var(--border-width-xs) solid var(--color-error);
+  border-radius: var(--radius-s);
+  background: var(--color-error-tint);
+  color: var(--color-error-dark);
   font-size: var(--text-p12-size);
   line-height: var(--text-p12-line);
 }

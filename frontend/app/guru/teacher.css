@@ -478,6 +478,30 @@
   background: var(--lms-secondary);
   color: var(--lms-text);
 }
+
+/* Kartu ringkasan dengan susunan dan footer konsisten; tone hanya mengganti warna ikon/progres. */
+.tg-stats-summary { gap: var(--space-sm); }
+.tg-stat-summary { min-height: 140px; padding: var(--space-sm); gap: var(--space-xs); background: var(--color-surface); border-color: var(--color-border); }
+.tg-summary-stat-heading { display: flex; align-items: center; justify-content: space-between; gap: var(--space-sm); }
+.tg-stat-summary .tg-icon-tile { width: var(--space-xl); height: var(--space-xl); border-radius: var(--radius-s); }
+.tg-stat-summary .tg-icon-tile svg { width: var(--space-md); height: var(--space-md); }
+.tg-stat-summary .tg-label { font-size: var(--text-l12-size); line-height: var(--text-l12-line); font-weight: var(--font-weight-bold); }
+.tg-stat-summary .tg-stat-value { align-self: flex-end; font-size: var(--text-h5-size); line-height: var(--text-h5-line); text-align: right; }
+.tg-stat-summary .tg-stat-value > span { font-size: var(--text-h4-size); line-height: var(--text-h4-line); }
+.tg-stat-summary .tg-stat-value small { color: var(--color-text-secondary); font-size: var(--text-p12-size); line-height: var(--text-p12-line); white-space: nowrap; }
+.tg-summary-stat-footer { display: flex; flex-direction: column; gap: var(--space-xs); margin-top: auto; padding-top: var(--space-xs); border-top: var(--border-width-xs) solid var(--color-border); }
+.tg-summary-stat-progress { overflow: hidden; height: var(--space-xs); background: var(--color-primary-tint); border-radius: var(--radius-pill); }
+.tg-summary-stat-progress span { display: block; height: 100%; background: var(--color-primary); border-radius: inherit; }
+.tg-stat-tone-success .tg-summary-stat-progress span { background: var(--color-success); }
+.tg-summary-stat-note { display: flex; align-items: center; gap: var(--space-xs); color: var(--color-text-secondary); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-summary-stat-note svg { width: var(--space-sm); height: var(--space-sm); color: var(--color-warning-dark); }
+.tg-summary-stat-note strong { margin-left: auto; color: var(--color-primary); font-weight: var(--font-weight-bold); white-space: nowrap; }
+.tg-stat-tone-primary .tg-icon-tile { color: var(--color-primary); background: var(--color-primary-tint); }
+.tg-stat-tone-warning .tg-icon-tile { color: var(--color-warning-dark); background: var(--color-warning-tint); }
+.tg-stat-tone-warning .tg-summary-stat-note { color: var(--color-warning-dark); }
+.tg-stat-tone-success .tg-icon-tile { color: var(--color-success-dark); background: var(--color-success-tint); }
+.tg-stat-tone-success .tg-summary-stat-note strong { color: var(--color-success-dark); }
+.tg-stat-tone-error .tg-icon-tile { color: var(--color-error-dark); background: var(--color-error-tint); }
  
 /* Badge: pill, latar tint, teks varian dark */
 .tg-badge {
@@ -1039,6 +1063,123 @@
   font-weight: var(--font-weight-bold);
 }
 
+/* Workspace penilaian manual: lembar jawaban di kiri dan panel nilai di kanan. */
+.tg-grading-page { display: flex; flex-direction: column; gap: var(--space-md); min-width: 0; }
+.tg-grading-heading .tg-heading.tg-card { gap: var(--space-lg); margin-bottom: 0; padding: var(--space-lg); border-radius: var(--radius-l); }
+.tg-grading-heading .tg-heading > div:first-child { min-width: 0; }
+.tg-grading-heading .tg-heading h1 { font-size: var(--text-h5-size); line-height: var(--text-h5-line); font-weight: var(--font-weight-bold); }
+.tg-grading-heading .tg-heading p { margin-top: var(--space-sm); color: var(--color-text-secondary); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-grading-heading .tg-heading .tg-badge { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto auto; align-items: center; column-gap: var(--space-sm); row-gap: 0; padding: var(--space-sm) var(--space-md); color: var(--color-primary); background: var(--color-primary-tint); font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
+.tg-grading-heading .tg-heading .tg-badge > svg { grid-column: 1; grid-row: 1 / span 2; }
+.tg-grading-heading .tg-heading .tg-badge small { grid-column: 2; grid-row: 2; font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
+.tg-grading-layout { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); align-items: start; gap: var(--space-md); min-width: 0; }
+.tg-grading-left,
+.tg-grading-right { display: flex; flex-direction: column; gap: var(--space-md); min-width: 0; }
+.tg-grading-file { display: flex; align-items: center; justify-content: space-between; gap: var(--space-md); padding: var(--space-md); }
+.tg-grading-file-info { display: flex; align-items: center; gap: var(--space-sm); min-width: 0; }
+.tg-grading-file-info > div { display: flex; align-items: center; column-gap: var(--space-xs); row-gap: var(--space-xs); flex-wrap: wrap; min-width: 0; }
+.tg-grading-file-info > div > strong { font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
+.tg-grading-file-info > div > small { flex-basis: 100%; color: var(--color-text-secondary); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-grading-file-icon { display: grid; flex: 0 0 auto; place-items: center; width: var(--space-xl); height: var(--space-xl); color: var(--color-error); background: var(--color-error-tint); border-radius: var(--radius-m); font-size: var(--text-l12-size); line-height: var(--text-l12-line); font-weight: var(--font-weight-bold); }
+.tg-grading-file-actions { display: flex; gap: var(--space-sm); }
+.tg-grading-file-actions .tg-button-outline { border-color: transparent; background: var(--color-primary-tint); }
+.tg-grading-file-actions .tg-button { min-width: var(--space-2xl); padding-inline: var(--space-sm); }
+.tg-grading-document-card { display: flex; flex-direction: column; gap: var(--space-md); padding: var(--space-md); }
+.tg-grading-viewer-tools { display: flex; align-items: center; justify-content: space-between; gap: var(--space-md); }
+.tg-grading-paper { display: flex; flex-direction: column; gap: var(--space-md); min-height: var(--space-2xl); padding: var(--space-md); background: var(--color-surface); }
+.tg-grading-paper > .tg-badge { display: none; }
+.tg-grading-paper > h2 { padding: var(--space-sm); background: var(--color-primary-tint); border-radius: var(--radius-s) var(--radius-s) 0 0; font-size: var(--text-h5-size); line-height: var(--text-h5-line); font-weight: var(--font-weight-bold); }
+.tg-grading-paper > p.tg-small { margin-top: calc(-1 * var(--space-md)); padding: 0 var(--space-sm) var(--space-sm); background: var(--color-primary-tint); border-radius: 0 0 var(--radius-s) var(--radius-s); }
+.tg-grading-paper > h3 { font-size: var(--text-l12-size); line-height: var(--text-l12-line); font-weight: var(--font-weight-semibold); }
+.tg-grading-answer { padding: var(--space-md); background: var(--color-primary-tint); border-radius: var(--radius-s); }
+.tg-grading-answer p { color: var(--color-text-primary); font-size: var(--text-p12-size); line-height: var(--text-p16-line); }
+.tg-grading-answer p > span { background: var(--lms-secondary-soft); }
+.tg-grading-answer-lines { display: flex; flex-direction: column; gap: var(--space-sm); min-height: var(--space-2xl); padding: var(--space-md); background: var(--color-background); border-radius: var(--radius-s); }
+.tg-grading-answer-lines span { width: 100%; border-top: var(--border-width-xs) solid var(--color-border); }
+.tg-grading-answer-lines span:last-child { width: 68%; }
+.tg-grading-pagination { display: flex; align-items: center; justify-content: center; gap: var(--space-md); align-self: center; padding: var(--space-xs) var(--space-sm); border: var(--border-width-xs) solid var(--color-border); border-radius: var(--radius-pill); }
+.tg-grading-pagination > span { font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
+.tg-grading-pagination .tg-button { min-width: var(--space-xl); padding-inline: var(--space-xs); }
+.tg-grading-student { display: flex; align-items: center; gap: var(--space-sm); padding: var(--space-md); }
+.tg-grading-student > .tg-avatar { flex: 0 0 auto; }
+.tg-grading-student > div { flex: 1; min-width: 0; }
+.tg-grading-student > .tg-avatar { width: var(--space-xl); height: var(--space-xl); border-radius: var(--radius-circle); }
+.tg-grading-student h2 { font-size: var(--text-l12-size); line-height: var(--text-l12-line); font-weight: var(--font-weight-bold); }
+.tg-grading-student p { margin-top: var(--space-xs); font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
+.tg-grading-student > .tg-badge { flex: 0 0 auto; white-space: nowrap; }
+.tg-grading-summary { padding: var(--space-md); }
+.tg-grading-summary-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-md); }
+.tg-grading-summary-status { display: flex; flex-direction: column; align-items: flex-end; gap: var(--space-xs); text-align: right; }
+.tg-grading-summary-status .tg-badge { display: inline-flex; align-items: center; gap: var(--space-xs); }
+.tg-grading-summary-status small { color: var(--color-success-dark); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-grading-summary .tg-grade-total { font-size: var(--text-h5-size); line-height: var(--text-h5-line); }
+.tg-grading-summary .tg-grade-total small { color: var(--color-text-secondary); font-size: var(--text-p12-size); line-height: var(--text-p12-line); font-weight: var(--font-weight-regular); }
+.tg-grading-scale { position: relative; overflow: visible; height: var(--space-sm); margin-top: var(--space-md); background: var(--color-border); border-radius: var(--radius-pill); }
+.tg-grading-scale-value { display: block; height: 100%; background: var(--color-success); border-radius: inherit; }
+.tg-grading-kktp-marker { position: absolute; top: 0; left: 75%; height: 100%; border-left: var(--border-width-m) solid var(--color-primary-dark); }
+.tg-grading-kktp-marker .tg-badge { position: absolute; top: var(--space-sm); left: 0; transform: translateX(-50%); white-space: nowrap; padding: var(--space-xs); font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
+.tg-grading-scale-labels { display: flex; justify-content: space-between; color: var(--color-text-secondary); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-grading-question { display: flex; flex-direction: column; gap: var(--space-sm); padding: var(--space-sm); }
+.tg-grading-question-heading,
+.tg-grading-question-title,
+.tg-grading-question-footer,
+.tg-grading-auto-row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-sm); }
+.tg-grading-question-title { justify-content: flex-start; min-width: 0; }
+.tg-grading-question-title > div { min-width: 0; }
+.tg-grading-question-title h2 { font-size: var(--text-l12-size); line-height: var(--text-l12-line); font-weight: var(--font-weight-semibold); }
+.tg-grading-question-title small,
+.tg-grading-question-score small { color: var(--color-text-secondary); font-size: var(--text-p12-size); line-height: var(--text-p12-line); font-weight: var(--font-weight-regular); }
+.tg-grading-question-score { flex: 0 0 auto; font-size: var(--text-l16-size); line-height: var(--text-l16-line); font-weight: var(--font-weight-bold); text-align: right; }
+/* Kartu otomatis memakai baris ringkas; kontrol skor tetap dapat diakses saat fokus/hover. */
+.tg-grading-question:has(.tg-grading-auto-row) { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; grid-template-rows: auto auto; align-items: center; column-gap: var(--space-sm); row-gap: var(--space-xs); }
+.tg-grading-question:has(.tg-grading-auto-row) .tg-grading-question-heading,
+.tg-grading-question:has(.tg-grading-auto-row) .tg-grading-auto-row { display: contents; }
+.tg-grading-question:has(.tg-grading-auto-row) .tg-grading-question-title { display: grid; grid-column: 2; grid-row: 1 / span 2; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto auto; align-items: center; gap: var(--space-xs); }
+.tg-grading-question:has(.tg-grading-auto-row) .tg-grading-question-title > .tg-badge { grid-column: 1; grid-row: 1; padding: 0; color: var(--color-text-primary); background: transparent; border-radius: 0; text-transform: capitalize; }
+.tg-grading-question:has(.tg-grading-auto-row) .tg-grading-question-title > .tg-badge::after { content: "•"; margin-left: var(--space-xs); }
+.tg-grading-question:has(.tg-grading-auto-row) .tg-grading-question-title > div { display: contents; }
+.tg-grading-question:has(.tg-grading-auto-row) .tg-grading-question-title h2 { grid-column: 2; grid-row: 1; }
+.tg-grading-question:has(.tg-grading-auto-row) .tg-grading-question-title small { grid-column: 1 / span 2; grid-row: 2; }
+.tg-grading-question:has(.tg-grading-auto-row) .tg-grading-question-score { grid-column: 3; grid-row: 1 / span 2; color: var(--color-success-dark); }
+.tg-grading-question:has(.tg-grading-auto-row) .tg-grading-auto-row > span:first-child { grid-column: 1; grid-row: 1 / span 2; display: grid; place-items: center; width: var(--space-md); height: var(--space-md); color: var(--color-text-secondary); background: var(--color-primary-tint); border-radius: var(--radius-s); }
+.tg-grading-question:has(.tg-grading-auto-row) .tg-grading-auto-row > span:nth-child(2),
+.tg-grading-question:has(.tg-grading-auto-row) .tg-grading-auto-row > strong { display: none; }
+.tg-grading-question:has(.tg-grading-auto-row) .tg-grading-auto-row .tg-grading-static-action { grid-column: 4; grid-row: 1 / span 2; white-space: normal; text-align: center; }
+.tg-grading-auto-row { justify-content: flex-start; padding: var(--space-sm); color: var(--color-text-secondary); background: var(--color-primary-tint); border-radius: var(--radius-s); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-grading-auto-row > strong { margin-left: auto; color: var(--color-success-dark); font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
+.tg-grading-criteria { display: flex; flex-direction: column; gap: var(--space-xs); }
+.tg-grading-criterion { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: var(--space-sm); padding: var(--space-sm); background: var(--color-primary-tint); border-radius: var(--radius-s); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-grading-check { display: grid; place-items: center; width: var(--space-md); height: var(--space-md); color: transparent; background: var(--color-primary); border-radius: var(--radius-xs); }
+.tg-grading-criterion:not(.is-earned) .tg-grading-check { background: var(--color-surface); border: var(--border-width-xs) solid var(--color-text-secondary); }
+.tg-grading-criterion strong { color: var(--color-success-dark); font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
+.tg-grading-criterion:not(.is-earned) strong { color: var(--color-text-secondary); }
+.tg-grading-question-footer { color: var(--color-text-secondary); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-grading-question-footer strong { color: var(--color-text-primary); }
+.tg-grading-static-action { color: var(--color-primary); font-size: var(--text-l12-size); line-height: var(--text-l12-line); font-weight: var(--font-weight-semibold); white-space: nowrap; }
+.tg-grading-score-controls { display: flex; align-items: center; justify-content: flex-end; gap: var(--space-xs); max-height: 0; margin-top: calc(-1 * var(--space-sm)); overflow: hidden; opacity: 0; }
+.tg-grading-question:hover .tg-grading-score-controls,
+.tg-grading-question:focus-within .tg-grading-score-controls { max-height: var(--space-2xl); margin-top: 0; opacity: 1; }
+.tg-grading-question:hover .tg-grading-score-controls { max-height: var(--space-2xl); margin-top: 0; opacity: 1; }
+.tg-grading-question:has(.tg-grading-auto-row) .tg-grading-score-controls { grid-column: 1 / -1; }
+.tg-grading-score-controls .tg-button { min-width: var(--space-lg); min-height: var(--space-lg); padding: var(--space-xs); }
+.tg-grading-score-controls .tg-grade-input { width: var(--space-2xl); min-height: var(--space-lg); padding: var(--space-xs); font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
+.tg-grading-feedback { padding: var(--space-sm); }
+.tg-grading-feedback-heading { display: flex; align-items: center; justify-content: space-between; gap: var(--space-sm); margin-bottom: var(--space-sm); }
+.tg-grading-feedback-heading strong { font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
+.tg-grading-feedback-heading span { color: var(--color-text-secondary); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-grading-feedback textarea { width: 100%; min-height: var(--space-2xl); padding: var(--space-sm); background: var(--color-primary-tint); border: 0; border-radius: var(--radius-s); font-size: var(--text-p12-size); line-height: var(--text-p16-line); }
+.tg-grading-note .tg-notice { margin: 0; }
+.tg-grading-footer { position: sticky; bottom: 0; z-index: 1; display: grid; grid-template-columns: auto auto minmax(0, 1fr); align-items: center; gap: var(--space-md); padding: var(--space-md); background: var(--color-surface); border: var(--border-width-xs) solid var(--color-border); border-radius: var(--radius-m); box-shadow: var(--shadow-1); }
+.tg-grading-student-nav { display: flex; align-items: center; justify-content: center; gap: var(--space-sm); padding: var(--space-xs) var(--space-sm); background: var(--color-primary-tint); border-radius: var(--radius-pill); font-size: var(--text-l12-size); line-height: var(--text-l12-line); white-space: nowrap; }
+.tg-grading-footer > .tg-actions { justify-content: flex-end; }
+
+@media (max-width: 900px) {
+  .tg-grading-layout { grid-template-columns: minmax(0, 1fr); }
+  .tg-grading-footer { grid-template-columns: minmax(0, 1fr); }
+  .tg-grading-student-nav { order: -1; }
+  .tg-grading-footer > .tg-actions { flex-wrap: wrap; }
+}
+
 /* Ringkasan mata pelajaran: tab, kartu statistik, silabus, tugas, dan panel nilai */
 .tg-subject-summary {
   display: flex;
@@ -1065,8 +1206,8 @@
 .tg-subject-summary > .tg-tabs a {
   padding: var(--space-xs) 0 var(--space-sm);
   color: var(--lms-text-secondary);
-  font-size: var(--text-l12-size);
-  line-height: var(--text-l12-line);
+  font-size: var(--text-l16-size);
+  line-height: var(--text-l16-line);
   font-weight: var(--font-weight-semibold);
 }
 
@@ -1592,12 +1733,33 @@
 .tg-dialog {
   margin: auto;
   padding: var(--space-lg);
-  border: var(--border-width-xs) solid var(--lms-border);
+  border: var(--border-width-xs) solid var(--color-border);
   border-radius: var(--radius-l);
   width: min(560px, calc(100% - var(--space-xl)));
-  color: var(--lms-text);
+  color: var(--color-text-primary);
   background: var(--color-surface);
-  box-shadow: var(--lms-shadow-3);
+  box-shadow: var(--shadow-3);
+}
+
+.tg-dialog h2 {
+  margin: 0;
+  font-size: var(--text-p18-size);
+  line-height: var(--text-p18-line);
+  font-weight: var(--font-weight-bold);
+}
+
+.tg-dialog .tg-button-primary {
+  background: var(--color-primary);
+  color: var(--color-surface) !important;
+}
+
+.tg-dialog .tg-button-primary:hover {
+  background: var(--color-primary-hover);
+}
+
+.tg-dialog .tg-button-outline {
+  border-color: var(--color-border);
+  color: var(--color-primary-dark) !important;
 }
  
 .tg-dialog::backdrop {
@@ -2432,4 +2594,573 @@
 .tg-dashboard-shell .tg-notification {
   overflow: visible;
   background: var(--lms-info-soft);
+}
+
+/* Halaman daftar materi: panel peringatan, ringkasan rapat, dan tabel modul. */
+.tg-material-list { display: flex; flex-direction: column; gap: var(--space-lg); min-width: 0; }
+.tg-material-list > .tg-heading .tg-button { display: inline-flex; align-items: center; gap: var(--space-sm); }
+.tg-material-list > .tg-heading .tg-button svg { width: var(--space-lg); height: var(--space-lg); }
+.tg-material-alert { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: var(--space-md); padding: var(--space-md); color: var(--color-warning-dark); background: var(--color-warning-tint); border: var(--border-width-xs) solid var(--color-warning); border-radius: var(--radius-m); }
+.tg-material-alert-icon { display: grid; place-items: center; width: var(--space-2xl); height: var(--space-2xl); color: var(--color-warning-dark); background: var(--color-surface); border: var(--border-width-xs) solid var(--color-warning); border-radius: var(--radius-m); }
+.tg-material-alert-icon svg { width: var(--space-lg); height: var(--space-lg); }
+.tg-material-alert-copy h3 { color: var(--color-error-dark); font-size: var(--text-l16-size); line-height: var(--text-l16-line); font-weight: var(--font-weight-bold); }
+.tg-material-alert-copy p { margin-top: var(--space-xs); color: var(--color-text-secondary); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-material-alert .tg-button { display: inline-flex; align-items: center; gap: var(--space-sm); color: var(--color-text-primary); background: var(--color-secondary); border-color: var(--color-secondary); font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
+.tg-material-alert .tg-button svg { width: var(--space-lg); height: var(--space-lg); }
+.tg-material-list .tg-stats-compact { gap: var(--space-md); }
+.tg-material-list .tg-stats-compact .tg-stat { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto 1fr; align-items: center; gap: var(--space-sm) var(--space-md); min-height: 136px; padding: var(--space-md); }
+.tg-material-list .tg-stats-compact .tg-stat > .tg-between { grid-column: 1 / -1; justify-content: flex-start; gap: var(--space-sm); }
+.tg-material-list .tg-stats-compact .tg-stat .tg-label { text-align: left; font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
+.tg-material-list .tg-stats-compact .tg-stat .tg-icon-tile { width: var(--space-2xl); height: var(--space-2xl); }
+.tg-material-list .tg-stats-compact .tg-stat:nth-child(1) .tg-icon-tile { color: var(--color-success-dark); background: var(--color-success-tint); border: var(--border-width-xs) solid var(--color-success); }
+.tg-material-list .tg-stats-compact .tg-stat:nth-child(2) .tg-icon-tile { color: var(--color-warning-dark); background: var(--color-secondary); }
+.tg-material-list .tg-stats-compact .tg-stat:nth-child(3) .tg-icon-tile { color: var(--color-primary); background: var(--color-primary-tint); border: var(--border-width-xs) solid var(--color-primary); }
+.tg-material-list .tg-stats-compact .tg-stat-value { grid-column: 2; grid-row: 2; display: flex; align-items: baseline; gap: var(--space-xs); font-size: var(--text-h4-size); line-height: var(--text-h4-line); }
+.tg-material-list .tg-stats-compact .tg-stat-value small { font-size: var(--text-p12-size); line-height: var(--text-p12-line); white-space: nowrap; }
+.tg-material-list .tg-stats-compact .tg-stat > .tg-small { grid-column: 1 / -1; margin: 0; text-align: right; }
+.tg-material-list .tg-stats-compact .tg-stat:first-child > .tg-small { display: none; }
+.tg-material-filter-card { padding: var(--space-md); }
+.tg-material-filter-card .tg-toolbar { flex-wrap: nowrap; }
+.tg-material-filter-card .tg-search { min-width: 0; min-height: var(--space-2xl); background: var(--color-background); }
+.tg-material-filter-card select { min-height: var(--space-2xl); padding: 0 var(--space-md); color: var(--color-text-primary); background: var(--color-surface); border: var(--border-width-xs) solid var(--color-border); border-radius: var(--radius-s); font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
+.tg-material-filter-card .tg-button { white-space: nowrap; }
+.tg-material-table-card > .tg-card-heading h2 { font-size: var(--text-h5-size); line-height: var(--text-h5-line); font-weight: var(--font-weight-bold); }
+.tg-material-semesters { display: flex; gap: var(--space-xs); padding: var(--space-xs); background: var(--color-background); border-radius: var(--radius-m); color: var(--color-text-secondary); font-size: var(--text-l16-size); line-height: var(--text-l16-line); }
+.tg-material-semesters span { padding: var(--space-xs) var(--space-sm); border-radius: var(--radius-s); }
+.tg-material-semesters [aria-current] { color: var(--color-primary); background: var(--color-surface); box-shadow: var(--shadow-1); font-weight: var(--font-weight-bold); }
+.tg-material-table-card .tg-table-wrap table { min-width: 900px; }
+.tg-material-table-card th { white-space: nowrap; font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
+.tg-material-table-card td { font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-material-table-card tr.is-warning td { background: var(--color-warning-tint); }
+.tg-material-table-card td strong { color: var(--color-text-primary); font-weight: var(--font-weight-bold); }
+.tg-material-table-card td small { display: block; color: var(--color-text-secondary); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-material-table-card td .tg-badge { display: inline-flex; margin-top: var(--space-xs); }
+.tg-material-groups, .tg-material-row-actions { display: flex; align-items: center; gap: var(--space-xs); }
+.tg-material-groups span { padding: var(--space-xs) var(--space-sm); color: var(--color-primary-dark); background: var(--color-primary-tint); border-radius: var(--radius-xs); font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
+.tg-material-no-data { color: var(--color-text-secondary); }
+.tg-material-table-card .tg-progress .tg-between span:first-child { display: none; }
+.tg-material-table-card .tg-progress .tg-between { justify-content: flex-start; }
+.tg-material-row-actions .tg-button { padding: var(--space-xs) var(--space-sm); font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
+.tg-material-check { display: grid; place-items: center; width: var(--space-xl); height: var(--space-xl); color: var(--color-text-secondary); }
+.tg-material-check svg { width: var(--space-lg); height: var(--space-lg); }
+.tg-material-table-card .tg-table-foot { padding-top: var(--space-md); }
+.tg-material-table-card .tg-pages span { display: grid; place-items: center; min-width: var(--space-2xl); height: var(--space-2xl); color: var(--color-text-secondary); background: var(--color-background); border: var(--border-width-xs) solid var(--color-border); border-radius: var(--radius-s); }
+.tg-material-table-card .tg-pages [aria-current] { color: var(--color-surface); background: var(--color-primary); border-color: var(--color-primary); font-weight: var(--font-weight-bold); }
+
+/* Halaman daftar tugas: ringkasan koreksi dan kartu asesmen. */
+.tg-assessment-list { display: flex; flex-direction: column; gap: var(--space-lg); min-width: 0; }
+.tg-assessment-list > .tg-heading .tg-actions { gap: var(--space-sm); }
+.tg-assessment-heading-actions .tg-button { display: inline-flex; align-items: center; gap: var(--space-sm); }
+.tg-assessment-heading-actions .tg-button svg { width: var(--space-lg); height: var(--space-lg); }
+.tg-assessment-list .tg-stats-horizontal { gap: var(--space-md); }
+.tg-assessment-list .tg-stats-horizontal .tg-stat { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto 1fr auto; align-items: center; gap: var(--space-sm) var(--space-md); min-height: 144px; padding: var(--space-md); }
+.tg-assessment-list .tg-stats-horizontal .tg-stat > .tg-between { grid-column: 1 / -1; justify-content: space-between; }
+.tg-assessment-list .tg-stats-horizontal .tg-stat .tg-label { order: 1; text-align: left; font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
+.tg-assessment-list .tg-stats-horizontal .tg-stat .tg-icon-tile { order: 2; width: var(--space-xl); height: var(--space-xl); border-radius: var(--radius-s); }
+.tg-assessment-list .tg-stats-horizontal .tg-stat:first-child .tg-icon-tile { color: var(--color-warning-dark); background: var(--color-warning-tint); }
+.tg-assessment-list .tg-stats-horizontal .tg-stat:last-child .tg-icon-tile { color: var(--color-success-dark); background: var(--color-success-tint); }
+.tg-assessment-list .tg-stats-horizontal .tg-stat-warning { background: var(--color-surface); border-color: var(--color-warning); }
+.tg-assessment-list .tg-stats-horizontal .tg-stat-value { grid-column: 1 / -1; grid-row: 2; display: flex; align-items: baseline; gap: var(--space-sm); font-size: var(--text-h5-size); line-height: var(--text-h5-line); }
+.tg-assessment-list .tg-stats-horizontal .tg-stat:first-child .tg-stat-value > span:first-child { color: var(--color-warning-dark); font-weight: var(--font-weight-bold); }
+.tg-assessment-list .tg-stats-horizontal .tg-stat .tg-assessment-total { color: var(--color-text-secondary); font-size: var(--text-p18-size); line-height: var(--text-p18-line); font-weight: var(--font-weight-regular); }
+.tg-assessment-list .tg-stats-horizontal .tg-stat > .tg-small { grid-column: 1 / -1; grid-row: 3; margin: 0; font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-assessment-list .tg-stats-horizontal .tg-stat:first-child > .tg-small { color: var(--color-text-secondary); }
+.tg-assessment-trend { display: inline-flex; align-items: center; gap: var(--space-xs); color: var(--color-success-dark); font-size: var(--text-l12-size); line-height: var(--text-l12-line); font-weight: var(--font-weight-semibold); }
+.tg-assessment-trend svg { width: var(--space-md); height: var(--space-md); }
+.tg-assessment-filter-card { padding: var(--space-md); }
+.tg-assessment-filter-card .tg-toolbar { flex-wrap: nowrap; gap: var(--space-sm); }
+.tg-assessment-filter-card .tg-search { flex: 1; min-width: 0; min-height: var(--space-2xl); background: var(--color-background); }
+.tg-assessment-filter-card select { min-height: var(--space-2xl); padding: 0 var(--space-md); color: var(--color-text-primary); background: var(--color-surface); border: var(--border-width-xs) solid var(--color-border); border-radius: var(--radius-s); font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
+.tg-assessment-sort-label { color: var(--color-text-secondary); font-size: var(--text-p12-size); line-height: var(--text-p12-line); white-space: nowrap; }
+.tg-assessment-filter-card .tg-assessment-status-filter { max-width: 144px; }
+.tg-assessment-record { overflow: hidden; padding: 0; border-radius: var(--radius-m); }
+.tg-task-record { border-top: var(--space-xs) solid var(--color-secondary); }
+.tg-assessment-record-content { display: flex; flex-direction: column; gap: var(--space-md); padding: var(--space-lg); }
+.tg-assessment-record-heading { display: flex; align-items: center; justify-content: space-between; gap: var(--space-md); }
+.tg-assessment-record-meta { display: flex; align-items: center; gap: var(--space-sm); flex-wrap: wrap; }
+.tg-assessment-record-meta .tg-badge { display: inline-flex; align-items: center; gap: var(--space-xs); }
+.tg-assessment-record-meta .tg-error { border: var(--border-width-xs) solid var(--color-error); }
+.tg-assessment-record-meta .tg-badge svg { width: var(--space-md); height: var(--space-md); }
+.tg-assessment-deadline { display: flex; flex-direction: column; gap: var(--space-xs); padding: var(--space-sm) var(--space-md); color: var(--color-primary-dark); background: var(--color-primary-tint); border: var(--border-width-xs) solid var(--color-primary); border-radius: var(--radius-m); font-size: var(--text-p12-size); line-height: var(--text-p12-line); text-align: right; white-space: nowrap; }
+.tg-assessment-deadline strong { color: var(--color-primary); font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
+.tg-assessment-record h2 { max-width: 80%; font-size: var(--text-p18-size); line-height: var(--text-p18-line); font-weight: var(--font-weight-bold); }
+.tg-assessment-progress-card { display: flex; flex-direction: column; gap: var(--space-sm); padding: var(--space-md); border: var(--border-width-xs) solid var(--color-border); border-radius: var(--radius-m); }
+.tg-assessment-progress-heading { display: flex; justify-content: space-between; gap: var(--space-md); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-assessment-progress-heading strong { color: var(--color-text-primary); font-weight: var(--font-weight-bold); }
+.tg-assessment-progress-heading span { color: var(--color-text-secondary); text-align: right; }
+.tg-assessment-segmented-progress { display: flex; overflow: hidden; height: var(--space-sm); border-radius: var(--radius-pill); background: var(--color-background); }
+.tg-assessment-segment { flex-basis: 0; }
+.tg-assessment-segment.tg-graded { background: var(--color-primary); }
+.tg-assessment-segment.tg-pending { background: var(--color-secondary); }
+.tg-assessment-segment.tg-missing { background: var(--color-error-light); }
+.tg-assessment-legend { display: flex; align-items: center; gap: var(--space-md); flex-wrap: wrap; color: var(--color-text-secondary); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-assessment-legend > span { display: inline-flex; align-items: center; gap: var(--space-xs); }
+.tg-assessment-legend > span::before { width: var(--space-sm); height: var(--space-sm); border-radius: var(--radius-circle); content: ""; }
+.tg-assessment-legend-graded::before { background: var(--color-primary); }
+.tg-assessment-legend-pending::before { background: var(--color-secondary); }
+.tg-assessment-legend-missing::before { background: var(--color-error-light); }
+.tg-assessment-legend-graded strong { color: var(--color-text-primary); }
+.tg-assessment-legend-pending strong { color: var(--color-warning-dark); }
+.tg-assessment-legend-missing strong { color: var(--color-error-dark); }
+.tg-assessment-groups { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-sm); }
+.tg-assessment-group { display: flex; align-items: center; justify-content: space-between; gap: var(--space-sm); min-width: 0; padding: var(--space-sm); border: var(--border-width-xs) solid var(--color-border); border-radius: var(--radius-m); background: var(--color-background); }
+.tg-assessment-group > div:first-child { display: flex; flex-direction: column; gap: var(--space-xs); min-width: 0; }
+.tg-assessment-group > div:first-child strong { color: var(--color-text-primary); font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
+.tg-assessment-group > div:first-child span { color: var(--color-text-secondary); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-assessment-group.is-selected { color: var(--color-primary-dark); background: var(--color-primary-tint); border-color: var(--color-primary); }
+.tg-assessment-group-status { display: flex; align-items: center; gap: var(--space-xs); }
+.tg-assessment-group .tg-badge { flex: 0 0 auto; }
+.tg-assessment-group .tg-error { border: var(--border-width-xs) solid var(--color-error); }
+.tg-assessment-completed { padding: var(--space-xs) var(--space-sm); color: var(--color-info-dark); background: var(--color-info-tint); border: var(--border-width-xs) solid var(--color-info); border-radius: var(--radius-s); font-size: var(--text-l12-size); line-height: var(--text-l12-line); white-space: nowrap; }
+.tg-assessment-record-actions { display: flex; justify-content: flex-end; gap: var(--space-sm); padding-top: var(--space-md); border-top: var(--border-width-xs) solid var(--color-border); }
+.tg-assessment-record-actions .tg-button { display: inline-flex; align-items: center; gap: var(--space-sm); }
+.tg-assessment-record-actions .tg-button svg { width: var(--space-lg); height: var(--space-lg); }
+.tg-assessment-pagination { display: flex; align-items: center; justify-content: space-between; gap: var(--space-md); padding: var(--space-md); color: var(--color-text-secondary); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-assessment-pagination .tg-pages { gap: var(--space-xs); }
+.tg-assessment-pagination .tg-pages span { display: grid; place-items: center; min-width: var(--space-xl); height: var(--space-xl); color: var(--color-text-primary); background: var(--color-surface); border: var(--border-width-xs) solid var(--color-border); border-radius: var(--radius-s); }
+.tg-assessment-pagination .tg-pages span[aria-current] { color: var(--color-surface); background: var(--color-primary); border-color: var(--color-primary); }
+.tg-assessment-pagination .tg-pages .is-disabled { color: var(--color-text-disabled); background: var(--color-background); }
+
+@media (max-width: 820px) {
+  .tg-assessment-filter-card .tg-toolbar { flex-wrap: wrap; }
+  .tg-assessment-filter-card .tg-search { flex-basis: 100%; }
+}
+
+@media (max-width: 640px) {
+  .tg-assessment-list .tg-stats-horizontal { grid-template-columns: 1fr !important; }
+  .tg-assessment-record-content { padding: var(--space-md); }
+  .tg-assessment-record-heading { align-items: flex-start; flex-direction: column; }
+  .tg-assessment-record h2 { max-width: none; }
+  .tg-assessment-progress-heading { flex-direction: column; }
+  .tg-assessment-progress-heading span { text-align: left; }
+  .tg-assessment-groups { grid-template-columns: 1fr; }
+  .tg-assessment-record-actions { align-items: stretch; flex-direction: column; }
+  .tg-assessment-pagination { align-items: flex-start; flex-direction: column; }
+}
+
+/* Empat tab mata pelajaran memakai token teks yang seragam pada seluruh subhalaman. */
+.tg-subject-tabs a { font-size: var(--text-l16-size); line-height: var(--text-l16-line); font-weight: var(--font-weight-semibold); }
+
+/* Halaman daftar asesmen: kartu ringkasan dan metrik hasil kuis. */
+.tg-assessment-overview { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-md); }
+.tg-assessment-summary { display: flex; flex-direction: column; justify-content: space-between; min-height: 124px; padding: var(--space-md); }
+.tg-assessment-summary-label { display: flex; align-items: center; justify-content: space-between; gap: var(--space-md); color: var(--color-text-secondary); font-size: var(--text-l12-size); line-height: var(--text-l12-line); font-weight: var(--font-weight-bold); }
+.tg-assessment-summary-icon { display: grid; place-items: center; width: var(--space-xl); height: var(--space-xl); color: var(--color-primary); background: var(--color-primary-tint); border-radius: var(--radius-s); }
+.tg-assessment-summary-icon svg { width: var(--space-lg); height: var(--space-lg); }
+.tg-assessment-summary-scheduled { color: var(--color-info-dark); background: var(--color-info-tint); }
+.tg-assessment-summary > strong { color: var(--color-text-primary); font-size: var(--text-h5-size); line-height: var(--text-h5-line); font-weight: var(--font-weight-bold); text-align: right; }
+.tg-quiz-state-running { border-top: var(--space-xs) solid var(--color-info); }
+.tg-quiz-state-closed { border-top: var(--space-xs) solid var(--color-success); }
+.tg-assessment-record-meta .tg-info { border-radius: var(--radius-pill); }
+.tg-assessment-deadline.tg-assessment-finished { color: var(--color-success-dark); background: var(--color-success-tint); border-color: var(--color-success); }
+.tg-assessment-deadline.tg-assessment-finished strong { color: var(--color-success-dark); }
+.tg-quiz-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: stretch; padding: var(--space-sm); border: var(--border-width-xs) solid var(--color-border); border-radius: var(--radius-m); }
+.tg-quiz-metric { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-xs); padding: var(--space-sm); text-align: center; }
+.tg-quiz-metric + .tg-quiz-metric { border-left: var(--border-width-xs) solid var(--color-border); }
+.tg-quiz-metric > strong { font-size: var(--text-l12-size); line-height: var(--text-l12-line); font-weight: var(--font-weight-semibold); }
+.tg-quiz-metric > b { font-size: var(--text-h5-size); line-height: var(--text-h5-line); font-weight: var(--font-weight-bold); }
+.tg-quiz-metric > span { color: var(--color-text-secondary); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-quiz-metric-average { color: var(--color-primary); }
+.tg-quiz-metric-highest { color: var(--color-success-dark); }
+.tg-quiz-metric-lowest { color: var(--color-error); }
+.tg-quiz-metric-follow-up { color: var(--color-warning-dark); background: var(--color-warning-tint); border: var(--border-width-xs) solid var(--color-warning); border-radius: var(--radius-s); }
+.tg-quiz-metric-follow-up > span { color: var(--color-warning-dark); }
+
+@media (max-width: 820px) {
+  .tg-quiz-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tg-quiz-metric:nth-child(3) { border-left: 0; }
+}
+
+@media (max-width: 640px) {
+  .tg-assessment-overview { grid-template-columns: 1fr; }
+  .tg-quiz-metrics { grid-template-columns: 1fr; }
+  .tg-quiz-metric + .tg-quiz-metric { border-left: 0; border-top: var(--border-width-xs) solid var(--color-border); }
+}
+
+/* Header pengumpulan tugas: chip tenggat di atas judul dengan susunan ringkas. */
+.tg-submission-header { display: flex; align-items: center; justify-content: space-between; gap: var(--space-lg); padding: var(--space-lg) var(--space-lg); }
+.tg-submission-header-copy { display: flex; flex: 1; flex-direction: column; align-items: flex-start; gap: var(--space-sm); min-width: 0; }
+.tg-submission-header-copy > .tg-badge { display: inline-flex; align-items: center; gap: var(--space-xs); }
+.tg-submission-header-copy > .tg-badge svg { width: var(--space-md); height: var(--space-md); }
+.tg-submission-header-copy h1 { font-size: var(--text-h5-size); line-height: var(--text-h5-line); font-weight: var(--font-weight-bold); }
+.tg-submission-header > .tg-button { flex: 0 0 auto; }
+
+/* Tabel pengumpulan: baris ringkas, avatar pastel, dan lampiran berbentuk chip. */
+.tg-submission-table { overflow: hidden; padding: 0; border-radius: var(--radius-m); }
+.tg-submission-table .tg-table-wrap { border-radius: 0; }
+.tg-submission-table table { min-width: 680px; table-layout: fixed; font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-submission-table th { padding: var(--space-md); background: var(--color-background); font-size: var(--text-l12-size); line-height: var(--text-l12-line); white-space: nowrap; }
+.tg-submission-table td { padding: var(--space-md); }
+.tg-submission-table th:nth-child(1) { width: 5%; }
+.tg-submission-table th:nth-child(2) { width: 12%; }
+.tg-submission-table th:nth-child(3) { width: 17%; }
+.tg-submission-table th:nth-child(4) { width: 7%; }
+.tg-submission-table th:nth-child(5) { width: 22%; }
+.tg-submission-table th:nth-child(6) { width: 20%; }
+.tg-submission-table th:nth-child(7) { width: 6%; }
+.tg-submission-table th:nth-child(8) { width: 11%; }
+.tg-submission-table th:last-child,
+.tg-submission-table td:last-child { text-align: center; }
+.tg-submission-table th:first-child,
+.tg-submission-table td:first-child { padding-left: var(--space-lg); }
+.tg-submission-table th:last-child,
+.tg-submission-table td:last-child { padding-right: var(--space-lg); }
+.tg-submission-table tbody tr:nth-child(even) { background: var(--color-background); }
+.tg-submission-table .tg-row { gap: var(--space-sm); }
+.tg-submission-table .tg-avatar { width: var(--space-xl); height: var(--space-xl); border-radius: var(--radius-circle); color: var(--color-primary); background: var(--color-primary-tint); font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
+.tg-submission-table tbody tr:nth-child(4n + 2) .tg-avatar { color: var(--color-warning-dark); background: var(--color-warning-tint); }
+.tg-submission-table tbody tr:nth-child(4n + 3) .tg-avatar { color: var(--color-info-dark); background: var(--color-info-tint); }
+.tg-submission-table tbody tr:nth-child(4n + 4) .tg-avatar { color: var(--color-primary); background: var(--color-primary-tint); }
+.tg-submission-table td strong { font-size: var(--text-p12-size); line-height: var(--text-p12-line); font-weight: var(--font-weight-semibold); }
+.tg-submission-table td small { display: block; color: var(--color-text-secondary); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-submission-table .tg-badge { padding: var(--space-xs) var(--space-sm); font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
+.tg-submission-file { display: flex; align-items: center; gap: var(--space-xs); width: 100%; min-width: 0; max-width: 100%; padding: var(--space-xs) var(--space-sm); background: var(--color-background); border-radius: var(--radius-s); }
+.tg-submission-file > svg { flex: 0 0 auto; width: var(--space-md); height: var(--space-md); color: var(--color-error); }
+.tg-submission-file > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tg-submission-file > small { flex: 0 0 auto; }
+.tg-submission-score-value { display: inline-block; padding: var(--space-xs); color: var(--color-success-dark); background: var(--color-success-tint); border-radius: var(--radius-s); }
+.tg-submission-score-empty { color: var(--color-primary); }
+.tg-submission-table .tg-submission-row-missing td:nth-child(5) { color: var(--color-error); }
+.tg-submission-table .tg-submission-row-missing td:nth-child(6),
+.tg-submission-table .tg-submission-row-missing td:nth-child(7) { color: var(--color-text-disabled); }
+.tg-submission-table .tg-submission-row-missing td .tg-button-outline { color: var(--color-error-dark) !important; background: var(--color-error-tint); border-color: var(--color-error); border-radius: var(--radius-pill); }
+.tg-submission-table .tg-submission-row-missing td .tg-button-outline:hover { background: var(--color-error-tint); }
+.tg-submission-table .tg-submission-remind { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-xs); width: max-content; max-width: 100%; flex-wrap: nowrap; white-space: nowrap; }
+.tg-submission-table .tg-submission-remind svg { display: block; flex: 0 0 var(--space-md); width: var(--space-md); height: var(--space-md); color: currentColor; }
+.tg-submission-table td .tg-button { min-width: 0; max-width: 100%; min-height: var(--space-xl); padding: var(--space-xs) var(--space-sm); white-space: normal; }
+.tg-submission-table td .tg-button svg { width: var(--space-md); height: var(--space-md); }
+.tg-submission-footer { display: flex; align-items: center; justify-content: space-between; gap: var(--space-md); padding: var(--space-md); border-top: var(--border-width-xs) solid var(--color-border); color: var(--color-text-secondary); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-submission-footer strong { color: var(--color-text-primary); font-weight: var(--font-weight-bold); }
+.tg-submission-pages { display: flex; align-items: center; gap: var(--space-sm); }
+.tg-submission-pages span { display: grid; place-items: center; min-width: var(--space-xl); height: var(--space-xl); padding: 0 var(--space-xs); color: var(--color-text-primary); background: var(--color-surface); border: var(--border-width-xs) solid var(--color-border); border-radius: var(--radius-s); }
+.tg-submission-pages span[aria-current="page"] { color: var(--color-surface); background: var(--color-primary); border-color: var(--color-primary); }
+.tg-submission-pages span[aria-disabled="true"] { color: var(--color-text-disabled); background: var(--color-background); }
+.tg-submission-pages span[aria-hidden="true"] { border-color: transparent; background: transparent; }
+.tg-submission-back { display: flex; justify-content: flex-end; }
+
+@media (max-width: 640px) {
+  .tg-submission-header { align-items: flex-start; flex-direction: column; gap: var(--space-md); }
+}
+
+@media (max-width: 820px) {
+  .tg-material-list .tg-stats-compact { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+}
+
+@media (max-width: 640px) {
+  .tg-material-alert { grid-template-columns: auto minmax(0, 1fr); }
+  .tg-material-alert .tg-button { grid-column: 1 / -1; justify-content: center; }
+  .tg-material-filter-card .tg-toolbar { flex-wrap: wrap; }
+  .tg-material-list .tg-stats-compact { grid-template-columns: 1fr !important; }
+}
+
+/* Halaman pembuatan tugas: kartu informasi penuh di atas, editor soal dan panel di bawah. */
+.tg-assessment-builder { gap: var(--space-lg); }
+.tg-assessment-builder-title { padding: var(--space-lg); background: var(--color-surface); border: var(--border-width-xs) solid var(--color-border); border-radius: var(--radius-m); box-shadow: var(--shadow-1); }
+.tg-assessment-builder-title h1 { color: var(--color-text-primary); font-size: var(--text-h4-size); line-height: var(--text-h4-line); font-weight: var(--font-weight-bold); }
+.tg-assessment-basic { padding: var(--space-md); border-radius: var(--radius-m); }
+.tg-assessment-basic .tg-card-heading h2 { font-size: var(--text-l12-size); line-height: var(--text-l12-line); font-weight: var(--font-weight-semibold); }
+.tg-assessment-basic .tg-card-heading { margin-bottom: 0; }
+.tg-assessment-required { color: var(--color-error); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-assessment-basic .tg-field > label { font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
+.tg-assessment-basic .tg-stack { gap: var(--space-sm); }
+.tg-assessment-basic .tg-field { gap: var(--space-xs); }
+.tg-assessment-basic input:not([type="checkbox"]):not([type="radio"]),
+.tg-assessment-basic select { min-height: var(--space-xl); padding: var(--space-xs) var(--space-sm); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-assessment-basic-grid { align-items: start; gap: var(--space-md); }
+.tg-assessment-cp { display: flex; align-items: center; gap: var(--space-sm); min-height: var(--space-2xl); padding: var(--space-xs) var(--space-sm); color: var(--color-text-primary); background: var(--color-primary-tint); border: var(--border-width-xs) solid var(--color-border); border-radius: var(--radius-s); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-assessment-cp > span:last-child { margin-left: auto; color: var(--color-text-secondary); }
+.tg-assessment-editor { overflow: hidden; border: var(--border-width-xs) solid var(--color-border); border-radius: var(--radius-s); }
+.tg-assessment-editor textarea { min-height: var(--space-2xl); padding: var(--space-xs); border: 0; border-radius: 0; font-size: var(--text-p12-size); line-height: var(--text-p12-line); white-space: pre-wrap; }
+.tg-assessment-toolbar { display: flex; align-items: center; gap: var(--space-sm); min-height: var(--space-xl); padding: 0 var(--space-sm); color: var(--color-text-secondary); background: var(--color-primary-tint); border-bottom: var(--border-width-xs) solid var(--color-border); }
+.tg-assessment-toolbar span { display: inline-grid; place-items: center; width: var(--space-md); height: var(--space-md); }
+.tg-assessment-toolbar svg { width: var(--space-md); height: var(--space-md); }
+.tg-assessment-toolbar i { width: var(--border-width-xs); height: var(--space-md); background: var(--color-border); }
+.tg-assessment-builder-columns { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); align-items: start; gap: var(--space-md); }
+.tg-assessment-builder-columns > * { min-width: 0; }
+.tg-assessment-question-list { gap: var(--space-lg); }
+.tg-assessment-question-heading { display: flex; align-items: center; justify-content: space-between; gap: var(--space-md); }
+.tg-assessment-question-heading > div { display: flex; align-items: center; gap: var(--space-sm); }
+.tg-assessment-question-heading h2 { color: var(--color-text-primary); font-size: var(--text-h5-size); line-height: var(--text-h5-line); font-weight: var(--font-weight-bold); }
+.tg-assessment-question-heading .tg-badge { padding: var(--space-xs) var(--space-sm); color: var(--color-primary); background: var(--color-primary-tint); font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
+.tg-assessment-add-question { padding: var(--space-sm) var(--space-md); font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
+.tg-assessment-add-question svg { width: var(--space-md); height: var(--space-md); }
+.tg-assessment-question-card { display: flex; flex-direction: column; gap: var(--space-md); padding: var(--space-md); border-radius: var(--radius-m); }
+.tg-assessment-question-card .tg-card-heading { display: none; }
+.tg-assessment-question-top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-sm); }
+.tg-assessment-question-top > .tg-inline { gap: var(--space-sm); }
+.tg-assessment-drag { color: var(--color-text-secondary); font-size: var(--text-l16-size); line-height: var(--text-l16-line); }
+.tg-assessment-question-top .tg-badge { padding: var(--space-xs); color: var(--color-surface); background: var(--color-primary); font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
+.tg-assessment-type { padding: var(--space-xs) var(--space-sm); color: var(--color-primary); background: var(--color-primary-tint); border: 0; border-radius: var(--radius-pill); font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
+.tg-assessment-type-1 { color: var(--color-warning-dark); background: var(--color-warning-tint); }
+.tg-assessment-type-2 { color: var(--color-primary); background: var(--color-primary-tint); }
+.tg-assessment-question-top select { min-height: var(--space-xl); cursor: pointer; }
+.tg-assessment-weight { display: inline-flex; align-items: center; gap: var(--space-xs); padding: var(--space-xs) var(--space-sm); color: var(--color-text-secondary); background: var(--color-primary-tint); border: var(--border-width-xs) solid var(--color-border); border-radius: var(--radius-s); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-assessment-weight input { width: var(--space-2xl); min-height: var(--space-lg); padding: 0 var(--space-xs); text-align: center; }
+.tg-assessment-question-top .tg-button-ghost { min-width: var(--space-lg); min-height: var(--space-lg); padding: var(--space-xs); }
+.tg-assessment-question-top .tg-button-ghost svg { width: var(--space-md); height: var(--space-md); }
+.tg-assessment-question-card .tg-field { gap: var(--space-xs); }
+.tg-assessment-question-card .tg-field > label { position: absolute; width: var(--space-xs); height: var(--space-xs); overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+.tg-assessment-question-text { min-height: 56px; padding: 0; border: 0; font-size: var(--text-p12-size); line-height: var(--text-p16-line); }
+.tg-assessment-options { min-width: 0; margin: 0; padding: 0; border: 0; }
+.tg-assessment-options .tg-form-grid { gap: var(--space-sm); }
+.tg-assessment-option { display: grid; grid-template-columns: auto var(--space-md) minmax(0, 1fr) auto; align-items: center; gap: var(--space-sm); min-width: 0; padding: var(--space-sm); background: var(--color-surface); border: var(--border-width-xs) solid var(--color-border); border-radius: var(--radius-m); }
+.tg-assessment-option.is-correct { background: var(--color-primary-tint); border: var(--border-width-m) solid var(--color-primary); }
+.tg-assessment-option > input[type="radio"] { width: var(--space-sm); min-height: var(--space-sm); }
+.tg-assessment-option > input:not([type="radio"]) { min-width: 0; min-height: var(--space-lg); padding: 0; border: 0; font-size: var(--text-p12-size); }
+.tg-assessment-option-letter { display: grid; place-items: center; width: var(--space-md); height: var(--space-md); color: var(--color-text-secondary); border: var(--border-width-xs) solid var(--color-border); border-radius: var(--radius-circle); font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
+.tg-assessment-option.is-correct .tg-assessment-option-letter { color: var(--color-surface); background: var(--color-primary); border-color: var(--color-primary); }
+.tg-assessment-option small { display: inline-flex; align-items: center; gap: var(--space-xs); color: var(--color-primary); font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
+.tg-assessment-option small svg { width: var(--space-sm); height: var(--space-sm); }
+/* Kartu pilihan ganda: overrides the generic teacher form controls only inside question cards. */
+.tg-assessment-question-card .tg-assessment-question-top select.tg-assessment-type { appearance: none; min-height: var(--space-xl); padding: var(--space-xs) var(--space-sm); border: 0; border-radius: var(--radius-pill); color: var(--color-primary); background: var(--color-primary-tint); font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
+.tg-assessment-question-card .tg-assessment-question-top select.tg-assessment-type-1 { color: var(--color-warning-dark); background: var(--color-warning-tint); }
+.tg-assessment-question-card .tg-assessment-question-top select.tg-assessment-type-2 { color: var(--color-primary); background: var(--color-primary-tint); }
+.tg-assessment-question-card .tg-assessment-question-text { min-height: var(--space-2xl); padding: 0; border: 0; background: transparent; font-size: var(--text-p12-size); line-height: var(--text-p12-line); resize: none; }
+.tg-assessment-question-card .tg-assessment-weight input.tg-grade-input { width: var(--space-2xl); min-height: var(--space-xl); padding: 0 var(--space-xs); border: var(--border-width-xs) solid var(--color-border); border-radius: var(--radius-s); background: var(--color-surface); font-size: var(--text-p12-size); line-height: var(--text-p12-line); text-align: center; }
+.tg-assessment-question-card .tg-assessment-option { position: relative; grid-template-columns: var(--space-md) minmax(0, 1fr) auto; }
+.tg-assessment-question-card .tg-assessment-option > input[type="radio"] { position: absolute; z-index: 1; width: var(--space-lg); height: var(--space-lg); opacity: 0; cursor: pointer; }
+.tg-assessment-question-card .tg-assessment-option:has(input[type="radio"]:focus-visible) { outline: var(--border-width-m) solid var(--color-primary); outline-offset: var(--border-width-xs); }
+.tg-assessment-question-card .tg-assessment-option > textarea { width: 100%; min-width: 0; min-height: var(--text-p12-line); padding: 0; border: 0; background: transparent; font-size: var(--text-p12-size); line-height: var(--text-p12-line); resize: none; overflow: hidden; }
+.tg-assessment-question-card .tg-assessment-option.is-correct { min-height: var(--space-2xl); padding: var(--space-sm) var(--space-md); grid-template-columns: var(--space-lg) minmax(0, 1fr) auto; }
+.tg-assessment-question-card .tg-assessment-option.is-correct .tg-assessment-option-letter { width: var(--space-lg); height: var(--space-lg); font-size: var(--text-l16-size); line-height: var(--text-l16-line); }
+.tg-assessment-question-card .tg-assessment-option.is-correct > textarea { min-height: var(--text-p12-line); color: var(--color-primary); font-size: var(--text-p12-size); line-height: var(--text-p12-line); font-weight: var(--font-weight-semibold); }
+.tg-assessment-question-card .tg-assessment-option.is-correct small { font-size: var(--text-l12-size); line-height: var(--text-l12-line); font-weight: var(--font-weight-semibold); }
+.tg-assessment-question-card .tg-assessment-option.is-correct small svg { width: var(--space-md); height: var(--space-md); }
+.tg-assessment-rubric { display: flex; flex-direction: column; gap: var(--space-sm); padding: var(--space-sm); background: var(--color-background); border: var(--border-width-xs) solid var(--color-border); border-radius: var(--radius-m); }
+.tg-assessment-rubric-heading { display: flex; align-items: center; justify-content: space-between; gap: var(--space-sm); }
+.tg-assessment-rubric-heading strong,
+.tg-assessment-rubric-heading > span { display: inline-flex; align-items: center; gap: var(--space-xs); font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
+.tg-assessment-rubric-heading strong svg { width: var(--space-md); height: var(--space-md); color: var(--color-primary); }
+.tg-assessment-rubric-heading > span { padding: var(--space-xs) var(--space-sm); color: var(--color-success-dark); background: var(--color-success-tint); border: var(--border-width-xs) solid var(--color-success-light); border-radius: var(--radius-pill); }
+.tg-assessment-rubric-heading > span svg { width: var(--space-sm); height: var(--space-sm); }
+.tg-assessment-rubric-samples { display: flex; flex-direction: column; gap: var(--space-sm); }
+.tg-assessment-rubric-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: var(--space-sm); min-height: var(--space-2xl); padding: var(--space-sm); background: var(--color-surface); border: var(--border-width-xs) solid var(--color-border); border-radius: var(--radius-s); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-assessment-rubric-row > span:first-child,
+.tg-assessment-rubric-row > span:last-child { color: var(--color-text-secondary); }
+.tg-assessment-rubric-row > strong { min-width: var(--space-2xl); padding: var(--space-xs); text-align: center; background: var(--color-background); border-radius: var(--radius-xs); }
+.tg-assessment-rubric-row small { color: var(--color-text-secondary); font-weight: var(--font-weight-regular); }
+.tg-assessment-rubric-input { min-height: var(--space-xl); font-size: var(--text-p12-size); }
+.tg-assessment-rubric .tg-field > label { position: static; width: auto; height: auto; clip: auto; overflow: visible; }
+.tg-assessment-add-criterion { display: inline-flex; align-items: center; gap: var(--space-xs); width: max-content; padding: var(--space-xs) var(--space-sm); color: var(--color-primary); background: transparent; border: 0; font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
+.tg-assessment-add-criterion svg { width: var(--space-md); height: var(--space-md); }
+/* Soal uraian dan unggah: skala kartu ringkas sesuai panel rubrik pada desain. */
+.tg-assessment-question-card-secondary { gap: var(--space-sm); padding: var(--space-md); }
+.tg-assessment-question-card-secondary .tg-assessment-question-top .tg-badge { color: var(--color-text-primary); background: var(--color-primary-tint); }
+.tg-assessment-question-card-secondary .tg-assessment-question-text { height: calc(var(--text-p12-line) * 3); min-height: calc(var(--text-p12-line) * 3); overflow: hidden; line-height: var(--text-p12-line); }
+.tg-assessment-question-card-secondary .tg-assessment-rubric { gap: var(--space-sm); padding: var(--space-sm); background: var(--color-primary-tint); border-radius: var(--radius-m); }
+.tg-assessment-question-card-secondary .tg-assessment-rubric-heading strong { font-size: var(--text-l12-size); line-height: var(--text-l12-line); font-weight: var(--font-weight-semibold); }
+.tg-assessment-question-card-secondary .tg-assessment-rubric-heading > span { padding: var(--space-xs) var(--space-sm); font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
+.tg-assessment-question-card-secondary .tg-assessment-rubric-samples { gap: var(--space-sm); }
+.tg-assessment-question-card-secondary .tg-assessment-rubric-row { min-height: var(--space-xl); padding: var(--space-sm); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-assessment-question-card-secondary .tg-assessment-rubric-row > strong { min-width: var(--space-xl); padding: var(--space-xs); }
+.tg-assessment-question-card-secondary .tg-assessment-rubric-input { min-height: var(--space-2xl); padding: var(--space-sm); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-assessment-question-card-secondary .tg-assessment-add-criterion { padding: var(--space-xs) var(--space-sm); font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
+.tg-assessment-format-note { display: inline-flex; align-items: center; gap: var(--space-xs); width: max-content; max-width: 100%; padding: var(--space-xs) var(--space-sm); color: var(--color-text-secondary); background: var(--color-primary-tint); border-radius: var(--radius-s); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-assessment-format-note svg { width: var(--space-sm); height: var(--space-sm); }
+.tg-assessment-builder-aside { gap: var(--space-lg); }
+.tg-assessment-builder-aside > .tg-card { padding: var(--space-md); border-radius: var(--radius-m); }
+.tg-assessment-builder-aside .tg-card-heading { align-items: flex-start; margin-bottom: var(--space-md); }
+.tg-assessment-builder-aside .tg-card-heading h2 { font-size: var(--text-h5-size); line-height: var(--text-h5-line); font-weight: var(--font-weight-bold); }
+.tg-assessment-builder-aside > .tg-card.tg-assessment-targets { padding: var(--space-lg); }
+.tg-assessment-targets .tg-card-heading h2 { max-width: calc(var(--space-2xl) * 5); font-size: var(--text-h5-size); line-height: var(--text-h5-line); }
+.tg-assessment-targets .tg-card-heading { margin-bottom: var(--space-md); }
+.tg-assessment-targets .tg-card-heading > div > p { margin-top: var(--space-sm); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-assessment-targets > .tg-stack { gap: var(--space-sm); }
+.tg-assessment-targets .tg-check-row { min-height: var(--space-2xl); padding: var(--space-sm); background: var(--color-surface); border: var(--border-width-xs) solid var(--color-primary); border-radius: var(--radius-s); }
+.tg-assessment-targets .tg-check-row > input { accent-color: var(--color-primary); }
+.tg-assessment-targets .tg-check-row > span { display: flex; flex-direction: column; gap: var(--space-xs); }
+.tg-assessment-targets .tg-check-row > span strong { display: block; font-size: var(--text-l12-size); line-height: var(--text-l12-line); font-weight: var(--font-weight-semibold); }
+.tg-assessment-targets .tg-check-row > span small { color: var(--color-text-secondary); font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
+.tg-assessment-targets .tg-check-row > .tg-badge { padding: 0; color: var(--color-text-primary); background: transparent; font-size: var(--text-l12-size); line-height: var(--text-l12-line); font-weight: var(--font-weight-semibold); }
+.tg-assessment-target-total { display: flex; align-items: center; justify-content: space-between; gap: var(--space-sm); padding: var(--space-sm); color: var(--color-text-primary); background: var(--color-primary-tint); border: var(--border-width-xs) solid var(--color-border); border-radius: var(--radius-s); font-size: var(--text-l12-size); line-height: var(--text-l12-line); font-weight: var(--font-weight-semibold); }
+.tg-assessment-target-total { min-height: var(--space-2xl); margin-top: var(--space-sm); padding: var(--space-sm) var(--space-md); }
+.tg-assessment-target-total > span { display: inline-flex; align-items: center; gap: var(--space-sm); }
+.tg-assessment-target-total svg { width: var(--space-md); height: var(--space-md); color: var(--color-primary); }
+.tg-assessment-target-total > strong { color: var(--color-primary); font-size: var(--text-h5-size); line-height: var(--text-h5-line); font-weight: var(--font-weight-bold); }
+.tg-assessment-targets .tg-assessment-shuffle { margin-top: var(--space-sm); padding-top: var(--space-md); }
+.tg-assessment-targets .tg-notice { padding: var(--space-sm); }
+.tg-assessment-targets .tg-notice > svg { display: none; }
+.tg-assessment-targets .tg-badge { padding: var(--space-xs) var(--space-sm); white-space: nowrap; }
+/* Jadwal tugas: pasangan tanggal/waktu dengan teks lokal, tenggat berwarna error, dan switch terpisah. */
+.tg-assessment-builder-aside > .tg-card.tg-assessment-schedule { padding: var(--space-lg); }
+.tg-assessment-schedule .tg-card-heading { margin-bottom: var(--space-lg); }
+.tg-assessment-schedule .tg-card-heading h2 { font-size: var(--text-h5-size); line-height: var(--text-h5-line); font-weight: var(--font-weight-semibold); }
+.tg-assessment-schedule .tg-field { gap: var(--space-xs); }
+.tg-assessment-schedule .tg-field > label { font-size: var(--text-l12-size); line-height: var(--text-l12-line); font-weight: var(--font-weight-semibold); text-transform: uppercase; }
+.tg-assessment-schedule > .tg-stack { gap: var(--space-md); }
+.tg-assessment-date-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-sm); }
+.tg-assessment-date { position: relative; display: flex; align-items: center; gap: var(--space-sm); min-width: 0; min-height: var(--space-2xl); padding: var(--space-sm) var(--space-md); color: var(--color-text-secondary); background: var(--color-primary-tint); border: var(--border-width-xs) solid var(--color-border); border-radius: var(--radius-s); }
+.tg-assessment-date svg { flex: 0 0 auto; width: var(--space-md); height: var(--space-md); color: var(--color-text-secondary); }
+.tg-assessment-date > span { overflow: hidden; color: var(--color-text-primary); font-size: var(--text-p12-size); line-height: var(--text-p12-line); text-overflow: ellipsis; white-space: nowrap; }
+.tg-assessment-schedule .tg-assessment-date input { position: absolute; inset: 0; width: 100%; height: 100%; min-width: 0; min-height: 0; padding: 0; border: 0; opacity: 0; cursor: pointer; }
+.tg-assessment-date:focus-within { border-color: var(--color-primary); outline: var(--border-width-m) solid var(--color-primary); outline-offset: var(--border-width-xs); }
+.tg-assessment-date-deadline { color: var(--color-error); background: var(--color-error-tint); border-color: var(--color-error-light); }
+.tg-assessment-date-deadline svg,
+.tg-assessment-date-deadline > span { color: var(--color-error); }
+.tg-assessment-date-deadline:focus-within { border-color: var(--color-error); outline-color: var(--color-error); }
+.tg-assessment-toggle-row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-md); padding-top: var(--space-md); border-top: var(--border-width-xs) solid var(--color-border); }
+.tg-assessment-toggle-row > span:first-child { display: flex; flex-direction: column; gap: var(--space-xs); font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
+.tg-assessment-shuffle strong { font-weight: var(--font-weight-regular); }
+.tg-assessment-toggle-row small { color: var(--color-text-secondary); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-assessment-schedule .tg-assessment-toggle-row > span:first-child { gap: var(--space-xs); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-assessment-schedule .tg-assessment-toggle-row strong { font-weight: var(--font-weight-medium); }
+.tg-assessment-schedule .tg-assessment-toggle-row small { font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-assessment-switch { position: relative; flex: 0 0 calc(var(--space-2xl) - var(--space-xs)); width: calc(var(--space-2xl) - var(--space-xs)); height: var(--space-lg); background: var(--color-primary); border-radius: var(--radius-pill); }
+.tg-assessment-switch::after { position: absolute; top: var(--border-width-xs); right: var(--space-xs); width: calc(var(--space-md) + var(--space-xs)); height: calc(var(--space-md) + var(--space-xs)); content: ""; background: var(--color-surface); border-radius: var(--radius-circle); }
+.tg-assessment-points .tg-card-heading { align-items: center; }
+.tg-assessment-builder-aside > .tg-card.tg-assessment-points { padding: var(--space-lg); }
+.tg-assessment-points .tg-card-heading { margin-bottom: var(--space-md); }
+.tg-assessment-points .tg-card-heading h2 { font-size: var(--text-h5-size); line-height: var(--text-h5-line); font-weight: var(--font-weight-semibold); }
+.tg-assessment-points .tg-card-heading > .tg-badge { color: var(--color-success-dark); background: var(--color-success-tint); font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
+.tg-assessment-points-total { display: flex; align-items: center; justify-content: space-between; gap: var(--space-md); color: var(--color-text-secondary); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-assessment-points-total strong { display: inline-flex; align-items: baseline; gap: var(--space-xs); color: var(--color-success); font-size: var(--text-h4-size); line-height: var(--text-h4-line); font-weight: var(--font-weight-semibold); }
+.tg-assessment-points-total small { color: var(--color-text-secondary); font-size: var(--text-p12-size); line-height: var(--text-p12-line); font-weight: var(--font-weight-regular); }
+.tg-assessment-points-bar { display: flex; overflow: hidden; height: 12px; margin-top: var(--space-sm); background: var(--color-primary-tint); border-radius: var(--radius-pill); }
+.tg-assessment-points-segment-0 { background: var(--color-primary); }
+.tg-assessment-points-segment-1 { background: var(--color-primary-light); }
+.tg-assessment-points-segment-2 { background: var(--color-info-light); }
+.tg-assessment-points-legend { display: flex; justify-content: space-between; gap: var(--space-sm); margin-bottom: var(--space-sm); color: var(--color-text-secondary); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-assessment-points-legend span { display: inline-flex; align-items: center; gap: var(--space-xs); }
+.tg-assessment-points-legend i { width: 12px; height: 12px; flex: 0 0 12px; background: var(--color-primary); border-radius: var(--radius-circle); }
+.tg-assessment-points-legend-1 i { background: var(--color-primary-light); }
+.tg-assessment-points-legend-2 i { background: var(--color-info-light); }
+.tg-assessment-points-rows { display: flex; flex-direction: column; gap: var(--space-sm); margin-top: var(--space-xs); padding-top: var(--space-md); border-top: var(--border-width-xs) solid var(--color-border); }
+.tg-assessment-points-rows > div { display: flex; justify-content: space-between; gap: var(--space-sm); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-assessment-points-rows > div > span { display: inline-flex; align-items: center; gap: var(--space-xs); }
+.tg-assessment-points-rows svg { width: var(--space-sm); height: var(--space-sm); color: var(--color-success); }
+.tg-assessment-points-rows strong { color: var(--color-success-dark); font-weight: var(--font-weight-medium); white-space: nowrap; }
+.tg-assessment-points .tg-notice { align-items: flex-start; margin-top: var(--space-md); padding: var(--space-md); color: var(--color-success-dark); background: var(--color-success-tint); border: var(--border-width-xs) solid var(--color-success-light); border-radius: var(--radius-l); font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
+.tg-assessment-points .tg-notice > svg { color: var(--color-success); }
+.tg-assessment-points .tg-notice small { display: block; margin-top: var(--space-xs); color: var(--color-text-secondary); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-assessment-builder-actions { align-items: center; padding: var(--space-md); background: var(--color-surface); border: 0; border-radius: var(--radius-m); box-shadow: var(--shadow-1); }
+.tg-assessment-builder-actions > a { border: 0; background: transparent; }
+.tg-assessment-builder-actions .tg-actions { gap: var(--space-sm); }
+.tg-assessment-builder-actions .tg-button { display: inline-flex; align-items: center; gap: var(--space-sm); }
+.tg-assessment-builder-actions .tg-button svg { width: var(--space-md); height: var(--space-md); }
+.tg-sr-only { position: absolute; width: var(--space-xs); height: var(--space-xs); overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+
+/* Halaman kuis baru: susunan editor utama dan ringkasan mengikuti panel Figma. */
+.tg-assessment-builder-columns { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: var(--space-md); }
+.tg-assessment-main-column { gap: var(--space-lg); }
+.tg-assessment-builder.is-creating .tg-assessment-basic { padding: var(--space-md); }
+.tg-assessment-builder.is-creating .tg-assessment-basic .tg-card-heading { align-items: flex-start; margin-bottom: var(--space-md); }
+.tg-assessment-builder.is-creating .tg-assessment-basic .tg-card-heading h2 { font-size: var(--text-h5-size); line-height: var(--text-h5-line); font-weight: var(--font-weight-bold); }
+.tg-assessment-builder.is-creating .tg-assessment-basic .tg-card-heading p { margin-top: var(--space-xs); color: var(--color-text-secondary); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-assessment-builder.is-creating .tg-assessment-basic .tg-field > label { font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
+.tg-assessment-builder.is-creating .tg-assessment-basic .tg-stack { gap: var(--space-md); }
+.tg-assessment-builder.is-creating .tg-assessment-basic .tg-field { gap: var(--space-xs); }
+.tg-assessment-quiz-settings { display: flex; flex-direction: column; gap: var(--space-md); padding: var(--space-md); }
+.tg-assessment-quiz-settings-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-md); }
+.tg-assessment-quiz-settings-grid section { min-width: 0; }
+.tg-assessment-quiz-settings-grid h3 { margin-bottom: var(--space-sm); color: var(--color-text-secondary); font-size: var(--text-l12-size); line-height: var(--text-l12-line); font-weight: var(--font-weight-medium); }
+.tg-assessment-duration { display: flex; align-items: center; justify-content: space-between; gap: var(--space-sm); min-height: var(--space-xl); }
+.tg-assessment-duration button { display: grid; place-items: center; width: var(--space-xl); height: var(--space-xl); color: var(--color-text-secondary); background: var(--color-primary-tint); border: 0; border-radius: var(--radius-s); font: inherit; }
+.tg-assessment-duration strong { color: var(--color-text-primary); font-size: var(--text-l16-size); line-height: var(--text-l16-line); }
+.tg-assessment-duration small { color: var(--color-text-secondary); font-size: var(--text-p12-size); line-height: var(--text-p12-line); font-weight: var(--font-weight-regular); }
+.tg-assessment-token-options { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-xs); padding: var(--space-xs); background: var(--color-primary-tint); border-radius: var(--radius-s); }
+.tg-assessment-token-options span { display: grid; place-items: center; min-height: var(--space-xl); padding: var(--space-xs); color: var(--color-text-secondary); border-radius: var(--radius-s); font-size: var(--text-l12-size); line-height: var(--text-l12-line); text-align: center; }
+.tg-assessment-token-options .is-selected { color: var(--color-surface); background: var(--color-primary); font-weight: var(--font-weight-semibold); }
+.tg-assessment-token-note { color: var(--color-text-secondary); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-assessment-feedback-setting { display: flex; align-items: center; justify-content: space-between; gap: var(--space-md); padding: var(--space-md); background: var(--color-primary-tint); border-radius: var(--radius-s); }
+.tg-assessment-feedback-setting > span:first-child,
+.tg-assessment-static-toggle > span:first-child { display: flex; flex-direction: column; gap: var(--space-xs); min-width: 0; }
+.tg-assessment-feedback-setting strong,
+.tg-assessment-static-toggle strong { color: var(--color-text-primary); font-size: var(--text-l12-size); line-height: var(--text-l12-line); font-weight: var(--font-weight-semibold); }
+.tg-assessment-feedback-setting small,
+.tg-assessment-static-toggle small { color: var(--color-text-secondary); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-assessment-randomization > .tg-card-heading { margin-bottom: var(--space-sm); }
+.tg-assessment-static-toggle { display: flex; align-items: center; justify-content: space-between; gap: var(--space-md); padding: var(--space-sm) 0; }
+.tg-assessment-static-toggle + .tg-assessment-static-toggle { border-top: var(--border-width-xs) solid var(--color-border); }
+.tg-assessment-switch-off { background: var(--color-border); }
+.tg-assessment-switch-off::after { right: auto; left: var(--border-width-xs); }
+.tg-assessment-schedule .tg-card-heading { margin-bottom: var(--space-md); }
+.tg-assessment-schedule .tg-card-heading > .tg-badge { color: var(--color-warning-dark); background: var(--color-warning-tint); font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
+.tg-assessment-publish-checklist > .tg-card-heading { margin-bottom: var(--space-sm); }
+.tg-assessment-publish-checklist > div:not(.tg-card-heading) { display: flex; align-items: center; gap: var(--space-sm); padding: var(--space-xs) 0; color: var(--color-text-primary); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-assessment-publish-checklist > div svg { flex: 0 0 auto; width: var(--space-md); height: var(--space-md); color: var(--color-success); }
+.tg-assessment-score-table-wrap { overflow-x: auto; }
+.tg-assessment-score-table { width: 100%; border-collapse: collapse; color: var(--color-text-secondary); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-assessment-score-table thead { background: var(--color-primary-tint); }
+.tg-assessment-score-table th,
+.tg-assessment-score-table td { padding: var(--space-sm); text-align: left; vertical-align: middle; }
+.tg-assessment-score-table thead th { color: var(--color-text-secondary); font-weight: var(--font-weight-semibold); white-space: nowrap; }
+.tg-assessment-score-table tbody th { color: var(--color-text-primary); font-weight: var(--font-weight-semibold); }
+.tg-assessment-score-table td:last-child { color: var(--color-text-primary); font-weight: var(--font-weight-semibold); white-space: nowrap; }
+.tg-assessment-score-table .tg-badge { padding: var(--space-xs) var(--space-sm); font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
+.tg-assessment-score-total { display: flex; align-items: center; justify-content: space-between; gap: var(--space-sm); margin-top: var(--space-md); padding: var(--space-md); border-radius: var(--radius-s); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-assessment-score-total > span { display: inline-flex; align-items: center; gap: var(--space-sm); }
+.tg-assessment-score-total svg { width: var(--space-md); height: var(--space-md); }
+.tg-assessment-score-total strong { font-size: var(--text-h5-size); line-height: var(--text-h5-line); font-weight: var(--font-weight-bold); white-space: nowrap; }
+.tg-assessment-score-total.is-valid { color: var(--color-success-dark); background: var(--color-success-tint); }
+.tg-assessment-score-total.is-valid svg { color: var(--color-success); }
+.tg-assessment-score-total.is-warning { color: var(--color-warning-dark); background: var(--color-warning-tint); }
+.tg-assessment-score-total.is-warning svg { color: var(--color-warning-dark); }
+
+/* Fine alignment reserved for the new-quiz route; assessment edit keeps its former layout. */
+.tg-assessment-builder.is-creating .tg-assessment-basic { padding: var(--space-lg); }
+.tg-assessment-builder.is-creating .tg-assessment-basic .tg-card-heading { margin-bottom: var(--space-md); }
+.tg-assessment-builder.is-creating .tg-assessment-basic .tg-stack { gap: var(--space-md); }
+.tg-assessment-builder.is-creating .tg-assessment-basic input:not([type="checkbox"]):not([type="radio"]),
+.tg-assessment-builder.is-creating .tg-assessment-basic select { min-height: calc(var(--space-xl) + var(--space-sm)); padding: var(--space-sm); }
+.tg-assessment-builder.is-creating .tg-assessment-basic-grid { grid-template-columns: minmax(0, 1fr); gap: var(--space-md); }
+.tg-assessment-builder.is-creating .tg-assessment-editor textarea { min-height: calc(var(--space-2xl) * 2 + var(--text-p16-line)); padding: var(--space-md); }
+.tg-assessment-builder.is-creating .tg-assessment-basic select:disabled { color: var(--color-text-primary); opacity: 1; }
+.tg-assessment-builder.is-creating .tg-assessment-toolbar { min-height: var(--space-2xl); padding-inline: var(--space-md); }
+.tg-assessment-builder.is-creating .tg-assessment-quiz-settings { gap: var(--space-md); padding-top: var(--space-md); }
+.tg-assessment-builder.is-creating .tg-assessment-question-list { gap: var(--space-sm); padding: var(--space-lg); }
+.tg-assessment-builder.is-creating .tg-assessment-question-list-edit { gap: var(--space-lg); padding: 0; background: transparent; border: 0; box-shadow: none; }
+.tg-assessment-builder.is-creating .tg-assessment-question-dnd > .tg-assessment-question-card { gap: var(--space-sm); padding: var(--space-md); }
+.tg-assessment-builder.is-creating .tg-assessment-question-dnd { min-width: 0; }
+.tg-assessment-builder.is-creating .tg-assessment-question-dnd.is-drop-target > .tg-assessment-question-card { border-color: var(--color-primary); }
+.tg-assessment-builder.is-creating .tg-assessment-drag { cursor: grab; touch-action: none; }
+.tg-assessment-builder.is-creating .tg-assessment-drag:active { cursor: grabbing; }
+.tg-assessment-builder.is-creating .tg-assessment-question-top { min-height: var(--space-xl); }
+.tg-assessment-builder.is-creating .tg-assessment-point-control { display: inline-flex; align-items: center; gap: var(--space-xs); color: var(--color-text-primary); }
+.tg-assessment-builder.is-creating .tg-assessment-point-control select { appearance: none; min-width: 0; min-height: 0; padding: 0; color: inherit; background: transparent; border: 0; font-size: var(--text-l12-size); line-height: var(--text-l12-line); font-weight: var(--font-weight-semibold); cursor: pointer; }
+.tg-assessment-builder.is-creating .tg-assessment-point-control svg { width: var(--space-md); height: var(--space-md); flex: 0 0 auto; }
+.tg-assessment-builder.is-creating .tg-assessment-question-preview { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; color: var(--color-text-primary); font-size: var(--text-p12-size); line-height: var(--text-p16-line); }
+.tg-assessment-builder.is-creating .tg-assessment-question-detail { display: flex; flex-direction: column; gap: var(--space-md); }
+.tg-assessment-builder.is-creating .tg-assessment-reorder-hint { display: flex; align-items: center; justify-content: center; gap: var(--space-sm); min-height: var(--space-xl); padding: var(--space-sm); color: var(--color-primary); background: var(--color-primary-tint); border-radius: var(--radius-s); font-size: var(--text-l12-size); line-height: var(--text-l12-line); font-weight: var(--font-weight-semibold); }
+.tg-assessment-builder.is-creating .tg-assessment-reorder-hint svg { width: var(--space-md); height: var(--space-md); }
+.tg-assessment-builder.is-creating .tg-assessment-reorder-hint.is-drop-target { outline: var(--border-width-m) solid var(--color-primary); outline-offset: var(--border-width-xs); }
+.tg-assessment-builder.is-creating .tg-assessment-reorder-status { display: flex; align-items: center; justify-content: space-between; gap: var(--space-md); padding: var(--space-sm) var(--space-md); color: var(--color-surface); background: var(--color-primary-dark); border-radius: var(--radius-s); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-assessment-builder.is-creating .tg-assessment-reorder-status > span { display: inline-flex; align-items: center; gap: var(--space-sm); }
+.tg-assessment-builder.is-creating .tg-assessment-reorder-status .tg-button { min-height: var(--space-xl); padding: var(--space-xs) var(--space-sm); color: var(--color-surface); font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
+.tg-assessment-builder.is-creating .tg-assessment-builder-aside .tg-card-heading h2 { font-size: var(--text-l16-size); line-height: var(--text-l16-line); font-weight: var(--font-weight-bold); }
+.tg-assessment-builder.is-creating .tg-assessment-targets { padding: var(--space-md); }
+.tg-assessment-builder.is-creating .tg-assessment-targets .tg-check-row { min-height: calc(var(--space-2xl) + var(--space-md)); background: var(--color-primary-tint); border-color: transparent; }
+.tg-assessment-builder.is-creating .tg-assessment-target-total { min-height: var(--space-xl); margin-top: 0; padding: var(--space-sm); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-assessment-builder.is-creating .tg-assessment-target-total > strong { font-size: var(--text-l16-size); line-height: var(--text-l16-line); }
+.tg-assessment-builder.is-creating .tg-assessment-schedule .tg-field > label { font-size: var(--text-p12-size); line-height: var(--text-p12-line); font-weight: var(--font-weight-medium); text-transform: none; }
+.tg-assessment-builder.is-creating .tg-assessment-date-pair { gap: var(--space-sm); }
+.tg-assessment-builder.is-creating .tg-assessment-date { min-height: var(--space-xl); padding: var(--space-sm); }
+.tg-assessment-builder.is-creating .tg-assessment-schedule .tg-assessment-date-pair { gap: var(--space-xs); padding: var(--space-sm); background: var(--color-primary-tint); border: var(--border-width-xs) solid var(--color-border); border-radius: var(--radius-s); }
+.tg-assessment-builder.is-creating .tg-assessment-schedule .tg-assessment-date-pair:has(.tg-assessment-date-deadline) { background: var(--color-error-tint); border-color: var(--color-error-light); }
+.tg-assessment-builder.is-creating .tg-assessment-schedule .tg-assessment-date { padding: var(--space-xs); background: transparent; border: 0; }
+.tg-assessment-builder.is-creating .tg-assessment-points .tg-card-heading { align-items: flex-start; }
+.tg-assessment-builder.is-creating .tg-assessment-question-discussion { display: flex; flex-direction: column; gap: var(--space-sm); padding: var(--space-md); background: var(--color-primary-tint); border-radius: var(--radius-s); }
+.tg-assessment-builder.is-creating .tg-assessment-question-discussion strong { font-size: var(--text-l12-size); line-height: var(--text-l12-line); font-weight: var(--font-weight-medium); }
+.tg-assessment-builder.is-creating .tg-assessment-question-discussion p { color: var(--color-text-secondary); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-assessment-builder.is-editing .tg-assessment-main-column { display: contents; }
+.tg-assessment-builder.is-editing .tg-assessment-basic { grid-column: 1 / -1; }
+.tg-assessment-builder.is-editing .tg-assessment-question-list-edit { grid-column: 1; }
+.tg-assessment-builder.is-editing .tg-assessment-builder-aside { grid-column: 2; }
+.tg-assessment-builder.is-editing .tg-assessment-question-list-edit { gap: var(--space-lg); padding: 0; background: transparent; border: 0; box-shadow: none; }
+
+@media (max-width: 1050px) {
+  .tg-assessment-builder-columns { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+  .tg-assessment-basic-grid,
+  .tg-assessment-options .tg-form-grid { grid-template-columns: 1fr; }
+  .tg-assessment-question-heading,
+  .tg-assessment-question-heading > div { align-items: flex-start; flex-direction: column; }
+  .tg-assessment-option { grid-template-columns: auto var(--space-md) minmax(0, 1fr); }
+  .tg-assessment-option small { grid-column: 3; }
+  .tg-assessment-builder-actions { align-items: stretch; flex-direction: column; }
+  .tg-assessment-builder-actions .tg-actions { flex-direction: column; }
+  .tg-assessment-quiz-settings-grid { grid-template-columns: 1fr; }
+  .tg-assessment-builder.is-creating .tg-assessment-basic { padding: var(--space-md); }
+  .tg-assessment-builder.is-creating .tg-assessment-question-list { padding: var(--space-md); }
 }

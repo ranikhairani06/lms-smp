@@ -1,71 +1,57 @@
 "use client";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, type ReactNode } from "react";
-import { Solar } from "./icon";
-import { initials, type AuthUser } from "@/lib/auth-types";
+import AppShell from "@/components/lms/shell/AppShell";
+import type { AppNavigationItem } from "@/components/lms/shell/types";
 import LogoutButton from "@/components/lms/LogoutButton";
+import { initials, type AuthUser } from "@/lib/auth-types";
+import { Solar } from "./icon";
+
 const menus = [
-  {
-    href: "/siswa",
-    label: "Dashboard",
-    icon: "home-2",
-  },
-  {
-    href: "/siswa/mata-pelajaran",
-    label: "Mata Pelajaran",
-    icon: "book-bookmark",
-  },
-  {
-    href: "/siswa/progres",
-    label: "Progress Pembelajaran",
-    icon: "ranking",
-  },
-  {
-    href: "/siswa/riwayat",
-    label: "Riwayat",
-    icon: "clock-circle",
-  },
-  {
-    href: "/siswa/profil",
-    label: "Profil",
-    icon: "user-circle",
-  },
+  { href: "/siswa", label: "Dashboard", icon: "home-2" },
+  { href: "/siswa/mata-pelajaran", label: "Mata Pelajaran", icon: "book-bookmark" },
+  { href: "/siswa/progres", label: "Progress Pembelajaran", icon: "ranking" },
+  { href: "/siswa/riwayat", label: "Riwayat", icon: "clock-circle" },
+  { href: "/siswa/profil", label: "Profil", icon: "user-circle" },
 ];
+
 export default function Shell({ children, user }: { children: ReactNode; user: AuthUser }) {
   const displayName = "Andi Pratama";
   const path = usePathname();
   const [notifications, setNotifications] = useState(false);
   const [logout, setLogout] = useState(false);
-  const active =
-    menus.find((m) =>
-      m.href === "/siswa" ? path === m.href : path.startsWith(m.href),
-    ) || menus[1];
-  const nav = menus.map((m) => (
-    <Link
-      key={m.href}
-      href={m.href}
-      aria-current={m === active ? "page" : undefined}
-      className={`es-nav-item ${m === active ? "is-active" : ""}`}
-    >
-      <Solar name={m.icon} />
-      <span>{m.label}</span>
-    </Link>
-  ));
+  const active = menus.find((item) =>
+    item.href === "/siswa" ? path === item.href : path.startsWith(item.href),
+  ) || menus[1];
+  const navigation: AppNavigationItem[] = menus.map((item) => ({
+    ...item,
+    icon: <Solar name={item.icon} />,
+    active: item === active,
+  }));
+  const mobileNavigation = navigation.map((item) => ({
+    ...item,
+    label: item.href === "/siswa/progres" ? "Progres" : item.label,
+  }));
+
   return (
-    <div className="student-app">
-      <a className="es-skip" href="#student-content">
-        Lewati navigasi
-      </a>
-      <header className="es-topbar">
-        <strong>
-          <Solar name="hamburger-menu" />
-          {active.label}
-        </strong>
-        <div className="es-top-actions">
+    <AppShell
+      brand={{
+        href: "/siswa",
+        icon: <Solar name="square-academic-cap" variant="bold-duotone" />,
+        title: "EduSpace LMS",
+        subtitle: "Portal Siswa",
+      }}
+      navigation={navigation}
+      topbar={{
+        title: active.label,
+        leadingIcon: <span className="es-menu-decoration" aria-hidden="true"><Solar name="hamburger-menu" /></span>,
+        rightSlot: <div className="es-top-actions">
           <div className="es-notification-wrap">
             <button
               className="es-icon-button"
+              type="button"
               aria-label="Notifikasi"
               aria-expanded={notifications}
               onClick={() => setNotifications(!notifications)}
@@ -98,54 +84,46 @@ export default function Shell({ children, user }: { children: ReactNode; user: A
               <small>Kelas VIII B</small>
             </span>
           </Link>
-        </div>
-      </header>
-      <aside className="es-sidebar">
-        <Link href="/siswa" className="es-brand">
-          <span className="es-brand-mark">
-            <Solar name="square-academic-cap" variant="bold-duotone" />
-          </span>
-          <span>
-            <strong>EduSpace LMS</strong>
-            <small>Portal Siswa</small>
-          </span>
-        </Link>
-        <nav aria-label="Navigasi siswa">{nav}</nav>
-        <button className="es-logout" onClick={() => setLogout(true)}>
+        </div>,
+      }}
+      footer={<>LMS SMP Terpadu â€¢ Sistem Administrasi &amp; Pembelajaran Terpadu</>}
+      mobileNavigation={mobileNavigation}
+      mobileNavigationBreakpoint="narrow"
+      mobileNavigationPresentation="bar"
+      mobileNavigationColumns={5}
+      mobileNavigationLabel="Navigasi siswa mobile"
+      navigationLabel="Navigasi siswa"
+      logout={
+        <button className="es-logout" type="button" onClick={() => setLogout(true)}>
           <Solar name="logout-2" />
           Logout
         </button>
-      </aside>
-      <main id="student-content" className="es-main">
-        <nav className="es-breadcrumb" aria-label="Breadcrumb">
-          <Link href="/siswa">LMS</Link>
-          <Solar name="alt-arrow-right" />
-          <Link href={active.href}>{active.label}</Link>
-          {path.split("/").length > 3 && (
-            <>
-              <Solar name="alt-arrow-right" />
-              <span>
-                {path.includes("hasil")
-                  ? "Hasil & Evaluasi"
-                  : path.includes("kuis")
-                    ? "Kuis Formatif"
-                    : path.includes("tugas")
-                      ? "Detail Tugas"
-                      : path.includes("materi/")
-                        ? "Detail Materi"
-                        : "Informatika"}
-              </span>
-            </>
-          )}
-        </nav>
-        <div className="es-page">{children}</div>
-        <footer className="es-footer">
-          LMS SMP Terpadu • Sistem Administrasi &amp; Pembelajaran Terpadu
-        </footer>
-      </main>
-      <nav className="es-bottom-nav" aria-label="Navigasi siswa mobile">
-        {nav}
+      }
+      className="student-app"
+    >
+      <a className="es-skip" href="#student-content">Lewati navigasi</a>
+      <nav className="es-breadcrumb" aria-label="Breadcrumb">
+        <Link href="/siswa">LMS</Link>
+        <Solar name="alt-arrow-right" />
+        <Link href={active.href}>{active.label}</Link>
+        {path.split("/").length > 3 && (
+          <>
+            <Solar name="alt-arrow-right" />
+            <span>
+              {path.includes("hasil")
+                ? "Hasil & Evaluasi"
+                : path.includes("kuis")
+                  ? "Kuis Formatif"
+                  : path.includes("tugas")
+                    ? "Detail Tugas"
+                    : path.includes("materi/")
+                      ? "Detail Materi"
+                      : "Informatika"}
+            </span>
+          </>
+        )}
       </nav>
+      <div className="es-page" id="student-content">{children}</div>
       {logout && (
         <div className="es-modal-overlay">
           <section
@@ -160,6 +138,7 @@ export default function Shell({ children, user }: { children: ReactNode; user: A
               <button
                 autoFocus
                 className="es-button es-button-outline"
+                type="button"
                 onClick={() => setLogout(false)}
               >
                 Batal
@@ -169,6 +148,6 @@ export default function Shell({ children, user }: { children: ReactNode; user: A
           </section>
         </div>
       )}
-    </div>
+    </AppShell>
   );
 }

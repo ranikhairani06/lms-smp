@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
+import AppShell from "@/components/lms/shell/AppShell";
+import type { AppNavigationItem } from "@/components/lms/shell/types";
 import { Solar } from "../siswa/_components/icon";
 import { initials, type AuthUser } from "@/lib/auth-types";
 import LogoutButton from "@/components/lms/LogoutButton";
@@ -38,86 +40,77 @@ export default function ParentShell({ children, user }: { children: ReactNode; u
   const currentSubject = pathname.includes("/hasil-belajar/")
     ? parentSubjectResults.find((subject) => pathname.endsWith("/" + subject.slug))
     : undefined;
+  const navigation: AppNavigationItem[] = menu.map((item) => ({
+    ...item,
+    icon: <Solar name={item.icon} />,
+    active: currentItem.href === item.href,
+  }));
 
   return (
-    <div className="parent-app">
+    <>
       <a className="parent-skip" href="#parent-content">
         Lewati navigasi
       </a>
 
-      <header className="parent-topbar">
-        <strong className="parent-topbar-title">
-          <Solar name="hamburger-menu" />
-          {currentTitle}
-        </strong>
-
-        <div className="parent-topbar-actions">
-          <div className="parent-notification-wrap">
-            <button
-              className="parent-icon-button"
-              type="button"
-              aria-label="Notifikasi"
-              aria-expanded={notificationOpen}
-              onClick={() => setNotificationOpen((open) => !open)}
-            >
-              <Solar name="bell" />
-              <span className="parent-notification-dot" />
-            </button>
-            {notificationOpen && (
-              <div className="parent-notification-popover">
-                <strong>Notifikasi</strong>
-                <p>Tugas Informatika akan dikumpulkan dalam 3 hari.</p>
-                <p>Nilai Kuis Formatif Bab 1 sudah tersedia.</p>
-              </div>
-            )}
-          </div>
-          <div className="parent-user-chip">
-            <span className="parent-avatar">{initials(user.name)}</span>
-            <span>
-              <strong>{user.name}</strong>
-              <small>Orang Tua / Wali Siswa</small>
-            </span>
-          </div>
-        </div>
-      </header>
-
-      <aside className="parent-sidebar">
-        <Link className="parent-brand" href="/orang-tua">
-          <span className="parent-brand-mark">
-            <Solar name="square-academic-cap" />
-          </span>
-          <span>
-            <strong>EduSpace LMS</strong>
-            <small>Portal Orang Tua</small>
-          </span>
-        </Link>
-
-        <nav className="parent-nav" aria-label="Navigasi orang tua">
-          {menu.map((item) => {
-            const active = currentItem.href === item.href;
-            return <Link
-              key={item.href}
-              href={item.href}
-              aria-current={active ? "page" : undefined}
-              className={`parent-nav-item ${active ? "is-active" : ""}`}
-            >
-              <Solar name={item.icon} />
-              <span>{item.label}</span>
-            </Link>;
-          })}
-        </nav>
-
-        <button
-          className="parent-logout"
-          type="button"
-          onClick={() => setLogoutOpen(true)}
-        >
-          <Solar name="logout-2" />
-          Keluar
-        </button>
-      </aside>
-
-      <main id="parent-content" className="parent-main">
+      <AppShell
+        brand={{
+          href: "/orang-tua",
+          icon: <Solar name="square-academic-cap" />,
+          title: "EduSpace LMS",
+          subtitle: "Portal Orang Tua",
+        }}
+        navigation={navigation}
+        topbar={{
+          title: currentTitle,
+          leadingIcon: <Solar name="hamburger-menu" />,
+          rightSlot: <div className="parent-topbar-actions">
+            <div className="parent-notification-wrap">
+              <button
+                className="parent-icon-button"
+                type="button"
+                aria-label="Notifikasi"
+                aria-expanded={notificationOpen}
+                onClick={() => setNotificationOpen((open) => !open)}
+              >
+                <Solar name="bell" />
+                <span className="parent-notification-dot" />
+              </button>
+              {notificationOpen && (
+                <div className="parent-notification-popover">
+                  <strong>Notifikasi</strong>
+                  <p>Tugas Informatika akan dikumpulkan dalam 3 hari.</p>
+                  <p>Nilai Kuis Formatif Bab 1 sudah tersedia.</p>
+                </div>
+              )}
+            </div>
+            <div className="parent-user-chip">
+              <span className="parent-avatar">{initials(user.name)}</span>
+              <span>
+                <strong>{user.name}</strong>
+                <small>Orang Tua / Wali Siswa</small>
+              </span>
+            </div>
+          </div>,
+        }}
+        footer={<>LMS SMP Terpadu â€¢ Sistem Administrasi &amp; Pembelajaran Terpadu</>}
+        mobileNavigation={navigation}
+        mobileNavigationLabel="Navigasi orang tua mobile"
+        mobileNavigationBreakpoint="tablet"
+        mobileNavigationColumns={4}
+        navigationLabel="Navigasi orang tua"
+        mainId="parent-content"
+        logout={
+          <button
+            className="parent-logout"
+            type="button"
+            onClick={() => setLogoutOpen(true)}
+          >
+            <Solar name="logout-2" />
+            Keluar
+          </button>
+        }
+        className="parent-app"
+      >
         <nav className="parent-breadcrumb" aria-label="Breadcrumb">
           <Link href="/orang-tua">LMS</Link>
           <Solar name="alt-arrow-right" />
@@ -125,26 +118,7 @@ export default function ParentShell({ children, user }: { children: ReactNode; u
         </nav>
 
         <div className="parent-page">{children}</div>
-
-        <footer className="parent-footer">
-          LMS SMP Terpadu • Sistem Administrasi &amp; Pembelajaran Terpadu
-        </footer>
-      </main>
-
-      <nav className="parent-mobile-nav" aria-label="Navigasi orang tua mobile">
-        {menu.map((item) => {
-          const active = currentItem.href === item.href;
-          return <Link
-            key={item.href}
-            href={item.href}
-            aria-current={active ? "page" : undefined}
-            className={`parent-mobile-nav-item ${active ? "is-active" : ""}`}
-          >
-            <Solar name={item.icon} />
-            <span>{item.label}</span>
-          </Link>;
-        })}
-      </nav>
+      </AppShell>
 
       {logoutOpen && (
         <div className="parent-modal-backdrop">
@@ -169,6 +143,6 @@ export default function ParentShell({ children, user }: { children: ReactNode; u
           </section>
         </div>
       )}
-    </div>
+    </>
   );
 }

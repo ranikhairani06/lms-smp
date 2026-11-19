@@ -17,6 +17,8 @@ export default function PasswordForm({ user }: { user: AuthUser }) {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
+  const [touched, setTouched] = useState([false, false, false]);
+  const [submitted, setSubmitted] = useState(false);
 
   const rules = [
     password.length >= 8,
@@ -33,21 +35,18 @@ export default function PasswordForm({ user }: { user: AuthUser }) {
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (pending) return;
+    setSubmitted(true);
     setError("");
     setMessage("");
 
-    if (!rules.every(Boolean)) {
-      setError("Kata sandi baru belum memenuhi seluruh ketentuan.");
-      return;
-    }
-
-    if (password === current) {
-      setError("Kata sandi baru harus berbeda dari kata sandi saat ini.");
-      return;
-    }
-
-    if (password !== confirmation) {
-      setError("Konfirmasi kata sandi tidak sama dengan kata sandi baru.");
+    if (
+      !current ||
+      !password ||
+      !confirmation ||
+      !rules.every(Boolean) ||
+      password === current ||
+      password !== confirmation
+    ) {
       return;
     }
 
@@ -87,9 +86,34 @@ export default function PasswordForm({ user }: { user: AuthUser }) {
     autoComplete: string,
   ) {
     const inputId = `password-${index}`;
+    const shouldValidate = touched[index] || submitted;
+    const fieldErrors: string[] = [];
+
+    if (shouldValidate) {
+      if (index === 0 && !current) fieldErrors.push("Kata sandi saat ini wajib diisi");
+      if (index === 1) {
+        if (!password) {
+          fieldErrors.push("Kata sandi baru wajib diisi");
+        } else {
+          if (!rules[0]) fieldErrors.push("Minimal 8 karakter");
+          if (!rules[1]) fieldErrors.push("Gunakan huruf besar dan kecil");
+          if (!rules[2]) fieldErrors.push("Minimal 1 angka (0–9)");
+          if (password === current) {
+            fieldErrors.push("Kata sandi baru harus berbeda dari kata sandi saat ini");
+          }
+        }
+      }
+      if (index === 2) {
+        if (!confirmation) {
+          fieldErrors.push("Konfirmasi kata sandi wajib diisi");
+        } else if (password !== confirmation) {
+          fieldErrors.push("Konfirmasi kata sandi tidak sama dengan kata sandi baru");
+        }
+      }
+    }
 
     return (
-      <div className={styles.field}>
+      <div className={`${styles.field} ${fieldErrors.length ? styles.invalidField : ""}`}>
         <label htmlFor={inputId}>
           {label} <span className={styles.required}>*</span>
         </label>
@@ -109,9 +133,11 @@ export default function PasswordForm({ user }: { user: AuthUser }) {
               setError("");
               setMessage("");
             }}
+            onBlur={() => setTouched((previous) => previous.map((value, position) => position === index ? true : value))}
             placeholder={placeholder}
             autoComplete={autoComplete}
-            required
+            aria-invalid={fieldErrors.length > 0}
+            aria-describedby={fieldErrors.length ? `${inputId}-errors${index === 0 ? " password-help" : ""}` : index === 0 ? "password-help" : undefined}
           />
 
           <button
@@ -129,8 +155,19 @@ export default function PasswordForm({ user }: { user: AuthUser }) {
           </button>
         </div>
 
+        {fieldErrors.length > 0 && (
+          <div className={styles.fieldValidation} id={`${inputId}-errors`} role="alert">
+            {fieldErrors.map((fieldError) => (
+              <p key={fieldError}>
+                <Icon name="info" />
+                {fieldError}
+              </p>
+            ))}
+          </div>
+        )}
+
         {index === 0 && (
-          <p className={styles.fieldHelp}>
+          <p className={styles.fieldHelp} id="password-help">
             Kata sandi default: tanggal lahir (DDMMYYYY).
           </p>
         )}
@@ -178,7 +215,7 @@ export default function PasswordForm({ user }: { user: AuthUser }) {
               <span className={styles.badge}>{user.student?.class_room?.name ? `Kelas ${user.student.class_room.name}` : user.role}</span>
             </section>
 
-            <form className={styles.form} onSubmit={submit}>
+            <form className={styles.form} onSubmit={submit} noValidate>
               {renderField(
                 0,
                 "Kata Sandi Saat Ini",

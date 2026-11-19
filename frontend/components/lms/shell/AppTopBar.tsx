@@ -3,12 +3,14 @@ import styles from "./AppShell.module.css";
 
 export default function AppTopBar({
   title,
+  leadingIcon,
   rightSlot,
   collapsed = false,
   onToggleCollapse,
   menuIcon,
 }: {
   title: string;
+  leadingIcon?: ReactNode;
   rightSlot?: ReactNode;
   collapsed?: boolean;
   onToggleCollapse?: () => void;
@@ -28,7 +30,7 @@ export default function AppTopBar({
             {menuIcon}
           </button>
         )}
-        <strong>{title}</strong>
+        <strong className={leadingIcon ? styles.topbarTitleWithIcon : ""}>{leadingIcon}{title}</strong>
       </div>
       {rightSlot && <div className={styles.topbarRight}>{rightSlot}</div>}
     </header>

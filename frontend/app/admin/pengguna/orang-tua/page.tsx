@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import AdminIcon from "@/app/admin/_components/AdminIcons";
 import AdminDirectoryToolbar from "@/app/admin/_components/AdminDirectoryToolbar";
 import useAdminDirectoryFilter from "@/app/admin/_components/useAdminDirectoryFilter";
@@ -22,6 +22,27 @@ export default function OrangTuaPage() {
   const [modal, setModal] = useState(false);
   const [page, setPage] = useState(1);
   const [form, setForm] = useState({ name: "", relation: "Ayah Kandung", phone: "", email: "", address: "", student: "Andi Pratama • 8B" });
+  const [touched, setTouched] = useState<Partial<Record<"name" | "relation" | "phone" | "email" | "address" | "student", boolean>>>({});
+  const [submitAttempted, setSubmitAttempted] = useState(false);
+  const emailIsValid = !form.email.trim() || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim());
+  const phoneIsValid = /^\d{8,15}$/.test(form.phone);
+  const fieldErrors = {
+    name: form.name.trim() ? "" : "Nama lengkap wajib diisi.",
+    relation: ["Ayah Kandung", "Ibu Kandung", "Wali Murid"].includes(form.relation) ? "" : "Hubungan dengan siswa wajib dipilih.",
+    phone: !form.phone ? "Nomor HP wajib diisi." : phoneIsValid ? "" : "Nomor HP harus 8–15 digit angka.",
+    email: emailIsValid ? "" : "Masukkan alamat email yang valid.",
+    address: form.address.trim() ? "" : "Alamat domisili wajib diisi.",
+    student: form.student.trim() ? "" : "Siswa tertaut wajib dipilih.",
+  };
+  const shouldShowError = (field: keyof typeof fieldErrors) => submitAttempted || Boolean(touched[field]);
+  const errorCount = Object.values(fieldErrors).filter(Boolean).length;
+  const displayedErrorCount = (Object.keys(fieldErrors) as (keyof typeof fieldErrors)[]).filter((field) => shouldShowError(field) && Boolean(fieldErrors[field])).length;
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setSubmitAttempted(true);
+    if (errorCount > 0) return;
+    setModal(false);
+  };
   const { keyword, setKeyword, category, setCategory, filtered } = useAdminDirectoryFilter({
     items: parents,
     getSearchText: getParentSearchText,
@@ -62,19 +83,21 @@ export default function OrangTuaPage() {
       </div>
 
       {/* Bagian tampilan: modal registrasi wali, relasi keluarga, dan multi-child linking. */}
-      {modal && <Modal title="Tambah Orang Tua / Wali" subtitle="Registrasi akun wali murid dan tautkan dengan data peserta didik aktif." onClose={() => setModal(false)} footer={<><Button variant="outline" onClick={() => setModal(false)}>Batal</Button><Button icon="diskette-linear" onClick={() => setModal(false)}>Simpan Akun Orang Tua</Button></>}>
+      {modal && <Modal title="Tambah Orang Tua / Wali" subtitle="Registrasi akun wali murid dan tautkan dengan data peserta didik aktif." onClose={() => setModal(false)} footer={<>{displayedErrorCount > 0 && <div style={{ display: "flex", alignItems: "center", gap: "var(--space-sm)", maxWidth: "220px", color: "var(--color-error)", fontSize: "var(--text-l12-size)", lineHeight: "var(--text-l12-line)" }}><AdminIcon name="danger-triangle-linear" size={16} />Pastikan {displayedErrorCount} kolom bermasalah telah diperbaiki</div>}<div style={{ display: "flex", alignItems: "center", gap: "var(--space-sm)", marginLeft: "auto" }}><Button variant="outline" onClick={() => setModal(false)}>Batal</Button><Button type="submit" form="parent-form" icon="diskette-linear" disabled={displayedErrorCount > 0}>Simpan Akun Orang Tua</Button></div></>}>
+        <form id="parent-form" onSubmit={handleSubmit} noValidate>
         <div className={s.formGrid}>
-          <div className={s.formFull}><Field label="Nama Lengkap Orang Tua / Wali" value={form.name} onChange={(value) => setForm({ ...form, name: value })} required placeholder="Nama lengkap beserta gelar (jika ada)" /></div>
-          <div className={s.formFull}><div className={s.formField}><span>Hubungan dengan Siswa *</span><div className={s.choiceRow}>{["Ayah Kandung", "Ibu Kandung", "Wali Murid"].map((item) => <label className={s.choicePill} key={item}><input type="radio" name="relation" checked={form.relation === item} onChange={() => setForm({ ...form, relation: item })} />{item}</label>)}</div></div></div>
-          <Field label="Nomor WhatsApp / HP Aktif" value={form.phone} onChange={(value) => setForm({ ...form, phone: value })} required placeholder="08xxxxxxxxxx" />
-          <Field label="Alamat Email" value={form.email} onChange={(value) => setForm({ ...form, email: value })} placeholder="nama@email.com" type="email" />
-          <div className={s.formFull}><Field label="Alamat Domisili" value={form.address} onChange={(value) => setForm({ ...form, address: value })} required placeholder="Alamat lengkap sesuai domisili" /></div>
+          <div className={s.formFull}><Field label="Nama Lengkap Orang Tua / Wali" value={form.name} onChange={(value) => setForm({ ...form, name: value })} onBlur={() => setTouched((current) => ({ ...current, name: true }))} error={shouldShowError("name") ? fieldErrors.name : undefined} required placeholder="Nama lengkap beserta gelar (jika ada)" /></div>
+          <div className={s.formFull}><div className={`${s.formField} ${shouldShowError("relation") && fieldErrors.relation ? s.formFieldInvalid : ""}`} role="radiogroup" aria-label="Hubungan dengan Siswa" aria-invalid={shouldShowError("relation") && Boolean(fieldErrors.relation)}><span>Hubungan dengan Siswa *</span><div className={s.choiceRow}>{["Ayah Kandung", "Ibu Kandung", "Wali Murid"].map((item) => <label className={s.choicePill} key={item}><input type="radio" name="relation" checked={form.relation === item} onBlur={() => setTouched((current) => ({ ...current, relation: true }))} onChange={() => setForm({ ...form, relation: item })} />{item}</label>)}</div>{shouldShowError("relation") && fieldErrors.relation && <small className={s.fieldError} role="alert"><AdminIcon name="danger-triangle-linear" size={14} />{fieldErrors.relation}</small>}</div></div>
+          <Field label="Nomor WhatsApp / HP Aktif" value={form.phone} onChange={(value) => setForm({ ...form, phone: value.replace(/\D/g, "").slice(0, 15) })} onBlur={() => setTouched((current) => ({ ...current, phone: true }))} error={shouldShowError("phone") ? fieldErrors.phone : undefined} required placeholder="08xxxxxxxxxx" inputMode="numeric" maxLength={15} />
+          <Field label="Alamat Email" value={form.email} onChange={(value) => setForm({ ...form, email: value })} onBlur={() => setTouched((current) => ({ ...current, email: true }))} error={shouldShowError("email") ? fieldErrors.email : undefined} placeholder="nama@email.com" type="email" />
+          <div className={s.formFull}><Field label="Alamat Domisili" value={form.address} onChange={(value) => setForm({ ...form, address: value })} onBlur={() => setTouched((current) => ({ ...current, address: true }))} error={shouldShowError("address") ? fieldErrors.address : undefined} required placeholder="Alamat lengkap sesuai domisili" /></div>
         </div>
         <div className={s.formSectionTitle}><span>Siswa Tertaut (Student Linking) *</span><StatusBadge tone="primary">1 Siswa Terpilih</StatusBadge></div>
-        <label className={s.searchField}><AdminIcon name="magnifer-linear" size={16} /><input value={form.student} onChange={(e) => setForm({ ...form, student: e.target.value })} placeholder="Ketik NISN atau nama siswa untuk menautkan..." /></label>
-        <div className={s.linkedStudent} style={{ marginTop: "var(--space-sm)" }}><span className={s.initialAvatar}>AP</span><div style={{ flex: 1 }}><strong>Andi Pratama <StatusBadge tone="success">Siswa Terhubung Utama</StatusBadge></strong><small>NISN: 0098471204 • Kelas 8B</small><small>Wali Kelas: Ibu Rina Marlina, M.Pd. • Aktif Semester Genap</small></div><button className={s.iconButton} aria-label="Hapus tautan"><AdminIcon name="close-linear" size={14} /></button></div>
+        <div className={shouldShowError("student") && fieldErrors.student ? s.formFieldInvalid : ""}><label className={s.searchField}><AdminIcon name="magnifer-linear" size={16} /><input aria-label="Siswa tertaut" aria-invalid={shouldShowError("student") && Boolean(fieldErrors.student)} aria-describedby={shouldShowError("student") && fieldErrors.student ? "parent-student-error" : undefined} value={form.student} onBlur={() => setTouched((current) => ({ ...current, student: true }))} onChange={(e) => setForm({ ...form, student: e.target.value })} placeholder="Ketik NISN atau nama siswa untuk menautkan..." /></label>{shouldShowError("student") && fieldErrors.student && <small id="parent-student-error" className={s.fieldError} role="alert"><AdminIcon name="danger-triangle-linear" size={14} />{fieldErrors.student}</small>}</div>
+        <div className={s.linkedStudent} style={{ marginTop: "var(--space-sm)" }}><span className={s.initialAvatar}>AP</span><div style={{ flex: 1 }}><strong>Andi Pratama <StatusBadge tone="success">Siswa Terhubung Utama</StatusBadge></strong><small>NISN: 0098471204 • Kelas 8B</small><small>Wali Kelas: Ibu Rina Marlina, M.Pd. • Aktif Semester Genap</small></div><button type="button" className={s.iconButton} aria-label="Hapus tautan"><AdminIcon name="close-linear" size={14} /></button></div>
         <button type="button" className={s.textLink} style={{ marginTop: "var(--space-md)", width: "100%", padding: "var(--space-sm)", border: "1px dashed var(--color-primary-light)", borderRadius: "var(--radius-s)" }}>+ Tautkan Anak / Siswa Lain (Multi-Child Support)</button>
         <div className={s.successLine} style={{ marginTop: "var(--space-md)" }}><AdminIcon name="check-circle-linear" size={15} /> Data terhubung dengan 1 peserta didik aktif</div>
+        </form>
       </Modal>}
     </>
   );
