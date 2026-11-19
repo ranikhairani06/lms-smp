@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import AdminIcon from "@/app/admin/_components/AdminIcons";
 import AdminDirectoryToolbar from "@/app/admin/_components/AdminDirectoryToolbar";
 import useAdminDirectoryFilter from "@/app/admin/_components/useAdminDirectoryFilter";
@@ -32,6 +32,8 @@ const subjectTones: Record<string, "primary" | "info" | "success" | "warning" | 
 export default function GuruPage() {
   const [modal, setModal] = useState(false);
   const [form, setForm] = useState({ name: "", nip: "", subject: "", task: "", homeroom: "", classes: [] as string[], email: "", phone: "" });
+  const [touched, setTouched] = useState<Partial<Record<"name" | "nip" | "subject" | "task" | "homeroom" | "classes" | "email" | "phone", boolean>>>({});
+  const [submitAttempted, setSubmitAttempted] = useState(false);
   const [page, setPage] = useState(1);
   const { keyword, setKeyword, category, setCategory, filtered } = useAdminDirectoryFilter({
     items: teachers,
@@ -44,12 +46,31 @@ export default function GuruPage() {
   const nipIsValid = form.nip.length === 18;
   const emailIsValid = form.email.trim().length > 0 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim());
   const normalizedPhone = form.phone.replace(/[\s()-]/g, "");
-  const phoneIsValid = normalizedPhone.length >= 8 && normalizedPhone.length <= 15 && /^\+?\d+$/.test(normalizedPhone);
+  const phoneIsValid = /^\d{8,15}$/.test(normalizedPhone);
+  const fieldErrors = {
+    name: form.name.trim() ? "" : "Nama lengkap wajib diisi.",
+    nip: /^\d{18}$/.test(form.nip) ? "" : "NIP harus tepat 18 digit angka.",
+    subject: form.subject ? "" : "Mata pelajaran wajib dipilih.",
+    task: form.task ? "" : "Tugas tambahan wajib dipilih.",
+    homeroom: form.task !== "Wali Kelas" || form.homeroom ? "" : "Kelas wali wajib dipilih.",
+    classes: form.classes.length ? "" : "Pilih minimal satu rombongan belajar.",
+    email: !form.email.trim() ? "Email wajib diisi." : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim()) ? "" : "Masukkan alamat email yang valid.",
+    phone: !form.phone ? "Nomor HP wajib diisi." : phoneIsValid ? "" : "Nomor HP harus 8–15 digit angka.",
+  };
+  const shouldShowError = (field: keyof typeof fieldErrors) => submitAttempted || Boolean(touched[field]);
+  const errorCount = Object.values(fieldErrors).filter(Boolean).length;
+  const displayedErrorCount = (Object.keys(fieldErrors) as (keyof typeof fieldErrors)[]).filter((field) => shouldShowError(field) && Boolean(fieldErrors[field])).length;
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setSubmitAttempted(true);
+    if (errorCount > 0) return;
+    setModal(false);
+  };
 
   return (
     <div className={s.teacherManagementPage}>
       <PageHeading breadcrumbs={["LMS", "Manajemen Pengguna", "Manajemen Guru"]} title="Manajemen Guru" description="Direktori staf pendidik, pembagian tugas mengajar, dan kredensial akun guru SMP Terpadu."
-        actions={<><Button variant="outline" tone="amber" icon="download-linear" onClick={() => alert("Pilih file Excel/CSV untuk proses import.")}>Import Data (Excel/CSV)</Button><Button icon="user-plus-linear" onClick={() => setModal(true)}>Tambah Guru Baru</Button></>} />
+        actions={<><Button variant="outline" tone="amber" icon="download-linear" onClick={() => alert("Pilih file Excel/CSV untuk proses import.")}>Import Data (Excel/CSV)</Button><Button icon="user-plus-linear" onClick={() => { setTouched({}); setSubmitAttempted(false); setModal(true); }}>Tambah Guru Baru</Button></>} />
       {/* Bagian tampilan: statistik guru dan staf. */}
       <AdminStatRow columns={3} items={[
         { label: "Total Guru", value: "58", icon: "users-group-rounded-linear", tone: "primary" },
@@ -89,26 +110,28 @@ export default function GuruPage() {
       </div>
 
       {/* Bagian tampilan: modal alokasi akun guru, mata pelajaran, tugas tambahan, dan rombel. */}
-      {modal && <Modal className={s.teacherModal} layout="studentForm" title="Tambah Guru & Staf" subtitle="Alokasikan akun pendidik baru, tugas pengampu mata pelajaran, dan wali kelas." onClose={() => setModal(false)} footer={<><span className={s.teacherModalFooterSpacer} /><div className={s.teacherModalFooterActions}><Button variant="outline" className={s.teacherCancelButton} onClick={() => setModal(false)}>Batal</Button><Button icon="diskette-linear" onClick={() => setModal(false)}>Simpan Guru &amp; Staf</Button></div></>}>
+      {modal && <Modal className={s.teacherModal} layout="studentForm" title="Tambah Guru & Staf" subtitle="Alokasikan akun pendidik baru, tugas pengampu mata pelajaran, dan wali kelas." onClose={() => setModal(false)} footer={<>{displayedErrorCount > 0 && <div style={{ display: "flex", alignItems: "center", gap: "var(--space-sm)", maxWidth: "220px", color: "var(--color-error)", fontSize: "var(--text-l12-size)", lineHeight: "var(--text-l12-line)" }}><AdminIcon name="danger-triangle-linear" size={16} />Pastikan {displayedErrorCount} kolom bermasalah telah diperbaiki</div>}<span className={s.teacherModalFooterSpacer} /><div className={s.teacherModalFooterActions}><Button variant="outline" className={s.teacherCancelButton} onClick={() => setModal(false)}>Batal</Button><Button type="submit" form="teacher-form" icon="diskette-linear" disabled={displayedErrorCount > 0}>Simpan Guru &amp; Staf</Button></div></>}>
+        <form id="teacher-form" onSubmit={handleSubmit} noValidate>
         <InfoBanner tone="primary"><strong>Kredensial Pendidik:</strong><p>NIP/NUPTK digunakan sebagai ID akun resmi. Password sementara digenerate otomatis dan wajib diperbarui pada login pertama.</p></InfoBanner>
         <div className={`${s.formGrid} ${s.teacherFormGrid}`}>
-          <Field className={s.teacherModalField} label="Nama Lengkap & Gelar" value={form.name} onChange={(value) => setForm({ ...form, name: value })} required valid={nameIsValid} placeholder="Nama lengkap dan gelar" />
-          <Field className={s.teacherModalField} label="NIP / NUPTK" value={form.nip} onChange={(value) => setForm({ ...form, nip: value.replace(/\D/g, "").slice(0, 18) })} required valid={nipIsValid} validLabel="18 Digit Valid" placeholder="Masukkan NIP/NUPTK" />
-          <label className={`${s.formField} ${s.teacherModalField}`}><span>Mata Pelajaran Utama <b>*</b></span><select required value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })}><option value="" disabled>Pilih mata pelajaran</option><option>Bahasa Indonesia</option><option>Matematika</option><option>Informatika</option><option>IPA Terpadu</option><option>Bahasa Inggris</option><option>Pendidikan Agama</option></select></label>
-          <label className={`${s.formField} ${s.teacherModalField}`}><span>Tugas Tambahan <b>*</b></span><select required value={form.task} onChange={(e) => setForm({ ...form, task: e.target.value })}><option value="" disabled>Pilih tugas tambahan</option><option>Wali Kelas</option><option>Kepala Lab Komputer</option><option>Pembina Rohis</option><option>Koord. Ekstrakurikuler</option><option>Tidak Ada</option></select></label>
+          <Field className={s.teacherModalField} label="Nama Lengkap & Gelar" value={form.name} onChange={(value) => setForm({ ...form, name: value })} onBlur={() => setTouched((current) => ({ ...current, name: true }))} error={shouldShowError("name") ? fieldErrors.name : undefined} required valid={nameIsValid} placeholder="Nama lengkap dan gelar" />
+          <Field className={s.teacherModalField} label="NIP / NUPTK" value={form.nip} onChange={(value) => setForm({ ...form, nip: value.replace(/\D/g, "").slice(0, 18) })} onBlur={() => setTouched((current) => ({ ...current, nip: true }))} error={shouldShowError("nip") ? fieldErrors.nip : undefined} required valid={nipIsValid} validLabel="18 Digit Valid" placeholder="Masukkan NIP/NUPTK" inputMode="numeric" maxLength={18} />
+          <label className={`${s.formField} ${s.teacherModalField} ${shouldShowError("subject") && fieldErrors.subject ? s.formFieldInvalid : ""}`}><span>Mata Pelajaran Utama <b>*</b></span><select aria-invalid={shouldShowError("subject") && Boolean(fieldErrors.subject)} onBlur={() => setTouched((current) => ({ ...current, subject: true }))} value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })}><option value="" disabled>Pilih mata pelajaran</option><option>Bahasa Indonesia</option><option>Matematika</option><option>Informatika</option><option>IPA Terpadu</option><option>Bahasa Inggris</option><option>Pendidikan Agama</option></select>{shouldShowError("subject") && fieldErrors.subject && <small className={s.fieldError} role="alert"><AdminIcon name="danger-triangle-linear" size={14} />{fieldErrors.subject}</small>}</label>
+          <label className={`${s.formField} ${s.teacherModalField} ${shouldShowError("task") && fieldErrors.task ? s.formFieldInvalid : ""}`}><span>Tugas Tambahan <b>*</b></span><select aria-invalid={shouldShowError("task") && Boolean(fieldErrors.task)} onBlur={() => setTouched((current) => ({ ...current, task: true }))} value={form.task} onChange={(e) => setForm({ ...form, task: e.target.value, homeroom: "" })}><option value="" disabled>Pilih tugas tambahan</option><option>Wali Kelas</option><option>Kepala Lab Komputer</option><option>Pembina Rohis</option><option>Koord. Ekstrakurikuler</option><option>Tidak Ada</option></select>{shouldShowError("task") && fieldErrors.task && <small className={s.fieldError} role="alert"><AdminIcon name="danger-triangle-linear" size={14} />{fieldErrors.task}</small>}</label>
           {form.task === "Wali Kelas" && <div className={s.teacherHomeroomPanel}>
-            <div className={s.teacherHomeroomHeader}><strong><AdminIcon name="users-group-rounded-linear" size={15} />Wali Kelas untuk:</strong><StatusBadge tone="success" className={s.teacherAllocationBadge}>Alokasi Aktif</StatusBadge></div>
-            <label className={`${s.formField} ${s.teacherModalField}`}><select required aria-label="Wali Kelas untuk" value={form.homeroom} onChange={(e) => setForm({ ...form, homeroom: e.target.value })}><option value="" disabled>Pilih kelas dan ruang</option><option>Kelas 7D (Ruang 104)</option><option>Kelas 8A (Ruang 201)</option><option>Kelas 9A (Ruang 301)</option></select></label>
+            <div className={s.teacherHomeroomHeader}><strong><AdminIcon name="users-group-rounded-linear" size={15} />Wali Kelas untuk: *</strong><StatusBadge tone="success" className={s.teacherAllocationBadge}>Alokasi Aktif</StatusBadge></div>
+            <label className={`${s.formField} ${s.teacherModalField} ${shouldShowError("homeroom") && fieldErrors.homeroom ? s.formFieldInvalid : ""}`}><select required aria-label="Wali Kelas untuk" aria-invalid={shouldShowError("homeroom") && Boolean(fieldErrors.homeroom)} onBlur={() => setTouched((current) => ({ ...current, homeroom: true }))} value={form.homeroom} onChange={(e) => setForm({ ...form, homeroom: e.target.value })}><option value="" disabled>Pilih kelas dan ruang</option><option>Kelas 7D (Ruang 104)</option><option>Kelas 8A (Ruang 201)</option><option>Kelas 9A (Ruang 301)</option></select>{shouldShowError("homeroom") && fieldErrors.homeroom && <small className={s.fieldError} role="alert"><AdminIcon name="danger-triangle-linear" size={14} />{fieldErrors.homeroom}</small>}</label>
           </div>}
-          <div className={`${s.formField} ${s.teacherModalField}`}><span>Rombongan Belajar yang Diampu <b>*</b></span><div className={s.teacherClassChoices}>{["Kelas 7A", "Kelas 7B", "Kelas 7C", "Kelas 7D", "Kelas 8A", "Kelas 8B"].map((item) => {
+          <div className={`${s.formField} ${s.teacherModalField} ${shouldShowError("classes") && fieldErrors.classes ? s.formFieldInvalid : ""}`} role="group" aria-label="Rombongan Belajar yang Diampu" aria-describedby={shouldShowError("classes") && fieldErrors.classes ? "teacher-classes-error" : undefined}><span>Rombongan Belajar yang Diampu <b>*</b></span><div className={s.teacherClassChoices} onBlur={() => setTouched((current) => ({ ...current, classes: true }))}>{["Kelas 7A", "Kelas 7B", "Kelas 7C", "Kelas 7D", "Kelas 8A", "Kelas 8B"].map((item) => {
             const selected = form.classes.includes(item);
             return <label className={`${s.teacherClassChoice} ${selected ? s.teacherClassChoiceSelected : ""}`} key={item}><input type="checkbox" checked={selected} onChange={() => toggleClass(item)} />{selected && <AdminIcon name="check-read-linear" size={13} />}{item}</label>;
-          })}<button type="button" className={s.teacherAddClass}>+ Tambah Rombel Lain</button></div></div>
+          })}<button type="button" className={s.teacherAddClass}>+ Tambah Rombel Lain</button></div>{shouldShowError("classes") && fieldErrors.classes && <small id="teacher-classes-error" className={s.fieldError} role="alert"><AdminIcon name="danger-triangle-linear" size={14} />{fieldErrors.classes}</small>}</div>
           <div className={s.teacherEmailContact}>
-            <Field className={s.teacherModalField} label="Email" value={form.email} onChange={(value) => setForm({ ...form, email: value })} required valid={emailIsValid} placeholder="nama@smp.sch.id" type="email" />
-            <Field className={s.teacherModalField} label="Kontak" value={form.phone} onChange={(value) => setForm({ ...form, phone: value })} required valid={phoneIsValid} placeholder="08xxxxxxxxxx" type="tel" />
+            <Field className={s.teacherModalField} label="Email" value={form.email} onChange={(value) => setForm({ ...form, email: value })} onBlur={() => setTouched((current) => ({ ...current, email: true }))} error={shouldShowError("email") ? fieldErrors.email : undefined} required valid={emailIsValid} placeholder="nama@smp.sch.id" type="email" />
+            <Field className={s.teacherModalField} label="Kontak" value={form.phone} onChange={(value) => setForm({ ...form, phone: value.replace(/\D/g, "").slice(0, 15) })} onBlur={() => setTouched((current) => ({ ...current, phone: true }))} error={shouldShowError("phone") ? fieldErrors.phone : undefined} required valid={phoneIsValid} placeholder="08xxxxxxxxxx" type="tel" inputMode="numeric" maxLength={15} />
           </div>
         </div>
+        </form>
       </Modal>}
     </div>
   );

@@ -8,5 +8,6 @@ export default async function LoginPage({ searchParams }: {
   const allowedRoles: Role[] = ["admin", "student", "teacher", "parent"];
   const initialRole = allowedRoles.find((role) => role === query.role) ?? "student";
   const roleMismatch = query.reason === "role-mismatch";
-  return <LoginForm key={`${initialRole}-${roleMismatch}`} initialRole={initialRole} roleMismatch={roleMismatch} />;
+  const sessionExpired = query.reason === "session-expired";
+  return <LoginForm key={`${initialRole}-${roleMismatch}-${sessionExpired}`} initialRole={initialRole} roleMismatch={roleMismatch} sessionExpired={sessionExpired} />;
 }

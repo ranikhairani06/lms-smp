@@ -10,6 +10,9 @@ export default function AppShell({
   topbar,
   footer,
   mobileNavigation = [],
+  mobileNavigationBreakpoint = "default",
+  mobileNavigationPresentation = "panel",
+  mobileNavigationColumns = 6,
   collapseBehavior = "compact",
   mobileNavigationMode = "default",
   collapsed = false,
@@ -19,24 +22,26 @@ export default function AppShell({
   mobileNavigationLabel = "Navigasi mobile",
   logout,
   children,
+  mainId,
   mainClassName = "",
   footerClassName = "",
   className = "",
 }: AppShellProps) {
   return (
-    <div className={`${styles.appShell} ${collapsed ? styles.collapsed : ""} ${collapseBehavior === "hide" ? styles.hideCollapsedSidebar : ""} ${mobileNavigationMode === "teacher" ? styles.teacherMobileShell : ""} ${className}`}>
+    <div className={`${styles.appShell} ${collapsed ? styles.collapsed : ""} ${collapseBehavior === "hide" ? styles.hideCollapsedSidebar : ""} ${mobileNavigationMode === "teacher" ? styles.teacherMobileShell : ""} ${mobileNavigationBreakpoint === "tablet" ? styles.tabletMobileNavigation : ""} ${mobileNavigationBreakpoint === "narrow" ? styles.narrowMobileNavigation : ""} ${mobileNavigationPresentation === "bar" ? styles.fullWidthMobileNavigation : ""} ${className}`}>
       <AppTopBar
         title={topbar.title}
+        leadingIcon={topbar.leadingIcon}
         rightSlot={topbar.rightSlot}
         collapsed={collapsed}
         onToggleCollapse={onToggleCollapse}
         menuIcon={menuIcon}
       />
       <AppSidebar brand={brand} navigation={navigation} logout={logout} navigationLabel={navigationLabel} />
-      <main className={`${styles.mainArea} ${mainClassName}`}>
+      <main id={mainId} className={`${styles.mainArea} ${mainClassName}`}>
         <div className={styles.mainContent}>{children}</div>
         <footer className={`${styles.footer} ${footerClassName}`}>{footer}</footer>
-        {mobileNavigation.length > 0 && <AppMobileNav items={mobileNavigation} label={mobileNavigationLabel} className={mobileNavigationMode === "teacher" ? styles.teacherMobileNav : ""} />}
+        {mobileNavigation.length > 0 && <AppMobileNav items={mobileNavigation} label={mobileNavigationLabel} columns={mobileNavigationColumns} className={mobileNavigationMode === "teacher" ? styles.teacherMobileNav : ""} />}
       </main>
     </div>
   );

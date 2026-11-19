@@ -155,3 +155,14 @@ dan boleh berbeda dari desain.
 2. Perbedaan yang sengaja tidak diubah dan alasannya.
 3. Hal yang butuh keputusan saya.
 4. File yang berubah dan hasil build.
+
+## Komponen lintas role (components/lms)
+- Komponen di components/lms tidak boleh memakai variabel milik role (--ad-*, --lms-*, --es-*, --parent-*).
+  Pakai token global dari globals.css (--color-*, --space-*, --radius-*, --text-*).
+- Komponen lintas role tidak boleh menetapkan font dasar pada elemen root.
+
+## Dialog, modal, dan popover
+- Dialog, modal, dan popover memakai token global, bukan variabel role. Elemen ini bisa dirender di luar
+  pembungkus role sehingga variabel role tidak tersedia.
+- Setelah memindahkan elemen apa pun ke komponen bersama, periksa apakah ia masih berada di dalam
+  pembungkus role yang gayanya ia butuhkan.

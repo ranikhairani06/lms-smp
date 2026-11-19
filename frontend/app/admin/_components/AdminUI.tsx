@@ -1,6 +1,6 @@
 "use client";
 
-import type { CSSProperties, ReactNode } from "react";
+import { useId, type CSSProperties, type InputHTMLAttributes, type ReactNode } from "react";
 import styles from "./AdminUI.module.css";
 import AdminIcon from "./AdminIcons";
 
@@ -292,6 +292,12 @@ export function Field({
   valid,
   validLabel,
   className = "",
+  error,
+  onBlur,
+  inputMode,
+  maxLength,
+  min,
+  step,
 }: {
   label: string;
   value: string;
@@ -303,10 +309,17 @@ export function Field({
   valid?: boolean;
   validLabel?: string;
   className?: string;
+  error?: string;
+  onBlur?: () => void;
+  inputMode?: InputHTMLAttributes<HTMLInputElement>["inputMode"];
+  maxLength?: number;
+  min?: number;
+  step?: number;
 }) {
+  const errorId = useId();
   const validationEnabled = valid !== undefined || validLabel !== undefined;
   return (
-    <label className={`${styles.formField} ${className}`}>
+    <label className={`${styles.formField} ${error ? styles.formFieldInvalid : ""} ${className}`}>
       {validationEnabled ? (
         <span className={styles.fieldLabelRow}>
           <span>{label}{required && <b> *</b>}</span>
@@ -315,10 +328,11 @@ export function Field({
       ) : <span>{label}{required && <b> *</b>}</span>}
       {validationEnabled ? (
         <span className={`${styles.fieldControlWrap} ${valid ? styles.fieldControlValid : ""}`}>
-          <input type={type} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} />
+          <input id={error ? errorId : undefined} type={type} value={value} onChange={(event) => onChange(event.target.value)} onBlur={onBlur} inputMode={inputMode} maxLength={maxLength} min={min} step={step} aria-invalid={error ? true : undefined} aria-describedby={error ? errorId : undefined} placeholder={placeholder} />
           {valid && <AdminIcon name="check-circle-bold" size={14} />}
         </span>
-      ) : <input type={type} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} />}
+      ) : <input id={error ? errorId : undefined} type={type} value={value} onChange={(event) => onChange(event.target.value)} onBlur={onBlur} inputMode={inputMode} maxLength={maxLength} min={min} step={step} aria-invalid={error ? true : undefined} aria-describedby={error ? errorId : undefined} placeholder={placeholder} />}
+      {error && <small id={errorId} className={styles.fieldError} role="alert"><AdminIcon name="danger-triangle-linear" size={14} />{error}</small>}
       {hint && <small>{hint}</small>}
     </label>
   );

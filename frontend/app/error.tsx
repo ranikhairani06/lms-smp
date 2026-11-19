@@ -1,10 +1,42 @@
 "use client";
 
-export default function ErrorPage({ reset }: { reset: () => void }) {
-  return <main style={{ maxWidth: 640, margin: "80px auto", padding: 24 }}>
-    <h1>Halaman belum dapat dimuat</h1>
-    <p>Koneksi ke layanan sedang bermasalah. Silakan coba lagi dalam beberapa saat.</p>
-    <button type="button" onClick={reset}>Coba lagi</button>
-    <p><a href="/login">Kembali ke login</a></p>
-  </main>;
+import Link from "next/link";
+import { ErrorState } from "@/components/lms/state";
+
+export default function ErrorPage({
+  error,
+  retry: reset,
+}: {
+  error: Error & { digest?: string };
+  retry: () => void;
+}) {
+  return (
+    <main className="p-lg">
+      <ErrorState
+        title="Terjadi kesalahan"
+        description={
+          <>
+            <span>
+              Terjadi kesalahan saat memuat halaman. Coba lagi, atau kembali ke halaman utama.
+            </span>
+            {error.digest ? (
+              <small className="text-p12" style={{ display: "block", marginTop: "var(--space-xs)" }}>
+                Kode: {error.digest}
+              </small>
+            ) : null}
+          </>
+        }
+        action={
+          <>
+            <button type="button" className="btn btn-primary btn-m" onClick={reset}>
+              Coba lagi
+            </button>
+            <Link href="/login" className="link">
+              Kembali ke login
+            </Link>
+          </>
+        }
+      />
+    </main>
+  );
 }

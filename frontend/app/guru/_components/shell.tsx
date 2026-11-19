@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useState, type ReactNode } from "react";
 import AppShell from "@/components/lms/shell/AppShell";
 import type { AppNavigationItem } from "@/components/lms/shell/types";
@@ -22,6 +22,9 @@ const menu = [
 
 export default function TeacherShell({ user, children }: { user: AuthUser; children: ReactNode }) {
   const path = usePathname();
+  const searchParams = useSearchParams();
+  const normalizedPath = path.replace(/\/+$/, "");
+  const taskListRoute = normalizedPath.endsWith("/asesmen") && searchParams.get("tugas") !== null;
   const dashboardRoute = path === "/guru";
   const notificationRoute = path === "/guru/notifikasi";
   const [logout, setLogout] = useState(false);
@@ -35,8 +38,12 @@ export default function TeacherShell({ user, children }: { user: AuthUser; child
   if (subject) {
     const base = subjectUrl(subject.id);
     crumbs.push({ label: subject.name, href: base });
-    if (parts[3]) crumbs.push({ label: parts[3] === "materi" ? "Daftar Materi" : "Daftar Asesmen", href: `${base}/${parts[3]}` });
-    if (parts[4]) crumbs.push({ label: parts[4] === "baru" ? "Tambah Baru" : parts[3] === "materi" ? "Edit Materi" : parts[5] === "edit" ? "Edit Asesmen" : parts[5] === "pengumpulan" ? "Pengumpulan" : parts[5] === "analisis" ? "Analisis Hasil" : "Penilaian", href: path });
+    const newAssessmentRoute = parts[3] === "asesmen" && parts[4] === "baru";
+    const manualGradingRoute = parts[3] === "asesmen" && parts[5] === "nilai" && Boolean(parts[6]);
+    if (parts[3] && !newAssessmentRoute && !manualGradingRoute) crumbs.push({ label: parts[3] === "materi" ? "Daftar Materi" : taskListRoute ? "Daftar Tugas" : "Daftar Asesmen", href: taskListRoute ? `${base}/asesmen?tugas` : `${base}/${parts[3]}` });
+    if (manualGradingRoute) crumbs.push({ label: parts[4] === "kuis-01" ? "Kuis 01" : "Tugas 01", href: `${base}/asesmen/${parts[4]}/pengumpulan` });
+    if (parts[4] && !manualGradingRoute) crumbs.push({ label: newAssessmentRoute ? "Tambah Asesmen" : parts[4] === "baru" ? "Tambah Baru" : parts[3] === "materi" ? "Edit Materi" : parts[5] === "edit" ? "Edit Asesmen" : parts[5] === "pengumpulan" ? "Pengumpulan" : parts[5] === "analisis" ? "Analisis Hasil" : "Penilaian", href: path });
+    if (manualGradingRoute) crumbs.push({ label: "Nilai Asesmen Manual", href: path });
   } else if (parts[1] === "kelas" && parts[2]) {
     crumbs.push({ label: `Kelas ${parts[2].toUpperCase()}`, href: classUrl(parts[2]) });
     if (parts[3]) crumbs.push({ label: parts[3] === "nilai" ? "Buku Nilai" : "Progres Siswa", href: path });
@@ -72,7 +79,6 @@ export default function TeacherShell({ user, children }: { user: AuthUser; child
         </div>,
       }}
       footer={<>LMS SMP Terpadu â€¢ Sistem Administrasi &amp; Pembelajaran Terpadu</>}
-      footerClassName="tg-footer"
       mobileNavigation={mobileNavigation}
       collapsed={collapsed}
       onToggleCollapse={() => setCollapsed(!collapsed)}

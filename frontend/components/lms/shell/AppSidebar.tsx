@@ -10,7 +10,7 @@ function NavigationLink({ item, nested = false }: { item: AppNavigationItem; nes
   return (
     <Link href={item.href} className={className} aria-current={item.active ? "page" : undefined}>
       {item.icon && <span className={styles.navIcon}>{item.icon}</span>}
-      <span>{item.label}</span>
+      <span className={styles.navLabel}>{item.label}</span>
     </Link>
   );
 }

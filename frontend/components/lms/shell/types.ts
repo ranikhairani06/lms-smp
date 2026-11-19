@@ -17,6 +17,7 @@ export type AppShellBrand = {
 
 export type AppShellTopbar = {
   title: string;
+  leadingIcon?: ReactNode;
   rightSlot?: ReactNode;
 };
 
@@ -26,6 +27,9 @@ export type AppShellProps = {
   topbar: AppShellTopbar;
   footer: ReactNode;
   mobileNavigation?: AppNavigationItem[];
+  mobileNavigationBreakpoint?: "default" | "tablet" | "narrow";
+  mobileNavigationPresentation?: "panel" | "bar";
+  mobileNavigationColumns?: 4 | 5 | 6;
   collapseBehavior?: "compact" | "hide";
   mobileNavigationMode?: "default" | "teacher";
   collapsed?: boolean;
@@ -35,6 +39,7 @@ export type AppShellProps = {
   mobileNavigationLabel?: string;
   logout?: ReactNode;
   children: ReactNode;
+  mainId?: string;
   mainClassName?: string;
   footerClassName?: string;
   className?: string;

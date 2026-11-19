@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 import AdminIcon from "@/app/admin/_components/AdminIcons";
 import { Button, Field, Modal, PageHeading, Pagination, SearchField, SelectField, StatCard, TableEmpty, adminStyles as s } from "@/app/admin/_components/AdminUI";
 
@@ -24,11 +24,34 @@ export default function RombelPage() {
   const [selected, setSelected] = useState<Room>(initialClasses[0]);
   const [page, setPage] = useState(1);
   const [form, setForm] = useState({ name: "", level: "Kelas VII", wali: "", nip: "", room: "", capacity: "36" });
+  const [touched, setTouched] = useState<Partial<Record<"name" | "level" | "wali" | "nip" | "room" | "capacity", boolean>>>({});
+  const [submitAttempted, setSubmitAttempted] = useState(false);
+  const fieldErrors = {
+    name: form.name.trim() ? "" : "Nama kelas wajib diisi.",
+    level: form.level ? "" : "Tingkat kelas wajib dipilih.",
+    wali: form.wali.trim() ? "" : "Nama wali kelas wajib diisi.",
+    nip: form.nip.trim() ? "" : "NIP wali kelas wajib diisi.",
+    room: form.room.trim() ? "" : "Ruang kelas wajib diisi.",
+    capacity: !form.capacity ? "Kapasitas wajib diisi." : /^[1-9]\d*$/.test(form.capacity) ? "" : "Kapasitas harus bilangan bulat positif.",
+  };
+  const shouldShowError = (field: keyof typeof fieldErrors) => submitAttempted || Boolean(touched[field]);
+  const errorCount = Object.values(fieldErrors).filter(Boolean).length;
+  const displayedErrorCount = (Object.keys(fieldErrors) as (keyof typeof fieldErrors)[]).filter((field) => shouldShowError(field) && Boolean(fieldErrors[field])).length;
   const filtered = useMemo(() => rows.filter((row) => `${row.name} ${row.wali}`.toLowerCase().includes(keyword.toLowerCase()) && (category === "Semua Kategori" || row.level === category)), [rows, keyword, category]);
   const show = (type: "add" | "edit" | "detail", row?: Room) => {
     if (row) { setSelected(row); setForm({ name: row.name, level: row.level, wali: row.wali, nip: row.nip, room: row.room, capacity: String(row.capacity) }); }
     else setForm({ name: "", level: "Kelas VII", wali: "", nip: "", room: "", capacity: "36" });
+    setTouched({});
+    setSubmitAttempted(false);
     setModal(type);
+  };
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setSubmitAttempted(true);
+    if (errorCount > 0) return;
+    if (modal === "add") setRows((list) => [...list, { name: form.name || "Kelas Baru", level: form.level, wali: form.wali, nip: form.nip, room: form.room, filled: 0, capacity: Number(form.capacity) || 36 }]);
+    else setRows((list) => list.map((row) => row.name === selected.name ? { ...row, name: form.name, level: form.level, wali: form.wali, nip: form.nip, room: form.room, capacity: Number(form.capacity) || 36 } : row));
+    setModal(null);
   };
 
   return (
@@ -61,8 +84,17 @@ export default function RombelPage() {
       </div>
 
       {/* Bagian tampilan: modal tambah atau edit master rombongan belajar. */}
-      {(modal === "add" || modal === "edit") && <Modal title={modal === "add" ? "Tambah Rombongan Belajar" : "Edit Rombongan Belajar"} subtitle="Atur tingkat, wali kelas, ruang, dan kapasitas siswa." onClose={() => setModal(null)} footer={<><Button variant="outline" onClick={() => setModal(null)}>Batal</Button><Button onClick={() => { if (modal === "add") setRows((list) => [...list, { name: form.name || "Kelas Baru", level: form.level, wali: form.wali, nip: form.nip, room: form.room, filled: 0, capacity: Number(form.capacity) || 36 }]); else setRows((list) => list.map((row) => row.name === selected.name ? { ...row, name: form.name, level: form.level, wali: form.wali, nip: form.nip, room: form.room, capacity: Number(form.capacity) || 36 } : row)); setModal(null); }}>Simpan Data</Button></>}>
-        <div className={s.formGrid}><Field label="Nama Kelas" value={form.name} onChange={(value) => setForm({ ...form, name: value })} required placeholder="Contoh: Kelas 7D" /><label className={s.formField}><span>Tingkat *</span><select value={form.level} onChange={(e) => setForm({ ...form, level: e.target.value })}><option>Kelas VII</option><option>Kelas VIII</option><option>Kelas IX</option></select></label><Field label="Wali Kelas" value={form.wali} onChange={(value) => setForm({ ...form, wali: value })} required placeholder="Nama guru" /><Field label="NIP Wali Kelas" value={form.nip} onChange={(value) => setForm({ ...form, nip: value })} required placeholder="NIP" /><Field label="Ruang Kelas" value={form.room} onChange={(value) => setForm({ ...form, room: value })} required placeholder="Ruang kelas" /><Field label="Kapasitas Maksimal" value={form.capacity} onChange={(value) => setForm({ ...form, capacity: value })} required /></div>
+      {(modal === "add" || modal === "edit") && <Modal title={modal === "add" ? "Tambah Rombongan Belajar" : "Edit Rombongan Belajar"} subtitle="Atur tingkat, wali kelas, ruang, dan kapasitas siswa." onClose={() => setModal(null)} footer={<>{displayedErrorCount > 0 && <div style={{ display: "flex", alignItems: "center", gap: "var(--space-sm)", maxWidth: "220px", color: "var(--color-error)", fontSize: "var(--text-l12-size)", lineHeight: "var(--text-l12-line)" }}><AdminIcon name="danger-triangle-linear" size={16} />Pastikan {displayedErrorCount} kolom bermasalah telah diperbaiki</div>}<div style={{ display: "flex", alignItems: "center", gap: "var(--space-sm)", marginLeft: "auto" }}><Button variant="outline" onClick={() => setModal(null)}>Batal</Button><Button type="submit" form="rombel-form" disabled={displayedErrorCount > 0}>Simpan Data</Button></div></>}>
+        <form id="rombel-form" onSubmit={handleSubmit} noValidate>
+        <div className={s.formGrid}>
+          <Field label="Nama Kelas" value={form.name} onChange={(value) => setForm({ ...form, name: value })} onBlur={() => setTouched((current) => ({ ...current, name: true }))} error={shouldShowError("name") ? fieldErrors.name : undefined} required placeholder="Contoh: Kelas 7D" />
+          <label className={`${s.formField} ${shouldShowError("level") && fieldErrors.level ? s.formFieldInvalid : ""}`}><span>Tingkat *</span><select aria-invalid={shouldShowError("level") && Boolean(fieldErrors.level)} onBlur={() => setTouched((current) => ({ ...current, level: true }))} value={form.level} onChange={(e) => setForm({ ...form, level: e.target.value })}><option value="">Pilih tingkat kelas</option><option>Kelas VII</option><option>Kelas VIII</option><option>Kelas IX</option></select>{shouldShowError("level") && fieldErrors.level && <small className={s.fieldError} role="alert"><AdminIcon name="danger-triangle-linear" size={14} />{fieldErrors.level}</small>}</label>
+          <Field label="Wali Kelas" value={form.wali} onChange={(value) => setForm({ ...form, wali: value })} onBlur={() => setTouched((current) => ({ ...current, wali: true }))} error={shouldShowError("wali") ? fieldErrors.wali : undefined} required placeholder="Nama guru" />
+          <Field label="NIP Wali Kelas" value={form.nip} onChange={(value) => setForm({ ...form, nip: value })} onBlur={() => setTouched((current) => ({ ...current, nip: true }))} error={shouldShowError("nip") ? fieldErrors.nip : undefined} required placeholder="NIP" />
+          <Field label="Ruang Kelas" value={form.room} onChange={(value) => setForm({ ...form, room: value })} onBlur={() => setTouched((current) => ({ ...current, room: true }))} error={shouldShowError("room") ? fieldErrors.room : undefined} required placeholder="Ruang kelas" />
+          <Field label="Kapasitas Maksimal" value={form.capacity} onChange={(value) => setForm({ ...form, capacity: value })} onBlur={() => setTouched((current) => ({ ...current, capacity: true }))} error={shouldShowError("capacity") ? fieldErrors.capacity : undefined} required type="number" inputMode="numeric" min={1} step={1} />
+        </div>
+        </form>
       </Modal>}
       {/* Bagian tampilan: rincian rombel dan daftar status kapasitas. */}
       {modal === "detail" && <Modal title={`Detail ${selected.name}`} subtitle={`${selected.level} • ${selected.room}`} onClose={() => setModal(null)} footer={<Button onClick={() => setModal(null)}>Tutup</Button>}>
