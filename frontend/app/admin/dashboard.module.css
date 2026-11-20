@@ -1,0 +1,18 @@
+/* Warna ikon dan tombol khusus kartu peringatan Dashboard Administrator. */
+.attentionWarningIcon { color: var(--color-warning-dark); }
+.attentionDangerIcon { color: var(--color-error); }
+.attentionButton {
+  padding: var(--space-xs) var(--space-sm);
+  color: var(--color-text-primary);
+  background: var(--color-secondary);
+  border: 0;
+  border-radius: var(--radius-s);
+  font-size: var(--text-l12-size);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--text-l12-line);
+  text-decoration: none;
+}
+.attentionButtonDanger {
+  color: var(--color-surface);
+  background: var(--color-error);
+}
