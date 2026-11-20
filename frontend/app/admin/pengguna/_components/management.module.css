@@ -1,0 +1,9 @@
+/* Table frame shares the existing Admin table geometry without replacing its variants. */
+.tableFrame {
+  composes: tableWrap from "../../_components/AdminUI.module.css";
+}
+
+/* Action groups keep one flex rhythm while each page supplies its own actions. */
+.actionButtons {
+  composes: tableActions from "../../_components/AdminUI.module.css";
+}

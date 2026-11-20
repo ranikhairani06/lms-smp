@@ -18,7 +18,7 @@ const menus = [
 ];
 
 export default function Shell({ children, user }: { children: ReactNode; user: AuthUser }) {
-  const displayName = "Andi Pratama";
+  const displayName = user.name;
   const path = usePathname();
   const [notifications, setNotifications] = useState(false);
   const [logout, setLogout] = useState(false);
@@ -66,13 +66,13 @@ export default function Shell({ children, user }: { children: ReactNode; user: A
                   onClick={() => setNotifications(false)}
                   href="/siswa/mata-pelajaran/informatika/tugas/1"
                 >
-                  Tugas analisis topologi jaringan tersedia.
+                  Notifikasi siswa belum tersedia dari API.
                 </Link>
                 <Link
                   onClick={() => setNotifications(false)}
                   href="/siswa/mata-pelajaran/informatika/kuis/1"
                 >
-                  Kuis formatif siap dikerjakan.
+                  Informasi asesmen tersedia pada halaman mata pelajaran.
                 </Link>
               </div>
             )}
@@ -81,7 +81,7 @@ export default function Shell({ children, user }: { children: ReactNode; user: A
             <span className="es-avatar">{initials(displayName)}</span>
             <span>
               <strong>{displayName}</strong>
-              <small>Kelas VIII B</small>
+              <small>{user.student?.class_room?.name ?? "Kelas belum ditetapkan"}</small>
             </span>
           </Link>
         </div>,

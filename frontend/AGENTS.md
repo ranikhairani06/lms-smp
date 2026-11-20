@@ -166,3 +166,9 @@ dan boleh berbeda dari desain.
   pembungkus role sehingga variabel role tidak tersedia.
 - Setelah memindahkan elemen apa pun ke komponen bersama, periksa apakah ia masih berada di dalam
   pembungkus role yang gayanya ia butuhkan.
+
+## Error handling
+- Setiap halaman yang memuat data dari API wajib menangani tiga keadaan: memuat (LoadingState),
+  kosong (EmptyState), dan gagal (ErrorState dengan tombol coba lagi) dari components/lms/state.
+- Setiap pemanggilan API dibungkus penanganan gagal (jaringan, 401, 403, 404, 422, 500) dengan pesan
+  bahasa Indonesia; jangan menampilkan pesan teknis mentah.

@@ -636,50 +636,6 @@
 .teacherModal .teacherCancelButton { color: var(--color-text-secondary); background: var(--color-surface); border-color: var(--color-border); }
 .teacherModal .teacherCancelButton:hover { color: var(--color-text-primary); background: var(--color-background); border-color: var(--color-border); }
 
-/* Tampilan desktop modal tambah siswa agar mengikuti komposisi desain Figma. */
-@media (min-width: 761px) {
-  .modal[aria-label="Tambah Siswa Baru"] {
-    height: calc(100vh - (var(--space-lg) * 2));
-  }
-
-  .modal[aria-label="Tambah Siswa Baru"] .modalHeader h2 {
-    font-size: var(--text-h4-size);
-    line-height: var(--text-h4-line);
-    font-weight: var(--font-weight-bold);
-  }
-
-  .modal[aria-label="Tambah Siswa Baru"] .infoBanner {
-    border-radius: var(--radius-m);
-  }
-
-  .modal[aria-label="Tambah Siswa Baru"] #student-form .formGrid > .formField:nth-child(-n + 3),
-  .modal[aria-label="Tambah Siswa Baru"] #student-form .formGrid > .formField:nth-child(6) {
-    grid-column: 1 / -1;
-  }
-
-  .modal[aria-label="Tambah Siswa Baru"] #student-form .formField input,
-  .modal[aria-label="Tambah Siswa Baru"] #student-form .formField select {
-    min-height: 40px;
-    border-radius: var(--radius-m);
-  }
-
-  .modal[aria-label="Tambah Siswa Baru"] #student-form .linkedStudent {
-    min-height: 74px;
-    padding: var(--space-md);
-    border-radius: var(--radius-m);
-  }
-
-  .modal[aria-label="Tambah Siswa Baru"] #student-form .linkedStudent strong {
-    font-size: var(--text-p16-size);
-    line-height: var(--text-p16-line);
-  }
-
-  .modal[aria-label="Tambah Siswa Baru"] #student-form .initialAvatar {
-    width: 40px;
-    height: 40px;
-  }
-}
-
 /* Master tahun ajaran dan rombel. */
 .yearHero { display: flex; justify-content: space-between; align-items: center; gap: var(--space-lg); margin-bottom: var(--space-lg); padding: var(--space-lg) var(--space-lg); color: var(--color-surface); background: linear-gradient(105deg, var(--color-primary), var(--color-primary-light)); border-radius: var(--radius-l); }
 .yearHero h2 { margin: var(--space-sm) 0; font-size: var(--text-h4-size); line-height: var(--text-h4-line); }
@@ -798,17 +754,26 @@
 
 /* Tabel guru: pertahankan lebar baca yang nyaman dan scroll horizontal di wadahnya. */
 .teacherTableWrap { min-width: 0; overflow-x: auto; padding: var(--space-sm); }
-.teacherTable { width: max-content; min-width: max(100%, 1500px); table-layout: auto; }
+.teacherTable { width: max(100%, 1272px); min-width: max(100%, 1272px); table-layout: fixed; }
 .teacherTable th,
 .teacherTable td { padding: var(--space-md) var(--space-md); }
 .teacherTable th { padding: var(--space-md) var(--space-md); }
 .teacherTable th {
-  background: var(--color-surface);
+  background: var(--color-background);
   border-bottom: var(--border-width-xs) solid var(--color-border);
   font-weight: var(--font-weight-semibold);
   letter-spacing: normal;
 }
-.teacherTable td { overflow-wrap: anywhere; }
+.teacherTable td { padding-top: var(--space-lg); padding-bottom: var(--space-lg); overflow-wrap: anywhere; }
+.teacherTable th:nth-child(1) { width: 22%; }
+.teacherTable th:nth-child(2) { width: 13%; }
+.teacherTable th:nth-child(3) { width: 12%; }
+.teacherTable th:nth-child(4) { width: 10%; }
+.teacherTable th:nth-child(5) { width: 12%; }
+.teacherTable th:nth-child(6) { width: 15%; }
+.teacherTable th:nth-child(7) { width: 7%; }
+.teacherTable th:nth-child(8) { width: 10%; }
+.teacherTable tbody tr:nth-child(even) { background: var(--color-primary-tint); }
 .teacherTable .teacherName {
   display: block;
   overflow: visible;
@@ -862,6 +827,29 @@
 .teacherStatusActive { color: var(--color-primary-dark); background: var(--color-primary-tint); border-color: var(--color-primary); }
 .teacherStatusError { color: var(--color-error-dark); background: var(--color-error-tint); border-color: var(--color-error); }
 .teacherStatusWarning { color: var(--color-warning-dark); background: var(--color-warning-tint); border-color: var(--color-warning); }
+
+/* Aksi direktori guru mengikuti tombol ringkas pada tabel referensi. */
+.teacherActionButton { min-height: calc(var(--text-l12-line) + var(--space-sm)); display: inline-flex; align-items: center; justify-content: center; gap: var(--space-xs); padding: var(--space-xs) var(--space-sm); color: var(--color-text-primary); background: var(--color-primary-tint); border: 0; border-radius: var(--radius-s); font: inherit; font-size: var(--text-l12-size); line-height: var(--text-l12-line); cursor: pointer; white-space: nowrap; }
+.teacherActionButton:hover { color: var(--color-primary-dark); }
+
+/* Toolbar, tabel, relasi siswa, dan pagination khusus direktori orang tua. */
+.parentManagementPage { display: contents; }
+.parentManagementPage .parentTable { min-width: 100%; table-layout: fixed; }
+.parentManagementPage .parentTable th { background: var(--color-primary-tint); }
+.parentManagementPage .parentTable th:nth-child(1) { width: 30%; }
+.parentManagementPage .parentTable th:nth-child(2) { width: 18%; }
+.parentManagementPage .parentTable th:nth-child(3) { width: 12%; }
+.parentManagementPage .parentTable th:nth-child(4) { width: 12%; }
+.parentManagementPage .parentTable th:nth-child(5) { width: 14%; }
+.parentManagementPage .parentTable th:nth-child(6) { width: 14%; }
+.parentManagementPage .parentTable td { padding-top: var(--space-lg); padding-bottom: var(--space-lg); }
+.parentManagementPage .parentTable .directoryStatusBadge { border-color: transparent; }
+.parentManagementPage .parentChildren { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-xs); }
+.parentManagementPage .parentAdditionalChildren { display: inline-flex; align-items: center; gap: var(--space-xs); padding: var(--space-xs) var(--space-sm); color: var(--color-text-secondary); background: var(--color-primary-tint); border-radius: var(--radius-pill); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.parentManagementPage .parentTable .tableActions .iconButton { color: var(--color-text-secondary); background: transparent; border-color: transparent; }
+.parentManagementPage .parentTable .tableActions .iconButton:hover { color: var(--color-primary); background: var(--color-primary-tint); }
+.paginationDirectory { margin: 0; padding: var(--space-md); background: var(--color-primary-tint); border-top: var(--border-width-xs) solid var(--color-border); }
+.pageEllipsis { width: 27px; display: grid; place-items: center; color: var(--color-text-secondary); }
 
 @media (max-width: 420px) {
   .statGrid, .statGridThree, .statGridFour, .reportStats { grid-template-columns: 1fr; }

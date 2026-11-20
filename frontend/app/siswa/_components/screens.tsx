@@ -1,9 +1,8 @@
 "use client";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Solar } from "./icon";
-import { subjects, student, modules, assignments } from "./data";
 import {
   Attachment,
   Badge,
@@ -13,70 +12,51 @@ import {
   Progress,
   Stats,
 } from "./ui";
+import { StudentEmpty, StudentError, StudentLoading } from "./api-state";
+import { ApiError } from "@/lib/api";
+import { useStudentResource } from "@/lib/useStudentResource";
+import {
+  completeStudentMaterial,
+  getCurrentStudentUser,
+  getStudentCourse,
+  getStudentCourseBySlug,
+  getStudentCourses,
+  getStudentDashboard,
+  getStudentProfile,
+  studentCourseSlug,
+  type StudentCourse,
+} from "@/lib/student-api";
 const base = "/siswa/mata-pelajaran";
 
-const subjectCardDetails: Record<
-  string,
-  {
-    teacher: string;
-    schedule: string;
-    modules: string;
-    progress: number;
-    assessment: string;
-  }
-> = {
-  informatika: {
-    teacher: "Bpk. Hendra Gunawan, S.Kom.",
-    schedule: "Senin & Rabu | 08.00 – 09.20 WIB",
-    modules: "4/6",
-    progress: 65,
-    assessment: "1 Tugas Aktif",
-  },
-  matematika: {
-    teacher: "Ibu Siti Nurhaliza, M.Pd.",
-    schedule: "Selasa & Kamis | 07.15 – 08.45 WIB",
-    modules: "8/10",
-    progress: 80,
-    assessment: "Tidak ada tugas aktif",
-  },
-  ipa: {
-    teacher: "Bpk. Bambang Sutrisno, M.Si.",
-    schedule: "Rabu & Jumat | 09.30 – 11.00 WIB",
-    modules: "7/10",
-    progress: 70,
-    assessment: "1 Kuis CBT Terjadwal",
-  },
-  "bahasa-indonesia": {
-    teacher: "Ibu Ratna Dewi, S.Pd.",
-    schedule: "Senin & Kamis | 10.00 – 11.30 WIB",
-    modules: "9/10",
-    progress: 90,
-    assessment: "1 Tugas Portofolio",
-  },
-  "bahasa-inggris": {
-    teacher: "Bpk. Michael Tan, S.Pd.",
-    schedule: "Selasa & Jumat | 08.00 – 09.30 WIB",
-    modules: "6/10",
-    progress: 60,
-    assessment: "1 Tugas Listening",
-  },
-  ppkn: {
-    teacher: "Bpk. Ahmad Wahyudi, S.Pd.",
-    schedule: "Kamis | 13.00 – 14.30 WIB",
-    modules: "6/7",
-    progress: 85,
-    assessment: "Selesai Semua",
-  },
-};
+async function loadDashboardPage() {
+  const [dashboard, user] = await Promise.all([getStudentDashboard(), getCurrentStudentUser()]);
+  const courseDetails = await Promise.all(dashboard.courses.map(async (course) => {
+    try {
+      return await getStudentCourse(course.id);
+    } catch {
+      return null;
+    }
+  }));
+  const loadedCourses = courseDetails.filter((course) => course !== null);
+  return { dashboard, user, loadedCourses };
+}
+
+async function loadStudentCourses() {
+  return getStudentCourses();
+}
+
+async function loadStudentProfilePage() {
+  const [profile, dashboard, user] = await Promise.all([getStudentProfile(), getStudentDashboard(), getCurrentStudentUser()]);
+  return { profile, dashboard, user };
+}
 
 function SubjectCard({
   subject,
 }: {
-  subject: (typeof subjects)[number];
+  subject: StudentCourse;
 }) {
-  const detail = subjectCardDetails[subject.id];
-
-  if (!detail) return null;
+  const slug = studentCourseSlug(subject.name);
+  const progress = 0;
 
   return (
     <Card className="es-mapel-card">
@@ -85,30 +65,30 @@ function SubjectCard({
       <div className="es-mapel-info">
         <p>
           <Solar name="user-rounded" />
-          <span>{detail.teacher}</span>
+          <span>Informasi guru pengampu tidak tersedia dari API.</span>
         </p>
 
         <p>
           <Solar name="clock-circle" />
-          <span>{detail.schedule}</span>
+          <span>Informasi jadwal tidak tersedia dari API.</span>
         </p>
       </div>
 
       <div className="es-mapel-progress">
         <div className="es-mapel-progress-label">
-          <span>Progres Belajar ({detail.modules} Modul)</span>
-          <strong>{detail.progress}%</strong>
+          <span>Progres Belajar</span>
+          <strong>—</strong>
         </div>
 
         <div
           className="es-mapel-progress-track"
           role="progressbar"
           aria-label={`Progres belajar ${subject.name}`}
-          aria-valuenow={detail.progress}
+          aria-valuenow={progress}
           aria-valuemin={0}
           aria-valuemax={100}
         >
-          <div style={{ width: `${detail.progress}%` }} />
+          <div style={{ width: `${progress}%` }} />
         </div>
       </div>
 
@@ -117,12 +97,12 @@ function SubjectCard({
 
         <div>
           <span>STATUS ASESMEN</span>
-          <p>{detail.assessment}</p>
+          <p>Informasi status asesmen tidak tersedia dari API.</p>
         </div>
       </div>
 
       <ButtonLink
-        href={`${base}/${subject.id}`}
+        href={`${base}/${slug}`}
         className="es-mapel-button"
       >
         Buka Mata Pelajaran
@@ -132,32 +112,45 @@ function SubjectCard({
   );
 }
 export function Dashboard() {
+  const resource = useStudentResource(loadDashboardPage);
+  if (resource.status === "loading") return <StudentLoading title="Memuat dashboard siswa..." />;
+  if (resource.status === "error") return <StudentError resource={resource} />;
+  if (resource.status === "empty") return <StudentEmpty title="Dashboard siswa belum memiliki data." />;
+  const { dashboard, user, loadedCourses } = resource.data;
+  const className = dashboard.student.class_room?.name ?? "Belum ditetapkan";
+  const eligibleCourses = dashboard.expected_grade === null ? [] : dashboard.courses.filter((course) => course.target_grade <= dashboard.expected_grade!);
+  const dashboardAssessments = loadedCourses.flatMap((course) => course.sections.flatMap((section) => section.assessments.map((assessment) => ({
+    ...assessment,
+    courseName: course.name,
+    sectionTitle: section.title,
+    courseSlug: studentCourseSlug(course.name),
+  }))));
+  const dashboardMaterials = loadedCourses.flatMap((course) => course.sections.flatMap((section) => section.materials.map((material) => ({ ...material, courseSlug: studentCourseSlug(course.name) }))));
+
   return (
     <div className="es-dashboard">
       <Card className="es-student-heading">
       <div className="es-student-heading-copy">
-        <h1>Halo, Andi Pratama!</h1>
+        <h1>Halo, {user.name}!</h1>
 
         <div className="es-student-info">
           <div>
             <Solar name="user-id" />
             <p>
-              NISN: <strong>0098471204</strong>
+              NISN: <strong>{dashboard.student.nisn}</strong>
             </p>
           </div>
 
           <div>
             <Solar name="square-academic-cap" />
             <p>
-              Kelas: <strong>VIII B</strong>
+              Kelas: <strong>{className}</strong>
             </p>
           </div>
 
           <div>
             <Solar name="user-rounded" />
-            <p>
-              Wali Kelas: <strong>Ibu Rina Marlina, M.Pd.</strong>
-            </p>
+            <p>Wali Kelas: <strong>Informasi tidak tersedia dari API.</strong></p>
           </div>
         </div>
       </div>
@@ -165,36 +158,35 @@ export function Dashboard() {
   <div className="es-student-heading-badges">
     <span className="es-student-status">
       <Solar name="check-circle" />
-      Siswa Aktif
+      {dashboard.student.is_active ? "Siswa Aktif" : "Tidak Aktif"}
     </span>
 
     <span className="es-student-year">
       <Solar name="calendar" />
-      Tahun Ajaran 2026/2027
+      {dashboard.expected_grade ? `Tingkat ${dashboard.expected_grade}` : "Tahun ajaran tidak tersedia"}
     </span>
   </div>
 </Card>
      <div className="es-hero es-exam-banner">
         <div className="es-exam-date">
-          <span>HARI INI</span>
-          <strong>14 Okt</strong>
-          <small>10:00 WIB</small>
+          <span>ASESMEN</span>
+          <strong>{dashboard.class_update_required ? "Kelas" : "—"}</strong>
+          <small>{dashboard.class_update_required ? "Perlu diperbarui" : "Jadwal tidak tersedia"}</small>
         </div>
 
         <div className="es-exam-copy">
-          <h2>Ujian Tengah Semester Matematika</h2>
+          <h2>{dashboard.class_update_required ? "Data kelas perlu diperbarui" : "Informasi ujian tidak tersedia"}</h2>
           <p>
-            Pastikan koneksi internet stabil dan masuk ruang ujian
-            10 menit sebelum mulai.
+            {dashboard.class_update_required ? "Kelas yang ditetapkan berbeda dari tingkat kelas yang diharapkan. Silakan hubungi administrator." : "API dashboard tidak menyediakan jadwal ujian."}
           </p>
         </div>
 
         <ButtonLink
-          href="/siswa/mata-pelajaran/matematika/kuis/1"
+          href="/siswa/mata-pelajaran"
           variant="secondary"
           className="es-exam-button"
         >
-          Mulai Ujian Sekarang
+          Lihat Mata Pelajaran
         </ButtonLink>
       </div>
      <Card
@@ -206,51 +198,51 @@ export function Dashboard() {
           className="es-semester-progress-track"
           role="progressbar"
           aria-label="Progres belajar semester ganjil"
-          aria-valuenow={70}
           aria-valuemin={0}
           aria-valuemax={100}
+          aria-valuetext="Progres tidak tersedia dari API"
         >
           <div
             className="es-semester-progress-fill"
-            style={{ width: "70%" }}
+            style={{ width: "0%" }}
           />
 
           <span
             className="es-semester-progress-value"
-            style={{ left: "70%" }}
+            style={{ left: "0%" }}
           >
-            70%
+            —
           </span>
         </div>
 
         <div className="es-semester-stats">
           {[
             {
-              value: "28",
+              value: "—",
               label: "Tugas Tuntas",
               icon: "medal-ribbons-star",
               tone: "green",
             },
             {
-              value: "8",
+              value: "—",
               label: "Tugas Berjalan",
               icon: "clipboard-text",
               tone: "amber",
             },
             {
-              value: "28",
+              value: "—",
               label: "Modul Tuntas",
               icon: "book",
               tone: "blue",
             },
             {
-              value: "8",
+              value: "—",
               label: "Modul Berjalan",
               icon: "refresh",
               tone: "blue",
             },
             {
-              value: "88.4",
+              value: "—",
               label: "Rata-rata Nilai",
               icon: "medal-star",
               tone: "amber",
@@ -282,73 +274,46 @@ export function Dashboard() {
                 className="es-current-subjects-link"
                 href="/siswa/mata-pelajaran"
               >
-                Lihat Semua 10 Mapel
+                Lihat Semua {eligibleCourses.length} Mapel
                 <Solar name="alt-arrow-right" />
               </Link>
             }
           >
             <div className="es-current-subjects-list">
-              <article className="es-current-subject">
+              {eligibleCourses.slice(0, 2).map((course) => {
+                const slug = studentCourseSlug(course.name);
+                const icon = /ipa|sains|alam/i.test(course.name) ? "dna" : /matematika/i.test(course.name) ? "calculator" : "book-bookmark";
+                return <article className="es-current-subject" key={course.id}>
                 <div className="es-current-subject-label">
                   <span className="es-current-subject-icon">
-                    <Solar name="calculator" />
+                    <Solar name={icon} />
                   </span>
                   <span className="es-current-subject-badge">
-                    Matematika
+                    {course.name}
                   </span>
                 </div>
 
                 <div className="es-current-subject-copy">
-                  <h3>Matematika Kelas 8</h3>
-                  <p>Bab 3: Teorema Pythagoras &amp; Tripel Pythagoras</p>
+                  <h3>{course.name} Kelas {dashboard.expected_grade ?? course.target_grade}</h3>
+                  <p>{course.description || "Deskripsi mata pelajaran belum tersedia dari API."}</p>
                 </div>
 
                 <div className="es-current-subject-next">
                   <Solar name="arrow-right" />
                   <p>
-                    Selanjutnya: <strong>Kuis 3.2 (Segitiga Siku-Siku)</strong>
+                    Selanjutnya: <strong>Materi berikutnya tidak tersedia dari API.</strong>
                   </p>
                 </div>
 
                 <ButtonLink
-                  href="/siswa/mata-pelajaran/matematika"
+                  href={`${base}/${slug}`}
                   className="es-current-subject-button"
                 >
-                  Buka Modul Matematika
+                  Buka Modul {course.name}
                   <Solar name="arrow-right" />
                 </ButtonLink>
-              </article>
-
-              <article className="es-current-subject">
-                <div className="es-current-subject-label">
-                  <span className="es-current-subject-icon">
-                    <Solar name="dna" />
-                  </span>
-                  <span className="es-current-subject-badge">
-                    Sains / IPA Terpadu
-                  </span>
-                </div>
-
-                <div className="es-current-subject-copy">
-                  <h3>IPA Terpadu Kelas 8</h3>
-                  <p>Bab 4: Sistem Peredaran Darah Manusia</p>
-                </div>
-
-                <div className="es-current-subject-next">
-                  <Solar name="arrow-right" />
-                  <p>
-                    Selanjutnya: <strong>Video Praktikum Denyut Nadi</strong>
-                  </p>
-                </div>
-
-                <ButtonLink
-                  href="/siswa/mata-pelajaran/ipa"
-                  className="es-current-subject-button"
-                >
-                  Buka Modul IPA
-                  <Solar name="arrow-right" />
-                </ButtonLink>
-              </article>
+              </article>;
+              })}
             </div>
           </Card>
           <Card
@@ -362,12 +327,12 @@ export function Dashboard() {
               </span>
 
               <div className="es-new-material-copy">
-                <h3>Bab 3: Sistem Persamaan Linear - Matematika</h3>
-                <p>Diunggah kemarin • PDF (2.4 MB)</p>
+                <h3>{dashboardMaterials[0]?.title ?? "Materi tidak tersedia dari API dashboard"}</h3>
+                <p>{dashboardMaterials[0] ? `${dashboardMaterials[0].type} · ${dashboardMaterials[0].courseSlug}` : "Buka mata pelajaran untuk melihat materi."}</p>
               </div>
 
               <ButtonLink
-                href="/siswa/mata-pelajaran/matematika/materi/3"
+                href="/siswa/mata-pelajaran"
                 variant="outline"
                 className="es-open-module"
               >
@@ -382,7 +347,7 @@ export function Dashboard() {
             className="es-active-assessments"
             action={
               <span className="es-assessments-count">
-                2 PERLU DIKERJAKAN
+                {dashboardAssessments.length} ASESMEN TERSEDIA
               </span>
             }
           >
@@ -396,21 +361,21 @@ export function Dashboard() {
                 </div>
 
                 <div className="es-assessment-copy">
-                  <h3>Kuis Aljabar Linear</h3>
-                  <p>Matematika Kelas 8</p>
+                  <h3>{dashboardAssessments[0]?.title ?? "Asesmen tidak tersedia dari API dashboard"}</h3>
+                  <p>{dashboardAssessments[0] ? `${dashboardAssessments[0].courseName} · ${dashboardAssessments[0].sectionTitle}` : "Asesmen tersedia pada halaman mata pelajaran."}</p>
                 </div>
 
                 <div className="es-assessment-footer">
                   <span className="es-assessment-deadline es-assessment-urgent">
                     <Solar name="clock-circle" />
-                    <span>Hari ini, 23:59 WIB</span>
+                    <span>{dashboardAssessments[0]?.end_at ? new Intl.DateTimeFormat("id-ID", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Jakarta" }).format(new Date(dashboardAssessments[0].end_at)) : "Jadwal tidak tersedia dari API"}</span>
                   </span>
 
                   <ButtonLink
-                    href="/siswa/mata-pelajaran/matematika/kuis/1"
+                    href={dashboardAssessments[0] ? `${base}/${dashboardAssessments[0].courseSlug}/kuis/${dashboardAssessments[0].id}` : "/siswa/mata-pelajaran"}
                     className="es-assessment-action"
                   >
-                    Kerjakan Kuis
+                  Lihat Mata Pelajaran
                   </ButtonLink>
                 </div>
               </article>
@@ -424,21 +389,21 @@ export function Dashboard() {
                 </div>
 
                 <div className="es-assessment-copy">
-                  <h3>Tugas Menulis Esai Deskriptif</h3>
-                  <p>Bahasa Indonesia</p>
+                  <h3>{dashboardAssessments[1]?.title ?? "Asesmen berikutnya tidak tersedia dari API dashboard"}</h3>
+                  <p>{dashboardAssessments[1] ? `${dashboardAssessments[1].courseName} · ${dashboardAssessments[1].sectionTitle}` : "Asesmen tersedia pada halaman mata pelajaran."}</p>
                 </div>
 
                 <div className="es-assessment-footer">
                   <span className="es-assessment-deadline">
                     <Solar name="upload" />
-                    <span>Besok, 12:00 WIB</span>
+                    <span>{dashboardAssessments[1]?.end_at ? new Intl.DateTimeFormat("id-ID", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Jakarta" }).format(new Date(dashboardAssessments[1].end_at)) : "Jadwal tidak tersedia dari API"}</span>
                   </span>
 
                   <ButtonLink
-                    href="/siswa/mata-pelajaran/bahasa-indonesia/tugas/1"
+                    href={dashboardAssessments[1] ? `${base}/${dashboardAssessments[1].courseSlug}/kuis/${dashboardAssessments[1].id}` : "/siswa/mata-pelajaran"}
                     className="es-assessment-action"
                   >
-                    Unggah Berkas
+                  Buka Asesmen
                   </ButtonLink>
                 </div>
               </article>
@@ -449,7 +414,7 @@ export function Dashboard() {
           className="es-today-schedule"
           action={
             <span className="es-schedule-date">
-              Senin, 14 Okt 2026
+              Jadwal tidak tersedia dari API
             </span>
           }
         >
@@ -460,16 +425,16 @@ export function Dashboard() {
 
               <div className="es-schedule-top">
                 <span className="es-schedule-time es-schedule-time-active">
-                  09:15 – 10:45 WIB
+                  Waktu tidak tersedia dari API
                 </span>
 
                 <span className="es-schedule-status es-schedule-status-active">
-                  Berlangsung
+                  Status tidak tersedia dari API
                 </span>
               </div>
 
-              <h3>IPA Terpadu</h3>
-              <p>Laboratorium IPA 2</p>
+              <h3>Mata pelajaran tidak tersedia dari API</h3>
+              <p>Ruang tidak tersedia dari API</p>
             </article>
 
             {/* Jadwal selesai */}
@@ -478,16 +443,16 @@ export function Dashboard() {
 
               <div className="es-schedule-top">
                 <span className="es-schedule-time">
-                  07:30 – 09:00 WIB
+                  Waktu tidak tersedia dari API
                 </span>
 
                 <span className="es-schedule-status es-schedule-status-finished">
-                  Selesai
+                  Status tidak tersedia dari API
                 </span>
               </div>
 
-              <h3>Matematika</h3>
-              <p>Ruang Kelas 8A</p>
+              <h3>Mata pelajaran tidak tersedia dari API</h3>
+              <p>Ruang tidak tersedia dari API</p>
             </article>
           </div>
         </Card>
@@ -501,21 +466,19 @@ export function Subjects() {
   const [search, setSearch] = useState("");
   const [view, setView] = useState("grid");
   const [sort, setSort] = useState("highest");
+  const resource = useStudentResource(loadStudentCourses, (data) => data.data.length === 0);
+  if (resource.status === "loading") return <StudentLoading title="Memuat mata pelajaran..." />;
+  if (resource.status === "error") return <StudentError resource={resource} />;
+  if (resource.status === "empty") return <StudentEmpty title="Daftar mata pelajaran belum tersedia." />;
 
+  const subjects = resource.data.expected_grade === null ? [] : resource.data.data.filter((course) => course.target_grade <= resource.data.expected_grade!);
+  if (subjects.length === 0) return <StudentEmpty title="Mata pelajaran yang dapat diakses belum tersedia." description="Tingkat kelas belum diketahui atau API belum mengembalikan mata pelajaran yang sesuai." />;
   const filtered = subjects
   .filter((s) =>
     s.name.toLowerCase().includes(search.toLowerCase()),
   )
   .sort((a, b) => {
-    const progressA =
-      subjectCardDetails[a.id]?.progress ?? a.progress;
-    const progressB =
-      subjectCardDetails[b.id]?.progress ?? b.progress;
-
-    if (sort === "lowest") return progressA - progressB;
-    if (sort === "name") return a.name.localeCompare(b.name);
-
-    return progressB - progressA;
+    return a.name.localeCompare(b.name);
   });
   return (
     <>
@@ -526,13 +489,13 @@ export function Subjects() {
           <div className="es-subjects-heading-info">
             <div>
               <Solar name="document-text" />
-              <span>Semester 1</span>
+              <span>Semester tidak tersedia dari API</span>
             </div>
 
             <div>
               <Solar name="square-academic-cap" />
               <span>
-                Kelas: <strong>VIII B</strong>
+                Tingkat: <strong>{resource.data.expected_grade ?? "—"}</strong>
               </span>
             </div>
           </div>
@@ -540,35 +503,35 @@ export function Subjects() {
 
         <span className="es-subjects-heading-count">
           <Solar name="book-bookmark" />
-          10 Mata Pelajaran Terdaftar
+          {subjects.length} Mata Pelajaran Terdaftar
         </span>
       </Card>
       <div className="es-subjects-summary">
         {[
           {
             label: "TOTAL MAPEL TERDAFTAR",
-            value: "10 Mapel",
+            value: `${subjects.length} Mapel`,
             icon: "book",
           },
           {
             label: "RATA-RATA PROGRES BELAJAR",
-            value: "74.8%",
+            value: "—",
             icon: "book-bookmark",
-            hint: "Total 48 dari 64 modul selesai",
+            hint: "Informasi progres tidak tersedia dari API.",
           },
           {
             label: "TUGAS & ASESMEN MENUNGGU",
-            value: "5 Tugas Aktif",
+            value: "—",
             icon: "clipboard-text",
-            hint: "Perlu dikerjakan pekan ini",
+            hint: "Informasi asesmen menunggu tidak tersedia dari API.",
             tone: "orange",
           },
           {
             label: "RATA-RATA NILAI FORMATIF",
-            value: "88.2",
+            value: "—",
             suffix: "/ 100",
             icon: "medal-star",
-            hint: "Di atas ambang batas KKM",
+            hint: "Informasi nilai tidak tersedia dari API.",
             tone: "green",
           },
         ].map((item) => (
@@ -695,7 +658,9 @@ export function Subjects() {
 }
 export function SubjectDetail() {
   const params = useParams();
-  const subject = subjects.find((s) => s.id === params.subject) || subjects[0];
+  const slug = typeof params.subject === "string" ? params.subject : String(params.subject?.[0] ?? "");
+  const loadCourse = useCallback(() => getStudentCourseBySlug(slug), [slug]);
+  const resource = useStudentResource(loadCourse, (data) => data.sections.length === 0);
   const query = useSearchParams();
   const [tab, setTab] = useState(query.get("tab") || "ringkasan");
   const [search, setSearch] = useState("");
@@ -703,65 +668,30 @@ export function SubjectDetail() {
   const [materialView, setMaterialView] = useState("grid");
   const [assessmentSemester, setAssessmentSemester] = useState("1");
   const [assessmentView, setAssessmentView] = useState("grid");
+  if (resource.status === "loading") return <StudentLoading title="Memuat detail mata pelajaran..." />;
+  if (resource.status === "error") return <StudentError resource={resource} />;
+  if (resource.status === "empty") return <StudentEmpty title="Mata pelajaran belum memiliki data." />;
+  const course = resource.data;
+  const subject = { id: studentCourseSlug(course.name), name: course.name };
   const b = `${base}/${subject.id}`;
-  const materialItems = [
-  {
-    id: 1,
-    category: "MODUL 01 • BERPIKIR KOMPUTASIONAL (BAB 1)",
-    title: "Pengenalan Algoritma dalam Kehidupan Sehari-hari",
-    release: "22 Sep 2026",
-    completed: "24 Sep 2026",
-    attachment: "1 Berkas PDF (3.5 MB)",
-    status: "done",
-  },
-  {
-    id: 2,
-    category: "MODUL 02 • BERPIKIR KOMPUTASIONAL (BAB 2)",
-    title: "Lembar Kerja Praktikum Konversi Bilangan Biner ke Desimal",
-    release: "02 Okt 2026",
-    completed: "04 Okt 2026",
-    status: "done",
-  },
-  {
-    id: 3,
-    category: "MODUL 03 • JARINGAN KOMPUTER & INTERNET (BAB 3)",
-    title: "Algoritma, Pemrograman Dasar & Struktur Percabangan",
-    release: "11 Okt 2026",
-    completed: "14 Okt 2026",
-    status: "done",
-  },
-  {
-    id: 4,
-    category: "MODUL 04 • JARINGAN KOMPUTER & INTERNET (BAB 4)",
-    title: "Perangkat Keras Jaringan Komputer",
-    release: "18 Okt 2026",
-    lastRead: "Hari ini, 08:15 WIB",
+  const materialItems = course.sections.flatMap((section) => section.materials.map((material) => ({
+    ...material,
+    category: section.title,
+    release: "Informasi tanggal rilis tidak tersedia dari API.",
     status: "active",
-  },
-  {
-    id: 5,
-    category: "MODUL 05 • ALGORITMA & PEMROGRAMAN VISUAL (BAB 5)",
-    title: "Pengantar Logika Percabangan (If-Else)",
-    release: "Menunggu Sesi Kelas (08 Nov 2026)",
-    status: "locked",
-  },
-  {
-    id: 6,
-    category: "MODUL 06 • ALGORITMA & PEMROGRAMAN VISUAL (BAB 5)",
-    title: "Struktur Perulangan (Looping) & Proyek Animasi Sederhana",
-    release: "Menunggu Sesi Kelas (15 Nov 2026)",
-    status: "locked",
-  },
-];
+    completed: undefined as string | undefined,
+    lastRead: undefined as string | undefined,
+    attachment: material.file_path ? material.file_path.split("/").pop() : undefined,
+  })));
+  const assessments = course.sections.flatMap((section) => section.assessments.map((assessment) => ({ ...assessment, sectionTitle: section.title })));
+  const currentMaterial = materialItems[0];
+  const upcomingAssessment = assessments[0];
   return (
     <>
       <Card className="es-subject-detail-heading">
         <div className="es-subject-detail-heading-copy">
-          <h1>{subject.name} Kelas VIII</h1>
-          <p>
-            Modul pembelajaran berpikir komputasional, jaringan komputer
-            &amp; internet, analisis data, dan algoritma.
-          </p>
+          <h1>{subject.name} Kelas {course.target_grade}</h1>
+          <p>{course.description || "Deskripsi mata pelajaran belum tersedia dari API."}</p>
         </div>
 
         <ButtonLink
@@ -779,29 +709,30 @@ export function SubjectDetail() {
       {
         label: "GURU PENGAMPU",
         icon: "user-rounded",
-        value: "Hendra",
-        secondLine: "Gunawan, S.Kom.",
-        hint: "NIP: 198204122008011003",
+        secondLine: undefined,
+        value: "—",
+        hint: "Informasi pengampu tidak tersedia dari API.",
       },
       {
         label: "RUANG & KELAS",
         icon: "home-2",
-        value: "8B",
-        secondLine: "Lab Komputer 1",
-        hint: "Kapasitas: 32 Siswa",
+        secondLine: undefined,
+        value: `Kelas ${course.target_grade}`,
+        hint: "Informasi ruang dan kapasitas tidak tersedia dari API.",
       },
       {
         label: "JADWAL SESI",
         icon: "calendar",
-        value: "Senin & Rabu",
-        hint: "07:30 – 09:00 WIB",
+        secondLine: undefined,
+        value: "—",
+        hint: "Waktu tidak tersedia",
       },
       {
         label: "KRITERIA KETUNTASAN",
         icon: "clipboard-check",
-        value: "75.0",
-        suffix: "/ 100",
-        hint: "Skala 0 – 100",
+        value: assessments.find((item) => item.passing_score !== null)?.passing_score?.toString() ?? "—",
+        suffix: assessments.some((item) => item.passing_score !== null) ? "/ 100" : undefined,
+        hint: "Ambang nilai ditentukan pada masing-masing asesmen.",
       },
     ].map((item) => (
       <Card className="es-detail-stat" key={item.label}>
@@ -839,28 +770,31 @@ export function SubjectDetail() {
     {[
       {
         label: "PROGRES MATERI",
-        value: "4 dari 6 Modul",
-        secondLine: "Selesai",
+        value: `${materialItems.length} Modul tersedia`,
         icon: "book-2",
-        hint: "2 Modul Tersisa",
+        secondLine: undefined,
+        hint: "Status selesai tidak tersedia dari API.",
       },
       {
         label: "DISELESAIKAN",
-        value: "3 Modul",
+        value: "—",
         icon: "check-circle",
-        hint: "Tuntas Terverifikasi",
+        secondLine: undefined,
+        hint: "Progres penyelesaian materi tidak tersedia dari API.",
       },
       {
         label: "SEDANG AKTIF",
-        value: "1 Modul",
+        value: `${materialItems.length} Modul tersedia`,
         icon: "document",
-        hint: "Modul 04",
+        secondLine: undefined,
+        hint: "Materi dapat dibuka sesuai akses kelas.",
       },
       {
         label: "BELUM DIBUKA",
-        value: "2 Modul",
+        value: "—",
         icon: "lock-keyhole",
-        hint: "Terkunci",
+        secondLine: undefined,
+        hint: "Informasi materi terkunci tidak tersedia dari API.",
       },
     ].map((item) => (
       <Card className="es-material-stat" key={item.label}>
@@ -893,24 +827,25 @@ export function SubjectDetail() {
   {[
     {
       label: "TUGAS & ASESMEN MENUNGGU",
-      value: "2 Tugas Aktif",
+      value: `${assessments.length} Asesmen tersedia`,
       icon: "clipboard-text",
-      hint: "Perlu dikerjakan pekan ini",
+      suffix: undefined,
+      hint: "Status pengumpulan belum tersedia dari API.",
       tone: "orange",
     },
     {
       label: "RATA-RATA NILAI FORMATIF",
-      value: "90",
-      suffix: "/ 100",
+      value: "—",
       icon: "medal-star",
-      hint: "Di atas ambang batas KKM",
+      suffix: undefined,
+      hint: "Informasi nilai belum tersedia dari API.",
       tone: "green",
     },
     {
       label: "DISIPLIN WAKTU",
-      value: "5",
+      value: "—",
       icon: "clock-circle",
-      hint: "5 Tugas On-Time berturut-turut",
+      hint: "Informasi ketepatan waktu tidak tersedia dari API.",
       tone: "neutral",
     },
   ].map((item) => (
@@ -969,7 +904,7 @@ export function SubjectDetail() {
            <Card className="es-detail-learning-progress">
             <div className="es-detail-learning-copy">
               <h2>Progres Belajar {subject.name}</h2>
-              <p>Tuntas 6 dari total 10 modul pembelajaran semester ini.</p>
+            <p>Informasi progres penyelesaian materi belum tersedia dari API.</p>
             </div>
 
             <div className="es-detail-learning-meter">
@@ -977,14 +912,14 @@ export function SubjectDetail() {
                 className="es-detail-learning-track"
                 role="progressbar"
                 aria-label={`Progres belajar ${subject.name}`}
-                aria-valuenow={65}
                 aria-valuemin={0}
                 aria-valuemax={100}
+                aria-valuetext="Informasi progres belum tersedia"
               >
-                <div style={{ width: "65%" }} />
+                <div style={{ width: "0%" }} />
               </div>
 
-              <strong>65%</strong>
+              <strong>—</strong>
             </div>
           </Card>
             <Card
@@ -993,16 +928,14 @@ export function SubjectDetail() {
               subtitle="Fokus sesi aktif minggu ini"
             >
               <div className="es-current-module-copy">
-                <span className="es-current-module-badge">MODUL 04</span>
+                <span className="es-current-module-badge">{currentMaterial ? `MODUL ${currentMaterial.section_id}` : "MATERI"}</span>
 
                 <h3>
-                  Perangkat Keras Jaringan Komputer &amp; Subnetting Sederhana
+                  {currentMaterial?.title ?? "Materi belum tersedia dari API."}
                 </h3>
 
                 <p>
-                  Materi ini membahas fungsi switch, router, kabel UTP, access
-                  point, topologi LAN/WLAN serta pengenalan dasar pengalamatan
-                  IPv4 untuk jaringan sekolah lokal.
+                  {currentMaterial?.body ?? "Isi materi belum tersedia dari API."}
                 </p>
               </div>
 
@@ -1016,12 +949,13 @@ export function SubjectDetail() {
                     </span>
 
                     <div className="es-module-file-copy">
-                      <strong>Modul_Jaringan_Komputer.pdf</strong>
-                      <span>1.4 MB</span>
+                      <strong>{currentMaterial?.file_path?.split("/").pop() ?? "Berkas materi tidak tersedia"}</strong>
+                      <span>{currentMaterial?.type ?? ""}</span>
                     </div>
 
                     <a
-                      href="/siswa-demo/Modul_Jaringan_Komputer.pdf"
+                      href={currentMaterial?.file_path ?? "#"}
+                      aria-disabled={!currentMaterial?.file_path}
                       download
                       aria-label="Unduh Modul Jaringan Komputer"
                     >
@@ -1035,12 +969,13 @@ export function SubjectDetail() {
                     </span>
 
                     <div className="es-module-file-copy">
-                      <strong>Slide_Topologi_dan_Perangkat.pptx</strong>
-                      <span>3.8 MB</span>
+                      <strong>Berkas lampiran tambahan tidak tersedia dari API</strong>
+                      <span>—</span>
                     </div>
 
                     <a
-                      href="/siswa-demo/Slide_Topologi_dan_Perangkat.pptx"
+                      href="#"
+                      aria-disabled="true"
                       download
                       aria-label="Unduh Slide Topologi dan Perangkat"
                     >
@@ -1051,10 +986,10 @@ export function SubjectDetail() {
               </div>
 
               <ButtonLink
-                href={`${b}/materi/4`}
+                href={currentMaterial ? `${b}/materi/${currentMaterial.id}` : `${b}?tab=materi`}
                 className="es-current-module-button"
               >
-                Lanjutkan Belajar Modul 04
+                {currentMaterial ? "Lanjutkan Belajar" : "Lihat Daftar Materi"}
                 <Solar name="arrow-right" />
               </ButtonLink>
             </Card>
@@ -1064,33 +999,9 @@ export function SubjectDetail() {
             subtitle="Alur pencapaian target kompetensi"
           >
             <div className="es-syllabus-list">
-              {[
-                {
-                  title: "Bab 01: Berpikir Komputasional (BK)",
-                  description: "Dekomposisi, Pengenalan Pola, dan Abstraksi Masalah",
-                  status: "done",
-                },
-                {
-                  title: "Bab 02: Bilangan Biner & Konversi Desimal",
-                  description: "Representasi Data Biner, Heksadesimal, dan Logika Gerbang",
-                  status: "done",
-                },
-                {
-                  title: "Bab 03: Arsitektur Internet & Protokol TCP/IP",
-                  description: "Model OSI, Alur Pengiriman Paket Data & Domain Name System",
-                  status: "done",
-                },
-                {
-                  title: "Bab 04: Jaringan Komputer & Internet",
-                  description: "Topologi LAN/WLAN, Subnet Mask & Konfigurasi Router",
-                  status: "active",
-                },
-                {
-                  title: "Bab 05: Algoritma & Pemrograman Visual (Blockly)",
-                  description: "Percabangan Logika, Perulangan Loop & Variabel Pemrograman",
-                  status: "locked",
-                },
-              ].map((item, index) => {
+              {course.sections.map((section) => {
+                const item = { title: section.title, description: "Informasi capaian dan progres bagian tidak tersedia dari API.", status: "active" };
+                const materialId = section.materials[0]?.id;
                 const content = (
                   <>
                     <div className="es-syllabus-copy">
@@ -1139,7 +1050,7 @@ export function SubjectDetail() {
                       </div>
                     ) : (
                       <Link
-                        href={`${b}/materi/${index + 1}`}
+                        href={materialId ? `${b}/materi/${materialId}` : `${b}?tab=materi`}
                         className="es-syllabus-chapter"
                       >
                         {content}
@@ -1159,27 +1070,26 @@ export function SubjectDetail() {
               <div className="es-upcoming-task">
                 <span className="es-upcoming-task-badge">
                   <Solar name="info-circle" />
-                  Sisa 2 Hari Lagi
+                  {upcomingAssessment?.end_at ? `Tenggat ${new Intl.DateTimeFormat("id-ID", { dateStyle: "medium" }).format(new Date(upcomingAssessment.end_at))}` : "Jadwal tidak tersedia dari API"}
                 </span>
 
                 <div className="es-upcoming-task-copy">
                   <h3>
-                    Tugas 01: Pembuatan ERD Database Sistem Klinik Sederhana
+                    {upcomingAssessment?.title ?? "Belum ada asesmen yang tersedia."}
                   </h3>
 
                   <p>
-                    Rancang skema ERD entitas pasien, dokter, dan rekam medis
-                    beserta kardinalitas relasinya sesuai panduan LKPD.
+                    {upcomingAssessment?.description ?? "Deskripsi asesmen belum tersedia dari API."}
                   </p>
                 </div>
 
                 <div className="es-upcoming-task-deadline">
                   <Solar name="clock-circle" />
-                  <span>25 Oktober 2026, 23:59 WIB</span>
+                  <span>{upcomingAssessment?.end_at ? new Intl.DateTimeFormat("id-ID", { dateStyle: "long", timeStyle: "short", timeZone: "Asia/Jakarta" }).format(new Date(upcomingAssessment.end_at)) : "Waktu pengumpulan tidak tersedia dari API."}</span>
                 </div>
 
                 <ButtonLink
-                  href={`${b}/tugas/1`}
+                  href={upcomingAssessment ? `${b}/kuis/${upcomingAssessment.id}` : `${b}?tab=asesmen`}
                   className="es-upcoming-task-button"
                 >
                   Buka Halaman Tugas
@@ -1194,20 +1104,20 @@ export function SubjectDetail() {
             <div className="es-learning-score">
               <div className="es-learning-score-top">
                 <span>RATA-RATA NILAI FORMATIF</span>
-                <span className="es-learning-score-badge">TUNTAS</span>
+                <span className="es-learning-score-badge">Nilai tidak tersedia</span>
               </div>
 
               <div className="es-learning-score-value">
-                <strong>90.0</strong>
+                <strong>—</strong>
                 <span>/ 100</span>
               </div>
             </div>
 
             <div className="es-learning-score-details">
               {[
-                { label: "Nilai Rata-rata Kuis", value: "92" },
-                { label: "Nilai Tugas Mandiri", value: "88" },
-                { label: "Nilai LKPD Praktikum", value: "90" },
+                { label: "Nilai Rata-rata Kuis", value: "—" },
+                { label: "Nilai Tugas Mandiri", value: "—" },
+                { label: "Nilai LKPD Praktikum", value: "—" },
               ].map((item) => (
                 <div className="es-learning-score-row" key={item.label}>
                   <span>{item.label}</span>
@@ -1455,31 +1365,21 @@ export function SubjectDetail() {
                 <div className="es-priority-task-header">
                   <span className="es-task-pill es-task-pill-red">
                     <Solar name="info-circle" />
-                    14 Jam Tersisa
+                    Jadwal asesmen
                   </span>
 
                   <span className="es-task-pill es-task-pill-yellow">
-                    Batas: 27 Okt 2026 • 23:59 WIB
+                    Informasi status dan batas pengumpulan tidak tersedia dari API.
                   </span>
                 </div>
 
                 <div className="es-priority-task-body">
                   <div>
-                    <span className="es-task-topic">
-                      Informatika • Bab 3 Algoritma, Pemrograman Dasar
-                      &amp; Struktur Percabangan
-                    </span>
+                    <span className="es-task-topic">{upcomingAssessment?.sectionTitle ?? "Informasi mata pelajaran tidak tersedia dari API"}</span>
 
-                    <h2>
-                      Latihan Mandiri : Membuat Pemrograman Dasar
-                      &amp; Struktur Percabangan
-                    </h2>
+                    <h2>{upcomingAssessment?.title ?? "Asesmen tidak tersedia dari API"}</h2>
 
-                    <p className="es-priority-task-description">
-                      Kerjakan 5 butir soal uraian pada lembar folio bergaris,
-                      sertakan langkah eliminasi lengkap, lalu foto/pindai
-                      menjadi 1 berkas PDF rapi sebelum batas waktu penutupan portal.
-                    </p>
+                    <p className="es-priority-task-description">{upcomingAssessment?.description ?? "Deskripsi asesmen tidak tersedia dari API."}</p>
                   </div>
 
                   <div className="es-priority-task-footer">
@@ -1492,8 +1392,8 @@ export function SubjectDetail() {
                         <div>
                           <span>Format Berkas</span>
                           <p>
-                            <strong>PDF / JPG</strong>
-                            <small> (Maks 10 MB)</small>
+                            <strong>Informasi format tidak tersedia dari API</strong>
+                            
                           </p>
                         </div>
                       </div>
@@ -1505,16 +1405,16 @@ export function SubjectDetail() {
 
                         <div>
                           <span>Status Pengumpulan</span>
-                          <p>Belum Mengumpulkan</p>
+                          <p>Status pengumpulan tidak tersedia dari API.</p>
                         </div>
                       </div>
                     </div>
 
                     <ButtonLink
-                      href={`${b}/tugas/1`}
+                      href={upcomingAssessment ? `${b}/kuis/${upcomingAssessment.id}` : `${b}?tab=asesmen`}
                       className="es-task-primary-button"
                     >
-                      Kerjakan Tugas
+                      Buka Asesmen
                       <Solar name="arrow-right" />
                     </ButtonLink>
                   </div>
@@ -1524,7 +1424,7 @@ export function SubjectDetail() {
               <Card className="es-week-deadlines">
                 <div className="es-week-deadlines-heading">
                   <h2>Tenggat Pekan Ini</h2>
-                  <p>27 Okt – 01 Nov 2026</p>
+                  <p>Jadwal pekan ini tidak tersedia dari API.</p>
                 </div>
 
                 <div className="es-week-days">
@@ -1587,53 +1487,18 @@ export function SubjectDetail() {
             </div>
 
             <div className="es-assessment-row-list">
-              {[
-                {
-                  id: "task-1",
-                  status: "pending",
-                  badge: "Perlu Dikerjakan • Tenggat 4 Hari Lagi",
-                  metaLabel: "Tenggat Waktu:",
-                  metaValue: "Jumat, 31 Oktober 2026, 23:59 WIB",
-                  title: "Tugas 01: Analisis Topologi Jaringan Komputer & Skema LAN",
-                  topic: "Topik / Bab: Jaringan Komputer & Internet (Bab 4)",
-                  button: "Kerjakan Sekarang",
-                  href: `${b}/tugas/1`,
-                  icon: "arrow-right",
-                },
-                {
-                  id: "task-2",
-                  status: "review",
-                  badge: "Menunggu Koreksi Guru",
-                  metaLabel: "Dikumpulkan pada:",
-                  metaValue: "10 Okt 2026, 14:20 WIB",
-                  title: "Tugas 02: Lembar Kerja Praktikum Konversi Bilangan Biner ke Desimal",
-                  topic: "Topik / Bab: Berpikir Komputasional (Bab 2)",
-                  button: "Lihat Berkas Terkirim",
-                  icon: "folder",
-                },
-                {
-                  id: "quiz-1",
-                  status: "done",
-                  badge: "STATUS SELESAI",
-                  metaLabel: "Nilai Akhir:",
-                  title: "Kuis Formatif Bab 1: Logika Komputasional & Dekomposisi Masalah",
-                  topic: "Topik / Bab: Berpikir Komputasional (Bab 1)",
-                  button: "Lihat Hasil & Pembahasan",
-                  icon: "download",
-                },
-                {
-                  id: "final-exam",
-                  status: "locked",
-                  badge: "Terkunci",
-                  metaLabel: "Jadwal Pelaksanaan:",
-                  metaValue: "08 November 2026, 08:00 WIB",
-                  title: "Ulangan Akhir Semester",
-                  topic: "Topik / Bab: Semua Bab",
-                  button: "Terkunci – Belum Dibuka",
-                  icon: "lock-keyhole",
-                },
-              ]
-                .filter((item) =>
+              {assessments.map((assessment) => ({
+                id: assessment.id,
+                status: "pending",
+                badge: "Status pengumpulan tidak tersedia dari API",
+                metaLabel: "Jadwal:",
+                metaValue: assessment.end_at ? new Intl.DateTimeFormat("id-ID", { dateStyle: "long", timeStyle: "short", timeZone: "Asia/Jakarta" }).format(new Date(assessment.end_at)) : "Jadwal tidak tersedia dari API",
+                title: assessment.title,
+                topic: assessment.sectionTitle,
+                button: "Buka Asesmen",
+                href: `${b}/kuis/${assessment.id}`,
+                icon: "arrow-right",
+              })).filter((item) =>
                   item.title.toLowerCase().includes(search.toLowerCase()),
                 )
                 .map((item) => (
@@ -1651,14 +1516,7 @@ export function SubjectDetail() {
                       <div className="es-assessment-row-meta">
                         <span>{item.metaLabel}</span>
 
-                        {item.status === "done" ? (
-                          <div className="es-assessment-final-score">
-                            <strong>92</strong>
-                            <span>/ 100</span>
-                          </div>
-                        ) : (
-                          <strong>{item.metaValue}</strong>
-                        )}
+                        <strong>{item.metaValue}</strong>
                       </div>
                     </div>
 
@@ -1667,13 +1525,6 @@ export function SubjectDetail() {
                         <h3>{item.title}</h3>
                         <p>{item.topic}</p>
 
-                        {item.status === "done" && (
-                          <div className="es-assessment-quiz-details">
-                            <p>Tanggal Ujian: 28 September 2026, 09:15 WIB</p>
-                            <p>Status: 18 dari 20 Soal Benar</p>
-                            <p>Durasi pengerjaan: 25 menit</p>
-                          </div>
-                        )}
                       </div>
 
                       {item.href ? (
@@ -1707,50 +1558,60 @@ export function SubjectDetail() {
 }
 export function Material() {
   const params = useParams();
-  const subject =
-    subjects.find((s) => s.id === params.subject) || subjects[0];
-  const b = `${base}/${subject.id}`;
-
+  const slug = typeof params.subject === "string" ? params.subject : String(params.subject?.[0] ?? "");
+  const materialId = typeof params.material === "string" ? Number(params.material) : Number(params.material?.[0]);
+  const loadMaterial = useCallback(async () => {
+    const course = await getStudentCourseBySlug(slug);
+    const allMaterials = course.sections.flatMap((section) => section.materials.map((material) => ({ ...material, sectionTitle: section.title })));
+    const index = allMaterials.findIndex((item) => item.id === materialId);
+    const material = allMaterials[index];
+    if (!material) throw new ApiError("Materi tidak ditemukan.", 404);
+    const section = course.sections.find((item) => item.id === material.section_id);
+    return { course, material, section, allMaterials, materialIndex: index };
+  }, [slug, materialId]);
+  const resource = useStudentResource(loadMaterial);
   const [finished, setFinished] = useState(false);
-
-  const files = [
-    {
-      name: "Modul_03_Algoritma_Pemrograman.pdf",
-      size: "3.4 MB",
-      tone: "red",
-    },
-    {
-      name: "Slide_Presentasi_Informatika_Bab3.pptx",
-      size: "5.8 MB",
-      tone: "yellow",
-    },
-    {
-      name: "Lembar_Kerja_Siswa_Mandiri_LKPD.pdf",
-      size: "1.2 MB",
-      tone: "blue",
-    },
-  ];
-
+  const [saving, setSaving] = useState(false);
+  const [actionError, setActionError] = useState("");
+  if (resource.status === "loading") return <StudentLoading title="Memuat materi..." />;
+  if (resource.status === "error") return <StudentError resource={resource} />;
+  if (resource.status === "empty") return <StudentEmpty title="Materi belum tersedia." />;
+  const { course, material, section, allMaterials, materialIndex } = resource.data;
+  const b = `${base}/${studentCourseSlug(course.name)}`;
+  const relatedAssessment = section?.assessments[0];
+  const previousMaterial = allMaterials[materialIndex - 1];
+  const nextMaterial = allMaterials[materialIndex + 1];
+  async function markCompleted() {
+    if (finished || saving) return;
+    setSaving(true);
+    setActionError("");
+    try {
+      await completeStudentMaterial(material.id);
+      setFinished(true);
+    } catch {
+      setActionError("Materi belum dapat ditandai selesai. Silakan coba lagi.");
+    } finally {
+      setSaving(false);
+    }
+  }
   return (
     <div className="es-material-detail">
       <Card className="es-material-detail-heading">
         <div className="es-material-detail-heading-top">
           <div className="es-material-detail-heading-copy">
-            <h1>
-              Algoritma, Pemrograman Dasar &amp; Struktur Percabangan
-            </h1>
+            <h1>{material.title}</h1>
 
             <p>
               <Solar name="user-rounded" />
               <span>
-                Guru: <strong>Bpk. Hendra Gunawan, S.Kom.</strong>
+                Guru: <strong>Informasi tidak tersedia dari API.</strong>
               </span>
             </p>
 
             <p>
               <Solar name="calendar" />
               <span>
-                Rilis: <strong>14 Oktober 2026</strong>
+                Bagian: <strong>{material.sectionTitle}</strong>
               </span>
             </p>
           </div>
@@ -1759,11 +1620,11 @@ export function Material() {
             <button
               type="button"
               className="es-md-button es-md-button-primary"
-              disabled={finished}
-              onClick={() => setFinished(true)}
+              disabled={finished || saving}
+              onClick={() => void markCompleted()}
             >
               <Solar name="check-circle" />
-              {finished ? "Sudah Selesai" : "Tandai Sudah Selesai"}
+              {finished ? "Sudah Selesai" : saving ? "Menyimpan..." : "Tandai Sudah Selesai"}
             </button>
 
             <ButtonLink
@@ -1776,13 +1637,14 @@ export function Material() {
             </ButtonLink>
           </div>
         </div>
+        {actionError && <p role="alert">{actionError}</p>}
 
         <div className="es-material-detail-resources">
           {[
-            { icon: "videocamera", label: "1 Video Pembahasan" },
-            { icon: "book-2", label: "1 Catatan Bacaan" },
-            { icon: "link", label: "3 Berkas Lampiran" },
-            { icon: "pen-new-square", label: "1 Kuis Wajib" },
+            { icon: "videocamera", label: "Informasi video tidak tersedia dari API" },
+            { icon: "book-2", label: material.body ? "Konten bacaan tersedia" : "Konten bacaan tidak tersedia" },
+            { icon: "link", label: material.file_path ? "1 Berkas Lampiran" : "Berkas lampiran tidak tersedia" },
+            { icon: "pen-new-square", label: relatedAssessment ? "1 Asesmen tersedia" : "Asesmen tidak tersedia" },
           ].map((item) => (
             <div key={item.label}>
               <span>
@@ -1798,8 +1660,8 @@ export function Material() {
         <div className="es-material-detail-main">
           <Card className="es-md-video-card">
             <div className="es-md-section-heading">
-              <h2>Video Penjelasan Logika Flowchart</h2>
-              <p>Tonton untuk memahami pembelajaran</p>
+              <h2>Video Pembelajaran</h2>
+              <p>Konten video tidak tersedia dari API.</p>
             </div>
 
             <div className="es-md-video-preview">
@@ -1808,7 +1670,7 @@ export function Material() {
               </span>
 
               <p>
-                Penjelasan Logika &amp; Flowchart Algoritma Pemrograman
+                Konten video tidak tersedia dari API.
               </p>
 
               <div className="es-md-video-controls">
@@ -1819,8 +1681,8 @@ export function Material() {
                 <div className="es-md-video-controls-bottom">
                   <Solar name="play" />
                   <Solar name="volume-loud" />
-                  <span>07:45 / 18:24</span>
-                  <span className="es-md-video-quality">1080p HD</span>
+                  <span>— / —</span>
+                  <span className="es-md-video-quality">Informasi tidak tersedia</span>
                   <Solar name="settings" />
                   <Solar name="full-screen" />
                 </div>
@@ -1834,15 +1696,8 @@ export function Material() {
             </div>
 
             <div className="es-md-reading-copy">
-              <h3>Pengertian Algoritma dan Pemrograman</h3>
-              <p>
-                Dalam ilmu informatika, algoritma adalah urutan
-                langkah-langkah logis dan terstruktur yang disusun
-                secara sistematis untuk menyelesaikan suatu masalah
-                atau menghasilkan keluaran tertentu. Setiap instruksi
-                harus jelas, tidak menimbulkan makna ganda (ambigu),
-                serta memiliki langkah awal dan batas akhir yang pasti.
-              </p>
+              <h3>{material.title}</h3>
+              <p>{material.body ?? "Konten bacaan belum tersedia dari API."}</p>
             </div>
           </Card>
 
@@ -1853,7 +1708,7 @@ export function Material() {
             </div>
 
             <div className="es-md-file-list">
-              {files.map((file) => (
+              {material.file_path ? [{ name: material.file_path.split("/").pop() ?? material.title, size: material.type, tone: "red" }].map((file) => (
                 <div className="es-md-file" key={file.name}>
                   <span
                     className={`es-md-file-icon es-md-file-icon-${file.tone}`}
@@ -1867,21 +1722,21 @@ export function Material() {
                   </div>
 
                   <a
-                    href={`/siswa-demo/${file.name}`}
+                    href={material.file_path ?? "#"}
                     download
                     className="es-md-file-download"
                   >
                     Unduh
                   </a>
                 </div>
-              ))}
+              )) : <p>Berkas lampiran belum tersedia dari API.</p>}
             </div>
           </Card>
         </div>
 
         <div className="es-material-detail-aside">
           <Card className="es-md-quiz-card">
-            <h2>Kuis Pemahaman Bab 3</h2>
+            <h2>{relatedAssessment?.title ?? "Asesmen tidak tersedia"}</h2>
 
           <div className="es-md-quiz-info">
             <p>
@@ -1889,7 +1744,7 @@ export function Material() {
                 <Solar name="clock-circle" />
                 Batas Waktu:
               </span>
-              <strong>20 Okt 2026, 23:59</strong>
+              <strong>{relatedAssessment?.end_at ? new Intl.DateTimeFormat("id-ID", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Jakarta" }).format(new Date(relatedAssessment.end_at)) : "Jadwal tidak tersedia"}</strong>
             </p>
 
             <p>
@@ -1897,15 +1752,15 @@ export function Material() {
                 <Solar name="target" />
                 Nilai KKM Minimal:
               </span>
-              <strong>75 Poin</strong>
+              <strong>{relatedAssessment?.passing_score ?? "—"} Poin</strong>
             </p>
           </div>
 
             <ButtonLink
-              href={`${b}/kuis/1`}
+              href={relatedAssessment ? `${b}/kuis/${relatedAssessment.id}` : `${b}?tab=asesmen`}
               className="es-md-quiz-button"
             >
-              Mulai Kuis Sekarang
+              {relatedAssessment ? "Mulai Asesmen" : "Lihat Asesmen"}
               <Solar name="arrow-right" />
             </ButtonLink>
           </Card>
@@ -1916,7 +1771,7 @@ export function Material() {
             </div>
 
             <Link
-              href={`${b}/materi/2`}
+              href={previousMaterial ? `${b}/materi/${previousMaterial.id}` : `${b}?tab=materi`}
               className="es-md-navigation-item"
             >
               <span className="es-md-navigation-direction">
@@ -1925,19 +1780,16 @@ export function Material() {
               </span>
 
               <strong>
-                Bab 02:
-                <br />
-                Bilangan Biner &amp; Konversi Desimal
+                {previousMaterial?.title ?? "Materi sebelumnya tidak tersedia"}
               </strong>
 
               <span className="es-md-navigation-done">
-                <Solar name="check-read" />
-                Telah Selesai
+                {previousMaterial ? "Status selesai tidak tersedia" : ""}
               </span>
             </Link>
 
             <Link
-              href={`${b}/materi/4`}
+              href={nextMaterial ? `${b}/materi/${nextMaterial.id}` : `${b}?tab=materi`}
               className="es-md-navigation-item"
             >
               <span className="es-md-navigation-direction es-md-navigation-next">
@@ -1946,9 +1798,7 @@ export function Material() {
               </span>
 
               <strong>
-                Bab 04:
-                <br />
-                Jaringan Komputer &amp; Internet
+                {nextMaterial?.title ?? "Materi selanjutnya tidak tersedia"}
               </strong>
             </Link>
           </Card>
@@ -1959,16 +1809,29 @@ export function Material() {
 }
 export function Assignment() {
   const params = useParams();
-  const b = `${base}/${params.subject}`;
+  const subjectSlug = typeof params.subject === "string" ? params.subject : String(params.subject?.[0] ?? "");
+  const assignmentId = typeof params.assignment === "string" ? params.assignment : String(params.assignment?.[0] ?? "");
+  const loadAssignment = useCallback(async () => {
+    const course = await getStudentCourseBySlug(subjectSlug);
+    const assessment = course.sections.flatMap((section) => section.assessments.map((item) => ({ ...item, sectionTitle: section.title }))).find((item) => String(item.id) === assignmentId);
+    if (!assessment) throw new ApiError("Tugas tidak ditemukan.", 404);
+    return { course, assessment };
+  }, [assignmentId, subjectSlug]);
+  const resource = useStudentResource(loadAssignment);
+  const b = `${base}/${subjectSlug}`;
 
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState("");
-  const [submitted, setSubmitted] = useState(false);
   const [agreed, setAgreed] = useState(false);
   const [message, setMessage] = useState("");
 
+  if (resource.status === "loading") return <StudentLoading title="Memuat tugas..." />;
+  if (resource.status === "error") return <StudentError resource={resource} />;
+  if (resource.status === "empty") return <StudentEmpty title="Tugas tidak tersedia." />;
+  const { assessment } = resource.data;
+
   function selectFile(selected?: File) {
-    if (!selected || submitted) return;
+    if (!selected) return;
 
     const extension = selected.name.split(".").pop()?.toLowerCase();
 
@@ -2002,16 +1865,16 @@ export function Assignment() {
         <div className="es-ad-heading-copy">
           <span className="es-ad-deadline-badge">
             <Solar name="clock-circle" />
-            Tenggat 2 Hari Lagi
+            {assessment.end_at ? `Tenggat ${new Intl.DateTimeFormat("id-ID", { dateStyle: "long", timeStyle: "short", timeZone: "Asia/Jakarta" }).format(new Date(assessment.end_at))}` : "Informasi tenggat tidak tersedia dari API"}
           </span>
 
           <h1>
-            Tugas 01: Analisis Topologi Jaringan Komputer & Skema LAN
+            {assessment.title}
           </h1>
 
           <p>
             <Solar name="calendar" />
-            Dibuka: 18 Okt 2024, 08:00 WIB
+            {assessment.description ?? "Deskripsi tugas tidak tersedia dari API."}
           </p>
         </div>
 
@@ -2057,12 +1920,13 @@ export function Assignment() {
               </div>
 
               <a
-                href="/siswa-demo/LKPD_Praktikum_Topologi_Jaringan_Kelas8.pdf"
+                href="#"
+                aria-disabled="true"
                 download
                 className="es-ad-download"
               >
                 <Solar name="cloud-download" variant="bold" />
-                Unduh LKPD
+                Lampiran tidak tersedia
               </a>
             </div>
           </Card>
@@ -2088,16 +1952,13 @@ export function Assignment() {
                   return;
                 }
 
-                setSubmitted(true);
                 setError("");
-                setMessage(
-                  "Pengumpulan berhasil pada sesi demo. Berkas belum dikirim ke server.",
-                );
+                setMessage("Backend belum menyediakan endpoint untuk mengunggah berkas tugas.");
               }}
             >
               <label
                 className={`es-ad-dropzone ${
-                  submitted ? "is-disabled" : ""
+                  ""
                 }`}
                 onDragOver={(event) => event.preventDefault()}
                 onDrop={(event) => {
@@ -2108,7 +1969,6 @@ export function Assignment() {
                 <input
                   type="file"
                   accept=".pdf,.png,.jpg,.jpeg"
-                  disabled={submitted}
                   onChange={(event) => {
                     selectFile(event.target.files?.[0]);
                     event.target.value = "";
@@ -2151,9 +2011,7 @@ export function Assignment() {
                       <span>
                         {(file.size / (1024 * 1024)).toFixed(2)} MB
                         {" • "}
-                        {submitted
-                          ? "Dikumpulkan pada sesi demo"
-                          : "Dipilih untuk pengumpulan"}
+                        "Berkas hanya dipilih di perangkat; belum dikirim ke server."
                       </span>
                     </div>
 
@@ -2170,7 +2028,6 @@ export function Assignment() {
                       type="button"
                       className="es-ad-remove"
                       aria-label="Hapus berkas terlampir"
-                      disabled={submitted}
                       onClick={() => {
                         setFile(null);
                         setMessage("");
@@ -2190,7 +2047,6 @@ export function Assignment() {
                 <input
                   type="checkbox"
                   checked={agreed}
-                  disabled={submitted}
                   onChange={(event) => setAgreed(event.target.checked)}
                 />
 
@@ -2218,7 +2074,6 @@ export function Assignment() {
                 <button
                   type="button"
                   className="es-ad-draft"
-                  disabled={submitted}
                   onClick={() => {
                     if (!file) {
                       setError("Pilih berkas sebelum menyimpan draf.");
@@ -2226,9 +2081,7 @@ export function Assignment() {
                     }
 
                     setError("");
-                    setMessage(
-                      "Draf dipertahankan selama halaman ini tetap terbuka.",
-                    );
+                    setMessage("Backend belum menyediakan endpoint penyimpanan draft tugas.");
                   }}
                 >
                   Simpan Draf
@@ -2237,11 +2090,8 @@ export function Assignment() {
                 <button
                   type="submit"
                   className="es-ad-submit"
-                  disabled={submitted}
                 >
-                  {submitted
-                    ? "Tugas Sudah Dikirim"
-                    : "Kirim Tugas Sekarang"}
+                  Kirim Tugas Sekarang
                   <Solar name="alt-arrow-right" />
                 </button>
               </div>
@@ -2256,13 +2106,9 @@ export function Assignment() {
               <h2>Status Tugas</h2>
 
               <span
-                className={`es-ad-status-badge ${
-                  submitted ? "is-submitted" : ""
-                }`}
+                className="es-ad-status-badge"
               >
-                {submitted
-                  ? "Sudah Mengumpulkan"
-                  : "Belum Mengumpulkan"}
+                Status pengumpulan tidak tersedia dari API
               </span>
             </div>
 
@@ -2270,9 +2116,7 @@ export function Assignment() {
               <span>SISA WAKTU PENGERJAAN</span>
 
               <p>
-                <strong>2</strong>h{" "}
-                <strong>14</strong>j{" "}
-                <strong>22</strong>m
+                {assessment.end_at ? new Intl.DateTimeFormat("id-ID", { dateStyle: "long", timeStyle: "short", timeZone: "Asia/Jakarta" }).format(new Date(assessment.end_at)) : "Tidak tersedia"}
               </p>
             </div>
           </Card>
@@ -2282,11 +2126,7 @@ export function Assignment() {
             <h2>Rubrik Penilaian</h2>
 
             <div className="es-ad-rubric-weights">
-              {[
-                { label: "Skema Topologi & Routing", weight: 40 },
-                { label: "Kelengkapan Perangkat Keras", weight: 40 },
-                { label: "Kerapian Dokumen & Format", weight: 20 },
-              ].map((item) => (
+              {([] as Array<{ label: string; weight: number }>).map((item) => (
                 <div key={item.label} className="es-ad-rubric-weight">
                   <div className="es-ad-rubric-weight-heading">
                     <strong>{item.label}</strong>
@@ -2306,7 +2146,7 @@ export function Assignment() {
                 <br />
                 Maksimal
               </span>
-              <strong>100 Poin</strong>
+              <strong>Informasi tidak tersedia dari API</strong>
             </div>
           </Card>
         </aside>
@@ -2317,110 +2157,30 @@ export function Assignment() {
 export function LearningProgress() {
   const [search, setSearch] = useState("");
   const [activity, setActivity] = useState("all");
+  const resource = useStudentResource(loadStudentCourses, (data) => data.data.length === 0);
+  if (resource.status === "loading") return <StudentLoading title="Memuat progres pembelajaran..." />;
+  if (resource.status === "error") return <StudentError resource={resource} />;
+  if (resource.status === "empty") return <StudentEmpty title="Mata pelajaran belum tersedia." />;
 
   const summary = [
-    {
-      label: "Progres Keseluruhan",
-      value: "75%",
-      suffix: "",
-      icon: "document-text",
-      tone: "blue",
-      hint: <>Target Semester: <strong>80%</strong></>,
-    },
-    {
-      label: "Materi Selesai",
-      value: "18",
-      suffix: "/ 24 Modul",
-      icon: "documents",
-      tone: "blue",
-      hint: "6 materi siap dipelajari minggu ini",
-    },
-    {
-      label: "Asesmen Tuntas",
-      value: "6",
-      suffix: "/ 8 Ujian & Tugas",
-      icon: "check-circle",
-      tone: "green",
-      hint: "2 asesmen menunggu batas waktu",
-    },
-    {
-      label: "Rata-rata Nilai",
-      value: "84.0",
-      suffix: "/ 100",
-      icon: "cup",
-      tone: "yellow",
-      hint: "Akumulasi seluruh evaluasi mapel",
-    },
+    { label: "Progres Keseluruhan", value: "—", suffix: "", icon: "document-text", tone: "blue", hint: "Informasi progres tidak tersedia dari API." },
+    { label: "Materi Selesai", value: "—", suffix: "", icon: "documents", tone: "blue", hint: "API tidak menyediakan riwayat penyelesaian materi." },
+    { label: "Asesmen Tuntas", value: "—", suffix: "", icon: "check-circle", tone: "green", hint: "API tidak menyediakan riwayat asesmen." },
+    { label: "Rata-rata Nilai", value: "—", suffix: "", icon: "cup", tone: "yellow", hint: "Informasi nilai tidak tersedia dari API." },
   ];
 
-  const courses = [
-    {
-      id: "matematika",
-      name: "Matematika",
-      teacher: "Dra. Sri Wahyuni, M.Pd",
-      score: "88.0",
-      progress: 80,
-      materials: "8/10 Materi Selesai",
-      assessments: "4/5 Asesmen Selesai",
-      complete: false,
-    },
-    {
-      id: "ipa",
-      name: "Ilmu Pengetahuan Alam",
-      teacher: "Ahmad Fauzi, S.Si",
-      score: "81.0",
-      progress: 72,
-      materials: "7/10 Materi Selesai",
-      assessments: "3/6 Asesmen Selesai",
-      complete: false,
-    },
-    {
-      id: "informatika",
-      name: "Informatika",
-      teacher: "Hendra Gunawan, S.Kom.",
-      score: "90.0",
-      progress: 88,
-      materials: "9/10 Materi Selesai",
-      assessments: "4/4 Lengkap!",
-      complete: true,
-    },
-    {
-      id: "bahasa-indonesia",
-      name: "Bahasa Indonesia",
-      teacher: "Siti Rahmah, S.Pd",
-      score: "79.0",
-      progress: 65,
-      materials: "6/10 Materi Selesai",
-      assessments: "2/4 Asesmen Selesai",
-      complete: false,
-    },
-  ];
+  const courses = resource.data.data.map((course) => ({
+    id: studentCourseSlug(course.name),
+    name: course.name,
+    teacher: "Informasi guru tidak tersedia dari API.",
+    score: "—",
+    progress: 0,
+    materials: "Informasi progres materi tidak tersedia dari API.",
+    assessments: "Informasi progres asesmen tidak tersedia dari API.",
+    complete: false,
+  }));
 
-  const rows = [
-    {
-      id: 1,
-      type: "assignment",
-      title: "Persamaan Linear Dua Variabel",
-      date: "14 Sep 2026, 10:20 WIB",
-      subject: "Matematika",
-      score: 90,
-      icon: "document-text",
-      href: `${base}/matematika/tugas/1`,
-      action: "Lihat Berkas",
-    },
-    {
-      id: 2,
-      type: "quiz",
-      title: "Kuis Formatif Bab 1: Logika Komputasi",
-      date: "16 Sep 2026, 08:45 WIB",
-      subject: "Informatika",
-      score: 92,
-      icon: "clipboard-text",
-      href: `${base}/informatika/kuis/1/hasil`,
-      action: "Lihat Pembahasan",
-    },
-  ];
-
+  const rows: Array<{ id: number; type: string; title: string; date: string; subject: string; score: number | null; icon: string; href: string; action: string }> = [];
   const filtered = rows.filter((row) => {
     const matchesSearch = `${row.title} ${row.subject}`
       .toLowerCase()
@@ -2444,7 +2204,7 @@ export function LearningProgress() {
 
         <span className="es-lp-semester">
           <Solar name="document-text" />
-          Semester Ganjil 2026/2027
+          Informasi semester tidak tersedia dari API
         </span>
       </Card>
 
@@ -2643,7 +2403,7 @@ export function LearningProgress() {
               {!filtered.length && (
                 <tr>
                   <td colSpan={5}>
-                    Tidak ada aktivitas yang sesuai pencarian.
+                    Riwayat pembelajaran tidak tersedia dari API backend.
                   </td>
                 </tr>
               )}
@@ -2653,7 +2413,7 @@ export function LearningProgress() {
 
         <div className="es-lp-results-footer">
           <span>
-            Menampilkan {filtered.length} entri pembelajaran
+            Riwayat API: {filtered.length} entri
           </span>
 
           <div className="es-lp-pagination">
@@ -2694,54 +2454,7 @@ function MaterialHistory({
   const [statusFilter, setStatusFilter] = useState("all");
   const [sort, setSort] = useState("newest");
 
-  const rows = [
-    {
-      id: "network",
-      subjectId: "informatika",
-      subject: "Informatika",
-      teacher: "Pak Dimas Setiawan, S.Kom.",
-      title:
-        "Modul 04: Perangkat Keras Jaringan Komputer & Subnetting",
-      topic: "Topologi, Switch, Router & Konfigurasi IP",
-      date: "Hari Ini",
-      time: "08:15 WIB",
-      order: 3,
-      progress: 60,
-      detail: "3/5 Bab",
-      archived: false,
-      href: `${base}/informatika/materi/4`,
-    },
-    {
-      id: "essay",
-      subjectId: "bahasa-indonesia",
-      subject: "Bahasa Indonesia",
-      teacher: "Pak Budi Santoso, M.Pd.",
-      title: "Bab 2: Menulis Esai dan Teks Eksposisi Populer",
-      topic: "Struktur Argumen, Kaidah Kebahasaan & Fakta",
-      date: "08 Okt 2026",
-      time: "13:10 WIB",
-      order: 2,
-      progress: 40,
-      detail: "2/5 Modul",
-      archived: false,
-      href: `${base}/bahasa-indonesia/materi/2`,
-    },
-    {
-      id: "scratch",
-      subjectId: "informatika",
-      subject: "Informatika",
-      teacher: "",
-      title: "Modul Algoritma & Pemrograman Visual Scratch",
-      topic: "Logika Percabangan, Perulangan & Sprite Animasi",
-      date: "12 Sep 2026",
-      time: "11:00 WIB",
-      order: 1,
-      progress: 100,
-      detail: "Tuntas",
-      archived: true,
-      href: `${base}/informatika/materi/1?arsip=1`,
-    },
-  ];
+  const rows: Array<{ id: string | number; subjectId: string; subject: string; teacher?: string; title: string; topic?: string; date?: string; time?: string; order?: number; progress?: number; detail?: string; archived: boolean; href: string; type?: string; score?: number }> = [];
 
   const filtered = rows
     .filter((row) => {
@@ -2764,8 +2477,8 @@ function MaterialHistory({
     })
     .sort((a, b) =>
       sort === "oldest"
-        ? a.order - b.order
-        : b.order - a.order,
+        ? (a.order ?? 0) - (b.order ?? 0)
+        : (b.order ?? 0) - (a.order ?? 0),
     );
 
   return (
@@ -2773,8 +2486,7 @@ function MaterialHistory({
       <div className="es-mh-heading">
         <h1>Riwayat Akses Materi Pembelajaran</h1>
         <p>
-          Daftar materi dan modul yang telah dipelajari atau
-          diselesaikan.
+          API backend belum menyediakan endpoint riwayat akses atau penyelesaian materi.
         </p>
       </div>
 
@@ -2791,19 +2503,19 @@ function MaterialHistory({
         {[
           {
             label: "MODUL DIAKSES",
-            value: "48",
+            value: "—",
             icon: "documents",
             tone: "blue",
           },
           {
             label: "MODUL SELESAI",
-            value: "42",
+            value: "—",
             icon: "check-circle",
             tone: "green",
           },
           {
             label: "ARSIP KELAS 7",
-            value: "36",
+            value: "—",
             icon: "archive",
             tone: "gray",
           },
@@ -2827,12 +2539,8 @@ function MaterialHistory({
         <div>
           <h2>Ketentuan Akses Riwayat Tingkat Kelas:</h2>
           <p>
-            Sebagai siswa Kelas VIII, Anda memiliki akses penuh
-            ke materi Kelas VIII yang sedang berjalan, serta
-            akses arsip Baca-Saja (Read-Only) terhadap modul
-            pembelajaran Kelas VII yang telah lalu untuk
-            keperluan referensi dan pengulangan konsep dasar.
-            Seluruh modul Kelas VII diberi penanda.
+            Informasi tingkat akses, arsip kelas sebelumnya, dan riwayat penyelesaian
+            materi tidak tersedia melalui endpoint API role Siswa saat ini.
           </p>
         </div>
       </div>
@@ -2988,7 +2696,7 @@ function MaterialHistory({
               {!filtered.length && (
                 <tr>
                   <td colSpan={6}>
-                    Tidak ada riwayat yang sesuai pencarian.
+                    API backend belum menyediakan endpoint riwayat materi.
                   </td>
                 </tr>
               )}
@@ -3036,84 +2744,7 @@ function AssessmentHistory({
   const [typeFilter, setTypeFilter] = useState("all");
   const [sort, setSort] = useState("newest");
 
-  const rows = [
-    {
-      id: 1,
-      title: "Kuis Formatif Bab 1: Logika Komputasional",
-      subject: "Informatika",
-      subjectId: "informatika",
-      type: "quiz",
-      date: "28 Sep 2026",
-      time: "09:45 WIB",
-      score: 92,
-      archived: false,
-      href: `${base}/informatika/kuis/1/hasil`,
-    },
-    {
-      id: 2,
-      title: "Tugas 02: Praktikum Konversi Biner & Heksadesimal",
-      subject: "Informatika",
-      subjectId: "informatika",
-      type: "assignment",
-      date: "22 Sep 2026",
-      time: "11:20 WIB",
-      score: 90,
-      archived: false,
-      href: `${base}/informatika/tugas/2`,
-    },
-    {
-      id: 3,
-      title:
-        "Ulangan Harian Bab 2: Sistem Persamaan Linear Dua Variabel",
-      subject: "Matematika",
-      subjectId: "matematika",
-      type: "exam",
-      date: "15 Sep 2026",
-      time: "08:30 WIB",
-      score: 88,
-      archived: false,
-      href: `${base}/matematika/kuis/1/hasil`,
-    },
-    {
-      id: 4,
-      title:
-        "Kuis Formatif Struktur Sel & Organisasi Kehidupan",
-      subject: "IPA Terpadu",
-      subjectId: "ipa",
-      type: "quiz",
-      date: "08 Sep 2026",
-      time: "10:15 WIB",
-      score: 84,
-      archived: false,
-      href: `${base}/ipa/kuis/1/hasil`,
-    },
-    {
-      id: 5,
-      title:
-        "Sumatif Akhir Semester (SAS) Genap Informatika VII",
-      subject: "Informatika Kelas VII",
-      subjectId: "informatika",
-      type: "exam",
-      date: "10 Jun 2026",
-      time: "08:00 WIB",
-      score: 90,
-      archived: true,
-      href: `${base}/informatika/kuis/1/hasil?arsip=1`,
-    },
-    {
-      id: 6,
-      title:
-        "Praktikum Mandiri: Animasi Interaktif Scratch & Blockly",
-      subject: "Informatika Kelas VII",
-      subjectId: "informatika",
-      type: "assignment",
-      date: "18 Mei 2026",
-      time: "14:00 WIB",
-      score: 86,
-      archived: true,
-      href: `${base}/informatika/tugas/1?arsip=1`,
-    },
-  ];
+  const rows: Array<{ id: string | number; subjectId: string; subject: string; teacher?: string; title: string; topic?: string; date?: string; time?: string; order?: number; progress?: number; detail?: string; archived: boolean; href: string; type?: string; score?: number }> = [];
 
   const filtered = rows
     .filter((row) => {
@@ -3129,7 +2760,7 @@ function AssessmentHistory({
       );
     })
     .sort((a, b) =>
-      sort === "oldest" ? b.id - a.id : a.id - b.id,
+      sort === "oldest" ? String(b.id).localeCompare(String(a.id)) : String(a.id).localeCompare(String(b.id)),
     );
 
   return (
@@ -3137,9 +2768,7 @@ function AssessmentHistory({
       <div className="es-mh-heading">
         <h1>Riwayat & Arsip Nilai Asesmen</h1>
         <p>
-          Seluruh catatan hasil pengerjaan kuis formatif,
-          tugas praktikum LKPD, dan sumatif yang pernah
-          dikerjakan.
+          API backend belum menyediakan endpoint riwayat asesmen dan hasil terdahulu.
         </p>
       </div>
 
@@ -3162,11 +2791,11 @@ function AssessmentHistory({
           </div>
 
           <div className="es-ah-stat-value">
-            <strong>22 Asesmen</strong>
+            <strong>—</strong>
           </div>
 
           <div className="es-ah-stat-hint">
-            14 Kelas 8 + 8 Arsip Kelas 7
+            Riwayat asesmen tidak tersedia dari API.
           </div>
         </Card>
 
@@ -3179,15 +2808,12 @@ function AssessmentHistory({
           </div>
 
           <div className="es-ah-stat-value">
-            <strong>88.4</strong>
+            <strong>—</strong>
             <span>/ 100</span>
           </div>
 
           <div className="es-ah-stat-hint">
-            <span className="es-ah-threshold">
-              <Solar name="check-circle" />
-              Di atas KKTP 75.0
-            </span>
+            Nilai tidak tersedia dari API.
           </div>
         </Card>
 
@@ -3200,11 +2826,11 @@ function AssessmentHistory({
           </div>
 
           <div className="es-ah-stat-value">
-            <strong>14.5 Jam</strong>
+            <strong>—</strong>
           </div>
 
           <div className="es-ah-stat-hint">
-            Akumulasi seluruh asesmen
+            Waktu pengerjaan tidak tersedia dari API.
           </div>
         </Card>
       </div>
@@ -3351,7 +2977,7 @@ function AssessmentHistory({
               {!filtered.length && (
                 <tr>
                   <td colSpan={6}>
-                    Tidak ada asesmen yang sesuai pencarian.
+                    API backend belum menyediakan endpoint riwayat asesmen.
                   </td>
                 </tr>
               )}
@@ -3403,34 +3029,42 @@ export function History() {
   );
 }
 export function Profile() {
-  const [photoError, setPhotoError] = useState(false);
+  const [photoError, setPhotoError] = useState(true);
+  const resource = useStudentResource(loadStudentProfilePage);
+  if (resource.status === "loading") return <StudentLoading title="Memuat profil siswa..." />;
+  if (resource.status === "error") return <StudentError resource={resource} />;
+  if (resource.status === "empty") return <StudentEmpty title="Profil siswa belum tersedia." />;
+  const { dashboard, user } = resource.data;
+  const studentRecord = dashboard.student;
+  const className = studentRecord.class_room?.name ?? "Belum ditetapkan";
+  const birthDate = studentRecord.birth_date ? new Date(studentRecord.birth_date) : null;
+  const birthDateLabel = birthDate && Number.isFinite(birthDate.getTime())
+    ? new Intl.DateTimeFormat("id-ID", { dateStyle: "long", timeZone: "Asia/Jakarta" }).format(birthDate)
+    : "Informasi tidak tersedia dari API";
 
   const identity = [
-    ["Nama Lengkap", "Andi Pratama"],
-    ["Tempat, Tanggal Lahir", "Bandung, 14 Mei 2010"],
-    ["NIS / NISN", "222307012 / 0098471204"],
-    ["Jenis Kelamin", "Laki-laki"],
-    ["Agama", "Islam"],
-    ["NIK Siswa", "327321•••••0003"],
+    ["Nama Lengkap", user.name],
+    ["Tempat, Tanggal Lahir", birthDateLabel],
+    ["NIS / NISN", studentRecord.nisn],
+    ["Jenis Kelamin", "Informasi tidak tersedia dari API"],
+    ["Agama", "Informasi tidak tersedia dari API"],
+    ["NIK Siswa", "Informasi tidak tersedia dari API"],
   ];
 
   const academic = [
-    ["Tahun Ajaran Aktif", "2026/2027 – Ganjil"],
-    ["Tingkat & Kelas", "Kelas 8B"],
-    ["Status Keaktifan", "Aktif & Terverifikasi"],
-    ["Semester Berjalan", "Semester 1 (Ganjil)"],
-    ["Wali Kelas", "Bpk. Joko Susilo, S.Pd."],
+    ["Tahun Ajaran Aktif", "Informasi tidak tersedia dari API"],
+    ["Tingkat & Kelas", `Kelas ${className}`],
+    ["Status Keaktifan", studentRecord.is_active ? "Aktif" : "Tidak aktif"],
+    ["Semester Berjalan", "Informasi tidak tersedia dari API"],
+    ["Wali Kelas", "Informasi tidak tersedia dari API"],
   ];
 
   const parent = [
-    ["Nama Ayah / Wali", "Bambang Pratama, S.T."],
-    ["Nomor WhatsApp Terdaftar", "+62 812-3456-7890"],
-    ["Email Orang Tua", "bambang.pratama@email.com"],
-    ["Status Hubungan", "Ayah Kandung"],
-    [
-      "Alamat Tinggal Sesuai KK",
-      "Jl. Sukajadi No. 45, Coblong, Kota Bandung, Jawa Barat 40131",
-    ],
+    ["Nama Ayah / Wali", "Informasi tidak tersedia dari API siswa"],
+    ["Nomor WhatsApp Terdaftar", "Informasi tidak tersedia dari API siswa"],
+    ["Email Orang Tua", "Informasi tidak tersedia dari API siswa"],
+    ["Status Hubungan", "Informasi tidak tersedia dari API siswa"],
+    ["Alamat Tinggal Sesuai KK", "Informasi tidak tersedia dari API siswa"],
   ];
 
   return (
@@ -3447,32 +3081,32 @@ export function Profile() {
         <div className="es-sp-profile-main">
           <div className="es-sp-photo">
             {photoError ? (
-              <span>AP</span>
+              <span>{user.name.trim().split(/\s+/).slice(0, 2).map((name) => name[0]).join("").toUpperCase()}</span>
             ) : (
               <img
                 src="/images/andi-pratama.jpg"
-                alt="Foto profil Andi Pratama"
+                alt={`Foto profil ${user.name}`}
                 onError={() => setPhotoError(true)}
               />
             )}
           </div>
 
           <div className="es-sp-profile-copy">
-            <h2>Andi Pratama</h2>
+            <h2>{user.name}</h2>
 
             <span className="es-sp-nisn">
-              NISN: 0098471204
+              NISN: {studentRecord.nisn}
             </span>
 
             <span className="es-sp-class">
-              Rombongan Belajar: Kelas 8B
+              Rombongan Belajar: Kelas {className}
             </span>
 
             <p className="es-sp-homeroom">
               <Solar name="user" />
               <span>
                 Wali Kelas:{" "}
-                <strong>Bpk. Joko Susilo, S.Pd.</strong>
+                <strong>Informasi tidak tersedia dari API.</strong>
               </span>
             </p>
           </div>
@@ -3481,9 +3115,9 @@ export function Profile() {
         <div className="es-sp-profile-status">
           <span>
             <Solar name="check-circle" />
-            Siswa Aktif
+            {studentRecord.is_active ? "Siswa Aktif" : "Tidak Aktif"}
           </span>
-          <p>T.A. 2026/2027 Ganjil</p>
+          <p>Tingkat {dashboard.expected_grade ?? "—"}</p>
         </div>
       </Card>
 
@@ -3514,8 +3148,7 @@ export function Profile() {
           <div className="es-sp-notice">
             <Solar name="shield-check" variant="bold" />
             <p>
-              Data identitas disinkronkan dengan data Dapodik
-              Kemendikbudristek.
+              API siswa hanya menyediakan sebagian data identitas.
               <br />
               Jika terdapat kesalahan data pokok, ajukan
               perbaikan data melalui Bagian Tata Usaha.

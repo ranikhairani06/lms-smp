@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { questions } from "./data";
 
 export type QuizAttempt = {
   answers: Record<number, number>;
   submitted: boolean;
   duration: number;
   submittedAt?: string;
+  serverScore?: number | null;
+  serverStatus?: string;
+  passingScore?: number | null;
 };
 
 const UPDATE_EVENT = "eduspace:quiz-updated";
@@ -18,7 +20,7 @@ export function readQuizAttempts(
 ): QuizAttempt[] {
   try {
     const raw = localStorage.getItem(
-      `eduspace-demo:${subject}:${quiz}:attempts`,
+      `eduspace-student:${subject}:${quiz}:attempts`,
     );
 
     if (!raw) return [];
@@ -37,7 +39,7 @@ export function saveQuizAttempt(
   quiz: string,
   attempt: QuizAttempt,
 ) {
-  const key = `eduspace-demo:${subject}:${quiz}:attempts`;
+  const key = `eduspace-student:${subject}:${quiz}:attempts`;
   const attempts = readQuizAttempts(subject, quiz);
 
   localStorage.setItem(key, JSON.stringify([...attempts, attempt]));
@@ -49,14 +51,14 @@ export function readBestQuizAttempt(
   quiz: string,
 ): QuizAttempt | null {
   const attempts = readQuizAttempts(subject, quiz).filter(
-    (attempt) => attempt.submitted,
+    (attempt) => attempt.submitted && typeof attempt.serverStatus === "string" && typeof attempt.submittedAt === "string",
   );
 
   return attempts.reduce<QuizAttempt | null>((best, current) => {
     if (!best) return current;
 
-    const currentScore = quizScore(current.answers).score;
-    const bestScore = quizScore(best.answers).score;
+    const currentScore = current.serverScore ?? -1;
+    const bestScore = best.serverScore ?? -1;
 
     // Kalau nilainya sama, gunakan percobaan yang lebih baru
     if (currentScore > bestScore) return current;
@@ -71,18 +73,6 @@ export function readBestQuizAttempt(
 
     return best;
   }, null);
-}
-
-export function quizScore(answers: Record<number, number>) {
-  const correct = questions.filter(
-    (question, index) => answers[index] === question.answer,
-  ).length;
-
-  return {
-    correct,
-    total: questions.length,
-    score: Math.round((correct / questions.length) * 100),
-  };
 }
 
 export function useQuizAttempt(subject: string, quiz: string) {
