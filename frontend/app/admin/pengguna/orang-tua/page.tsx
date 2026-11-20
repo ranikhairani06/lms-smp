@@ -2,17 +2,30 @@
 
 import { useState, type FormEvent } from "react";
 import AdminIcon from "@/app/admin/_components/AdminIcons";
-import AdminDirectoryToolbar from "@/app/admin/_components/AdminDirectoryToolbar";
 import useAdminDirectoryFilter from "@/app/admin/_components/useAdminDirectoryFilter";
-import { AdminStatRow, AdminTableIconButton, Button, Field, InfoBanner, Modal, PageHeading, Pagination, StatusBadge, TableEmpty, adminStyles as s } from "@/app/admin/_components/AdminUI";
+import {
+  ManagementActionButtons,
+  ManagementFormField as Field,
+  ManagementModal as Modal,
+  ManagementPageHeader as PageHeading,
+  ManagementPagination as Pagination,
+  ManagementStatCard,
+  ManagementStatusBadge as StatusBadge,
+  ManagementTable,
+  ManagementToolbar,
+  type ManagementStat,
+} from "@/app/admin/pengguna/_components/ManagementComponents";
+import { AdminTableIconButton, Button, TableEmpty, adminStyles as s } from "@/app/admin/_components/AdminUI";
 
-const parents = [
-  { name: "Bambang Pratama, S.T.", relation: "Ayah Kandung", child: "Andi Pratama • 8B", phone: "0812-9844-1120", status: "Aktif", access: "15 Menit lalu" },
-  { name: "Ratna Juwita, S.E.", relation: "Ibu Kandung", child: "Siti Rahma • 8A", phone: "0813-2211-9043", status: "Aktif", access: "Hari ini, 08:20 WIB" },
-  { name: "Suryadi Fauzan", relation: "Ayah Kandung", child: "Rafi Ahmad • 7C +1 anak", phone: "0852-7711-4309", status: "Aktif", access: "Kemarin, 14:10 WIB" },
-  { name: "Hendrawati Kusuma", relation: "Wali Murid", child: "Dimas Surya K. • 9C", phone: "0819-3320-1178", status: "Aktif", access: "2 Hari lalu" },
-  { name: "Nurul Hasanah, S.Pd.", relation: "Ibu Kandung", child: "Zahra Aulia • 7D", phone: "0877-6655-2201", status: "Aktif", access: "3 Hari lalu" },
-  { name: "Dedi Supriyadi", relation: "Ayah Kandung", child: "Bagas Pratama • 9A", phone: "0811-9988-3344", status: "Aktif", access: "5 Hari lalu" },
+type ParentDirectoryItem = { name: string; relation: string; child: string; additionalChildren: number; phone: string; status: string; access: string };
+
+const parents: ParentDirectoryItem[] = [
+  { name: "Bambang Pratama, S.T.", relation: "Ayah Kandung", child: "Andi Pratama • 8B", additionalChildren: 0, phone: "0812-9844-1120", status: "Aktif", access: "15 Menit lalu" },
+  { name: "Ratna Juwita, S.E.", relation: "Ibu Kandung", child: "Siti Rahma • 8A", additionalChildren: 0, phone: "0813-2211-9043", status: "Aktif", access: "Hari ini, 08:20 WIB" },
+  { name: "Suryadi Fauzan", relation: "Ayah Kandung", child: "Rafi Ahmad • 7C", additionalChildren: 1, phone: "0852-7711-4309", status: "Aktif", access: "Kemarin, 14:10 WIB" },
+  { name: "Hendrawati Kusuma", relation: "Wali Murid", child: "Dimas Surya K. • 9C", additionalChildren: 0, phone: "0819-3320-1178", status: "Aktif", access: "2 Hari lalu" },
+  { name: "Nurul Hasanah, S.Pd.", relation: "Ibu Kandung", child: "Zahra Aulia • 7D", additionalChildren: 0, phone: "0877-6655-2201", status: "Aktif", access: "3 Hari lalu" },
+  { name: "Dedi Supriyadi", relation: "Ayah Kandung", child: "Bagas Pratama • 9A", additionalChildren: 0, phone: "0811-9988-3344", status: "Aktif", access: "5 Hari lalu" },
 ];
 
 const getParentSearchText = (parent: typeof parents[number]) => `${parent.name} ${parent.child} ${parent.phone}`;
@@ -49,38 +62,38 @@ export default function OrangTuaPage() {
     matchesCategory: matchesParentCategory,
     initialCategory: "Semua Kategori",
   });
+  const statistics: ManagementStat[] = [
+    { label: "Total Akun Orang Tua / Wali", value: "782", icon: "users-group-rounded-linear", tone: "primary" },
+    { label: "Penautan Peserta Didik", value: "94.6%", icon: "link-linear", tone: "warning" },
+    { label: "Akun Aktif Bulan Ini", value: "690", icon: "check-circle-linear", tone: "success" },
+  ];
 
   return (
-    <>
+    <div className={s.parentManagementPage}>
       <PageHeading breadcrumbs={["LMS", "Manajemen Pengguna", "Manajemen Orang Tua (Wali)"]} title="Manajemen Orang Tua (Wali Murid)" description="Pengelolaan data akun wali murid terverifikasi, penautan akun siswa, dan nomor kontak darurat."
         actions={<><Button variant="outline" tone="amber" icon="upload-linear" onClick={() => alert("Pilih file Excel/CSV untuk proses import.")}>Import Data (Excel/CSV)</Button><Button icon="user-plus-linear" onClick={() => setModal(true)}>Tambah Orang Tua/Wali</Button></>} />
       {/* Bagian tampilan: ringkasan akun orang tua dan status penautan peserta didik. */}
-      <AdminStatRow columns={3} items={[
-        { label: "Total Akun Orang Tua / Wali", value: "782", icon: "users-group-rounded-linear", tone: "primary" },
-        { label: "Penautan Peserta Didik", value: "94.6%", icon: "link-linear", tone: "warning" },
-        { label: "Akun Aktif Bulan Ini", value: "690", icon: "check-circle-linear", tone: "success" },
-      ]} />
+      <div className={`${s.statGridThree} ${s.adminStatRow}`}>
+        {statistics.map((item) => <ManagementStatCard key={item.label} item={item} />)}
+      </div>
       {/* Bagian tampilan: pencarian akun wali dan filter hubungan keluarga. */}
-      <AdminDirectoryToolbar
+      <ManagementToolbar
         keyword={keyword}
         onKeywordChange={setKeyword}
-        searchPlaceholder="Cari nama orang tua, siswa, atau nomor HP..."
+        searchPlaceholder="Cari nama guru, NIP, atau mata pelajaran..."
         category={category}
         onCategoryChange={setCategory}
         categoryOptions={["Semua Kategori", "Ayah Kandung", "Ibu Kandung", "Wali Murid"]}
       />
       {/* Bagian tampilan: direktori akun wali dan daftar siswa yang tertaut. */}
-      <div className={s.tableWrap}>
-        <table className={`${s.dataTable} ${s.directoryTable}`}>
+      <ManagementTable tableClassName={`${s.dataTable} ${s.directoryTable} ${s.parentTable}`} footer={<Pagination variant="directory" current={page} total={131} onChange={setPage} label="Menampilkan 1-7 dari 782 orang tua/wali" />}>
           <thead><tr><th>Nama Orang Tua / Wali</th><th>Siswa Terhubung &amp; Kelas</th><th>Nomor HP</th><th>Status Akun</th><th>Terakhir Akses</th><th>Aksi</th></tr></thead>
           <tbody>{filtered.map((parent) => <tr key={parent.name}>
             <td><span className={s.tableStrong}>{parent.name}</span><span className={s.tableSub}>{parent.relation}</span></td>
-            <td><StatusBadge tone="primary" className={s.directoryBadge}><AdminIcon name="graduation-cap-linear" size={12} /> {parent.child}</StatusBadge></td><td>{parent.phone}</td><td><StatusBadge tone={parent.status === "Aktif" ? "primary" : "warning"} className={`${s.directoryBadge} ${s.directoryStatusBadge}`}>{parent.status}</StatusBadge></td><td>{parent.access}</td>
-            <td><div className={s.tableActions}><AdminTableIconButton icon="eye-linear" title="Detail" ariaLabel="Detail" onClick={() => alert(`${parent.name}\n${parent.child}`)} /><AdminTableIconButton icon="pen-linear" title="Edit" ariaLabel="Edit" onClick={() => setModal(true)} /><AdminTableIconButton icon="history-linear" title="Riwayat" ariaLabel="Riwayat" onClick={() => alert("Riwayat akses akun wali")} /></div></td>
+            <td><div className={s.parentChildren}><StatusBadge tone="primary" className={s.directoryBadge}><AdminIcon name="graduation-cap-linear" size={12} /> {parent.child}</StatusBadge>{parent.additionalChildren > 0 && <span className={s.parentAdditionalChildren}>+{parent.additionalChildren} anak <AdminIcon name="info-circle-linear" size={12} /></span>}</div></td><td>{parent.phone}</td><td><StatusBadge tone={parent.status === "Aktif" ? "success" : "warning"} className={`${s.directoryBadge} ${s.directoryStatusBadge}`}>{parent.status}</StatusBadge></td><td>{parent.access}</td>
+            <td><ManagementActionButtons><AdminTableIconButton icon="eye-linear" title="Detail" ariaLabel="Detail" onClick={() => alert(`${parent.name}\n${parent.child}${parent.additionalChildren > 0 ? `\n+${parent.additionalChildren} anak` : ""}`)} /><AdminTableIconButton icon="pen-linear" title="Edit" ariaLabel="Edit" onClick={() => setModal(true)} /><AdminTableIconButton icon="history-linear" title="Riwayat" ariaLabel="Riwayat" onClick={() => alert("Riwayat akses akun wali")} /></ManagementActionButtons></td>
           </tr>)}{filtered.length === 0 && <TableEmpty colSpan={6} />}</tbody>
-        </table>
-        <Pagination current={page} total={4} onChange={setPage} label={`Menampilkan 1-${filtered.length} dari 782 orang tua/wali`} />
-      </div>
+      </ManagementTable>
 
       {/* Bagian tampilan: modal registrasi wali, relasi keluarga, dan multi-child linking. */}
       {modal && <Modal title="Tambah Orang Tua / Wali" subtitle="Registrasi akun wali murid dan tautkan dengan data peserta didik aktif." onClose={() => setModal(false)} footer={<>{displayedErrorCount > 0 && <div style={{ display: "flex", alignItems: "center", gap: "var(--space-sm)", maxWidth: "220px", color: "var(--color-error)", fontSize: "var(--text-l12-size)", lineHeight: "var(--text-l12-line)" }}><AdminIcon name="danger-triangle-linear" size={16} />Pastikan {displayedErrorCount} kolom bermasalah telah diperbaiki</div>}<div style={{ display: "flex", alignItems: "center", gap: "var(--space-sm)", marginLeft: "auto" }}><Button variant="outline" onClick={() => setModal(false)}>Batal</Button><Button type="submit" form="parent-form" icon="diskette-linear" disabled={displayedErrorCount > 0}>Simpan Akun Orang Tua</Button></div></>}>
@@ -99,6 +112,6 @@ export default function OrangTuaPage() {
         <div className={s.successLine} style={{ marginTop: "var(--space-md)" }}><AdminIcon name="check-circle-linear" size={15} /> Data terhubung dengan 1 peserta didik aktif</div>
         </form>
       </Modal>}
-    </>
+    </div>
   );
 }

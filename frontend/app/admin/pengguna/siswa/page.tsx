@@ -4,18 +4,22 @@ import { useRef, useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import * as XLSX from "xlsx";
 import AdminIcon from "@/app/admin/_components/AdminIcons";
-import AdminDirectoryToolbar from "@/app/admin/_components/AdminDirectoryToolbar";
 import useAdminDirectoryFilter from "@/app/admin/_components/useAdminDirectoryFilter";
 import {
+  ManagementActionButtons,
+  ManagementFormField as Field,
+  ManagementModal as Modal,
+  ManagementPageHeader as PageHeading,
+  ManagementPagination as Pagination,
+  ManagementStatCard,
+  ManagementStatusBadge as StatusBadge,
+  ManagementTable,
+  ManagementToolbar,
+  type ManagementStat,
+} from "@/app/admin/pengguna/_components/ManagementComponents";
+import {
   Button,
-  AdminStatRow,
-  AdminTableIconButton,
-  Field,
   InfoBanner,
-  Modal,
-  PageHeading,
-  Pagination,
-  StatusBadge,
   TableEmpty,
   adminStyles as s
 } from "@/app/admin/_components/AdminUI";
@@ -157,7 +161,9 @@ export default function SiswaPage() {
       setForm({ name: student.name, nisn: student.nisn, nik: student.nik ?? "", birthplace: student.birthplace ?? "", birthdate: student.birthdate ?? "", gender: student.gender, rombel: studentRombel ? formatRombel(studentRombel) : "" });
     } else {
       setSelected(initialStudents[0]);
-      setForm({ name: "", nisn: "", nik: "", birthplace: "", birthdate: "", gender: "Laki-laki", rombel: "" });
+      const preferredRombel = rombelData.find((rombel) => rombel.code === "8B" && rombel.filled < rombel.capacity)
+        ?? rombelData.find((rombel) => rombel.filled < rombel.capacity);
+      setForm({ name: "", nisn: "", nik: "", birthplace: "", birthdate: "", gender: "Laki-laki", rombel: preferredRombel ? formatRombel(preferredRombel) : "" });
     }
     setTouched({});
     setSubmitAttempted(false);
@@ -234,37 +240,32 @@ export default function SiswaPage() {
 
   const updateFormField = (field: FormFieldKey, value: string) => setForm((current) => ({ ...current, [field]: value }));
 
-  const renderTextField = (field: Exclude<FormFieldKey, "gender" | "rombel">, label: string, placeholder: string, required = false, fullWidth = false, trailingIcon?: string) => {
+  const renderTextField = (field: Exclude<FormFieldKey, "gender" | "rombel">, label: string, placeholder: string, required = false, fullWidth = false) => {
     const error = fieldErrors[field];
     const showError = Boolean(error && shouldShowError(field));
-    const value = form[field];
-    const isValid = Boolean(value.trim() && !error);
-    const statusIcon = showError ? "danger-triangle-linear" : isValid ? "check-circle-linear" : trailingIcon;
-    const statusColor = showError ? "var(--color-error)" : isValid ? "var(--color-success)" : "var(--color-text-secondary)";
     return (
-      <label className={s.formField} key={field} style={fullWidth ? { gridColumn: "1 / -1" } : undefined}>
-        <span>{label}{required && <b> *</b>}</span>
-        <div style={{ position: "relative" }}>
-          <input
-            type="text"
-            value={value}
-            onChange={(event) => updateFormField(field, field === "nisn" ? event.target.value.replace(/\D/g, "").slice(0, 10) : field === "nik" ? event.target.value.replace(/\D/g, "").slice(0, 16) : event.target.value)}
-            onBlur={() => setTouched((current) => ({ ...current, [field]: true }))}
-            placeholder={placeholder}
-            aria-required={required}
-            aria-invalid={showError}
-            style={{
-              paddingRight: statusIcon ? "var(--space-xl)" : undefined,
-              borderColor: showError ? "var(--color-error)" : isValid ? "var(--color-success)" : undefined,
-              borderWidth: showError ? "2px" : undefined,
-            }}
-          />
-          {statusIcon && <span aria-hidden="true" style={{ position: "absolute", right: "var(--space-sm)", top: "50%", display: "flex", transform: "translateY(-50%)", color: statusColor, pointerEvents: "none" }}><AdminIcon name={statusIcon} size={15} /></span>}
-        </div>
-        {showError && <small role="alert" style={{ display: "flex", alignItems: "center", gap: "var(--space-xs)", color: "var(--color-error)" }}><AdminIcon name="danger-triangle-linear" size={14} />{error}</small>}
-      </label>
+      <Field
+        key={field}
+        label={label}
+        value={form[field]}
+        onChange={(value) => updateFormField(field, field === "nisn" ? value.replace(/\D/g, "").slice(0, 10) : field === "nik" ? value.replace(/\D/g, "").slice(0, 16) : value)}
+        onBlur={() => setTouched((current) => ({ ...current, [field]: true }))}
+        placeholder={placeholder}
+        required={required}
+        inputMode={field === "nisn" || field === "nik" ? "numeric" : undefined}
+        maxLength={field === "nisn" ? 10 : field === "nik" ? 16 : undefined}
+        error={showError ? error : undefined}
+        className={fullWidth ? s.formFull : ""}
+      />
     );
   };
+
+  const statistics: ManagementStat[] = [
+    { label: "Total Siswa Terdaftar", value: "860", icon: "users-group-rounded-linear", tone: "primary" },
+    { label: "Siswa Aktif Login", value: "812", icon: "user-check-linear", tone: "success" },
+    { label: "Belum Ganti Password", value: "48", icon: "lock-keyhole-linear", tone: "warning" },
+    { label: "Perlu Verifikasi NISN", value: "18", icon: "clipboard-check-linear", tone: "danger" },
+  ];
 
   return (
     <>
@@ -278,7 +279,7 @@ export default function SiswaPage() {
             {/* Tombol Import Data */}
             <Button
               variant="outline"
-              tone="amber"
+              className={s.importStudentButton}
               icon="upload-bold"
               onClick={() => importInputRef.current?.click()}
               disabled={importBusy}
@@ -288,6 +289,7 @@ export default function SiswaPage() {
 
             {/* Tombol Tambah Siswa */}
             <Button
+              className={s.addStudentButton}
               icon="user-plus-rounded-linear"
               onClick={() => openModal("add")}
             >
@@ -301,58 +303,25 @@ export default function SiswaPage() {
       {importNotice && <InfoBanner tone="success">{importNotice}</InfoBanner>}
 
       {/* Bagian tampilan: kartu ringkasan akun peserta didik. */}
-      <AdminStatRow columns={4} items={[
-          {
-            label: "Total Siswa Terdaftar",
-            value: "860",
-            icon: "users-group-rounded-linear",
-            tone: "primary",
-          },
-          {
-            label: "Siswa Aktif Login",
-            value: "812",
-            icon: "user-check-linear",
-            tone: "success",
-          },
-          {
-            label: "Belum Ganti Password",
-            value: "48",
-            icon: "lock-keyhole-linear",
-            tone: "warning",
-          },
-          {
-            label: "Perlu Verifikasi NISN",
-            value: "18",
-            icon: "clipboard-check-linear",
-            tone: "danger",
-          },
-        ]} />
+      <div className={`${s.statGridFour} ${s.studentStatGrid}`}>
+        {statistics.map((item) => <ManagementStatCard key={item.label} item={item} variant="student" />)}
+      </div>
       {/* Bagian tampilan: pencarian dan penyaringan direktori siswa. */}
-      <AdminDirectoryToolbar
-        keyword={keyword}
-        onKeywordChange={setKeyword}
-        searchPlaceholder="Cari nama / NISN..."
-        category={category}
-        onCategoryChange={setCategory}
-        categoryOptions={["Semua Kategori", "Aktif", "Terkunci", "Belum Aktivasi"]}
-      />
+      <ManagementToolbar keyword={keyword} onKeywordChange={setKeyword} searchPlaceholder="Cari nama / NISN..." category={category} onCategoryChange={setCategory} categoryOptions={["Semua Kategori", "Aktif", "Terkunci", "Belum Aktivasi"]} />
       {/* Bagian tampilan: tabel peserta didik beserta aksi detail, edit, dan reset kredensial. */}
-      <div className={s.tableWrap}>
-        <table className={`${s.dataTable} ${s.directoryTable}`}>
+      <ManagementTable tableClassName={s.dataTable} footer={<Pagination current={page} total={3} onChange={setPage} label={`Menampilkan 1-${filtered.length} dari 860 siswa`} />}>
           <thead><tr><th>NISN</th><th>Nama Siswa</th><th>Rombel / Kelas</th><th>Jenis Kelamin</th><th>Status Akun LMS</th><th>Aktivitas Terakhir</th><th>Aksi</th></tr></thead>
           <tbody>
             {filtered.map((student) => (
               <tr key={student.nisn}>
-                <td>{student.nisn}</td><td><span className={s.tableStrong}>{student.name}</span></td><td><span className={s.directoryClassChip}>{student.rombel}</span></td><td>{student.gender}</td>
-                <td><StatusBadge className={`${s.directoryBadge} ${s.directoryStatusBadge}`} tone={student.status.startsWith("Aktif") ? "primary" : student.status.startsWith("Terkunci") ? "danger" : "warning"}>{student.status}</StatusBadge></td><td>{student.activity}</td>
-                <td><div className={s.tableActions}>{student.status.startsWith("Terkunci") && <button className={s.textLink} onClick={() => setStudents((rows) => rows.map((row) => row.nisn === student.nisn ? { ...row, status: "Aktif (Sandi Diperbarui)" } : row))}>Buka Kunci</button>}<AdminTableIconButton icon="eye-linear" title="Detail" ariaLabel="Detail" onClick={() => openModal("detail", student)} /><AdminTableIconButton icon="pen-linear" title="Edit" ariaLabel="Edit" onClick={() => openModal("edit", student)} /><AdminTableIconButton icon="lock-keyhole-linear" title="Reset kata sandi" ariaLabel="Reset kata sandi" onClick={() => openModal("reset", student)} /></div></td>
+                <td>{student.nisn}</td><td><span className={s.tableStrong}>{student.name}</span></td><td><span className={s.levelTag}>{student.rombel}</span></td><td>{student.gender}</td>
+                <td><StatusBadge tone={student.status.startsWith("Aktif") ? "info" : student.status.startsWith("Terkunci") ? "danger" : "neutral"}>{student.status}</StatusBadge></td><td>{student.activity}</td>
+                <td><ManagementActionButtons>{student.status.startsWith("Terkunci") && <button className={s.textLink} onClick={() => setStudents((rows) => rows.map((row) => row.nisn === student.nisn ? { ...row, status: "Aktif (Sandi Diperbarui)" } : row))}>Buka Kunci</button>}<button className={s.iconButton} title="Detail" onClick={() => openModal("detail", student)}><AdminIcon name="eye-linear" size={15} /></button><button className={s.iconButton} title="Edit" onClick={() => openModal("edit", student)}><AdminIcon name="pen-linear" size={15} /></button><button className={s.iconButton} title="Reset kata sandi" onClick={() => openModal("reset", student)}><AdminIcon name="lock-keyhole-linear" size={15} /></button></ManagementActionButtons></td>
               </tr>
             ))}
             {filtered.length === 0 && <TableEmpty colSpan={7} />}
           </tbody>
-        </table>
-        <Pagination current={page} total={3} onChange={setPage} label={`Menampilkan 1-${filtered.length} dari 860 siswa`} />
-      </div>
+      </ManagementTable>
 
       {importOpen && <Modal
         title="Pratinjau Import Data Siswa"
@@ -368,15 +337,13 @@ export default function SiswaPage() {
             </p>
             <Button variant="outline" onClick={() => importInputRef.current?.click()}>Pilih File Lain</Button>
           </div>
-          <div className={s.tableWrap}>
-            <table className={s.dataTable}>
+          <ManagementTable tableClassName={s.dataTable}>
               <thead><tr><th>Baris</th><th>NISN</th><th>Nama Siswa</th><th>Rombel</th><th>Jenis Kelamin</th><th>Validasi</th></tr></thead>
               <tbody>{importRows.map((row) => <tr key={`${row.rowNumber}-${row.nisn}`}>
                 <td>{row.rowNumber}</td><td>{row.nisn || "—"}</td><td>{row.name || "—"}</td><td>{row.rombel || "—"}</td><td>{row.gender || "—"}</td>
                 <td>{row.errors.length ? <StatusBadge tone="danger">{row.errors.join(" ")}</StatusBadge> : <StatusBadge tone="success">Siap diimpor</StatusBadge>}</td>
               </tr>)}</tbody>
-            </table>
-          </div>
+          </ManagementTable>
           <p className={s.pageDescription} style={{ marginBottom: 0, marginTop: "var(--space-sm)" }}>
             Kolom yang dibaca: NISN, Nama Siswa, Rombel / Kelas, dan Jenis Kelamin. Data dengan NISN duplikat, rombel tidak dikenal/penuh, atau nilai wajib tidak valid tidak akan diimpor.
           </p>
@@ -388,57 +355,38 @@ export default function SiswaPage() {
         title={modal === "add" ? "Tambah Siswa Baru" : "Edit Data Siswa"}
         subtitle="Daftarkan akun peserta didik baru ke sistem portal LMS."
         onClose={() => setModal(null)}
-        layout="studentForm"
-        footer={<>
-          {displayedErrorCount > 0 && <div style={{ display: "flex", alignItems: "center", gap: "var(--space-sm)", maxWidth: "220px", color: "var(--color-error)", fontSize: "var(--text-l12-size)", lineHeight: "var(--text-l12-line)" }}><AdminIcon name="danger-triangle-linear" size={16} />Pastikan {displayedErrorCount} kolom bermasalah telah diperbaiki</div>}
-          <div style={{ display: "flex", alignItems: "center", gap: "var(--space-sm)", marginLeft: "auto" }}>
-            <Button variant="outline" style={{ color: "var(--color-text-primary)", background: "var(--color-surface)", borderColor: "var(--color-border)" }} onClick={() => setModal(null)}>Batal</Button>
-            <Button type="submit" form="student-form" icon="diskette-linear" iconSize={14} disabled={displayedErrorCount > 0}>Simpan Siswa</Button>
-          </div>
-        </>}
+        width="wide"
+        footer={<><Button variant="outline" onClick={() => setModal(null)}>Batal</Button><Button type="submit" form="student-form" icon="diskette-linear" disabled={displayedErrorCount > 0}>Simpan Siswa</Button></>}
       >
         <form id="student-form" onSubmit={saveStudent}>
-          <div style={{ display: "flex", alignItems: "flex-start", gap: "var(--space-sm)", marginBottom: "var(--space-md)", padding: "var(--space-md)", color: "var(--color-primary-dark)", background: "var(--color-primary-tint)", border: "var(--border-width-xs) solid var(--color-primary-light)", borderRadius: "var(--radius-m)", fontSize: "var(--text-p12-size)", lineHeight: "var(--text-p12-line)" }}>
-            <AdminIcon name="info-circle-bold" size={18} color="var(--color-primary)" />
-            <div><strong style={{ display: "block", color: "var(--color-primary-dark)", fontWeight: "var(--font-weight-bold)" }}>Kredensial Login Siswa:</strong><p style={{ margin: 0 }}>NISN dipakai sebagai username awal. Kata sandi awal = tanggal lahir siswa (DDMMYYYY). Siswa wajib memperbarui sandi saat login perdana.</p></div>
-          </div>
-          <div className={s.formGrid} style={{ gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 13rem), 1fr))", gap: "var(--space-md)" }}>
-            {renderTextField("name", "Nama Lengkap", "Nama lengkap peserta didik", true, true)}
-            {renderTextField("nisn", "NISN (Nomor Induk Siswa Nasional)", "Masukkan 10 digit NISN", true, true)}
-            {renderTextField("nik", "NIK (Nomor Induk Kependudukan) (16 digit)", "Masukkan 16 digit NIK", false, true)}
+          <InfoBanner><strong>Kredensial Login Siswa:</strong><p>NISN dipakai sebagai username awal. Kata sandi awal = tanggal lahir siswa (DDMMYYYY). Siswa wajib memperbarui sandi saat login perdana.</p></InfoBanner>
+          <div className={s.formGrid}>
+            {renderTextField("name", "Nama Lengkap", "Nama lengkap peserta didik", true)}
+            {renderTextField("nisn", "NISN (Nomor Induk Siswa Nasional)", "Masukkan 10 digit NISN", true)}
+            {renderTextField("nik", "NIK (Nomor Induk Kependudukan) (16 digit)", "Masukkan 16 digit NIK")}
             {renderTextField("birthplace", "Tempat Lahir", "Kota kelahiran", true)}
-            {renderTextField("birthdate", "Tanggal Lahir", "DD/MM/YYYY", true, false, "calendar-linear")}
-            <div className={s.formField} role="radiogroup" aria-label="Jenis Kelamin" aria-invalid={genderErrorShown} style={{ gridColumn: "1 / -1" }}>
-              <span style={{ display: "flex", alignItems: "center", gap: "var(--space-xs)" }}>Jenis Kelamin <b>*</b>{genderErrorShown && <AdminIcon name="danger-triangle-linear" size={14} color="var(--color-error)" />}</span>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "var(--space-sm)" }}>
-                {["Laki-laki", "Perempuan"].map((gender) => {
-                  const checked = form.gender === gender;
-                  return <label key={gender} style={{ position: "relative", boxSizing: "border-box", width: "100%", height: "36px", minHeight: "36px", display: "flex", alignItems: "center", justifyContent: "center", padding: "0 var(--space-xl)", color: checked ? "var(--color-primary)" : "var(--color-text-secondary)", background: checked ? "var(--color-primary-tint)" : "var(--color-surface)", border: `${checked ? "calc(var(--border-width-xs) + var(--border-width-xs))" : "var(--border-width-xs)"} solid ${genderErrorShown ? "var(--color-error)" : checked ? "var(--color-primary)" : "var(--color-border)"}`, borderRadius: "var(--radius-m)", fontSize: "var(--text-l12-size)", lineHeight: "var(--text-l12-line)", fontWeight: checked ? "var(--font-weight-semibold)" : "var(--font-weight-medium)", whiteSpace: "nowrap", cursor: "pointer" }}>
-                    <input type="radio" name="gender" value={gender} checked={checked} onChange={() => updateFormField("gender", gender)} onBlur={() => setTouched((current) => ({ ...current, gender: true }))} style={{ position: "absolute", left: "var(--space-md)", top: "50%", transform: "translateY(-50%)", width: "18px", height: "18px", minWidth: "18px", minHeight: "18px", maxWidth: "18px", maxHeight: "18px", padding: 0, margin: 0, borderRadius: "var(--radius-circle)", accentColor: "var(--color-primary)" }} />
-                    {gender}
-                  </label>;
+            {renderTextField("birthdate", "Tanggal Lahir", "DD/MM/YYYY", true)}
+            <label className={`${s.formField} ${genderErrorShown ? s.formFieldInvalid : ""}`}>
+              <span>Jenis Kelamin <b>*</b></span>
+              <select value={form.gender} onChange={(event) => updateFormField("gender", event.target.value)} onBlur={() => setTouched((current) => ({ ...current, gender: true }))} aria-invalid={genderErrorShown}>
+                <option>Laki-laki</option>
+                <option>Perempuan</option>
+              </select>
+              {genderErrorShown && <small className={s.fieldError} role="alert">{fieldErrors.gender}</small>}
+            </label>
+            <label className={`${s.formField} ${s.formFull} ${rombelErrorShown ? s.formFieldInvalid : ""}`}>
+              <span>Rombongan Belajar (Rombel) <b>*</b></span>
+              <select value={form.rombel} onChange={(event) => { updateFormField("rombel", event.target.value); setTouched((current) => ({ ...current, rombel: true })); }} onBlur={() => setTouched((current) => ({ ...current, rombel: true }))} aria-invalid={rombelErrorShown}>
+                <option value="" disabled>Pilih rombongan belajar</option>
+                {rombelData.map((rombel) => {
+                  const label = formatRombel(rombel);
+                  const full = rombel.filled >= rombel.capacity;
+                  const canKeepCurrentClass = modal === "edit" && selected.rombel === rombel.code;
+                  return <option key={rombel.code} value={label} disabled={full && !canKeepCurrentClass}>{label}{full ? " (Penuh)" : ""}</option>;
                 })}
-              </div>
-              {genderErrorShown && <small role="alert" style={{ display: "flex", alignItems: "center", gap: "var(--space-xs)", color: "var(--color-error)" }}><AdminIcon name="danger-triangle-linear" size={14} />{fieldErrors.gender}</small>}
-            </div>
-            <label className={s.formField} style={{ gridColumn: "1 / -1" }}>
-              <span style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "var(--space-sm)" }}>
-                <span>Rombongan Belajar (Rombel) <b>*</b></span>
-                {selectedRombel && <StatusBadge tone="warning"><AdminIcon name="chair-2-linear" size={13} color="var(--color-warning-dark)" />{selectedRombelIsFull ? `Kapasitas ${selectedRombel.filled}/${selectedRombel.capacity} siswa (Penuh)` : `Kapasitas ${selectedRombel.filled}/${selectedRombel.capacity} siswa (Sisa ${selectedRombel.capacity - selectedRombel.filled} kursi)`}</StatusBadge>}
-              </span>
-              <div style={{ position: "relative" }}>
-                <select value={form.rombel} onChange={(event) => { updateFormField("rombel", event.target.value); setTouched((current) => ({ ...current, rombel: true })); }} onBlur={() => setTouched((current) => ({ ...current, rombel: true }))} aria-required="true" aria-invalid={rombelErrorShown} style={{ paddingRight: rombelErrorShown ? "var(--space-2xl)" : undefined, borderColor: rombelErrorShown ? "var(--color-error)" : undefined, borderWidth: rombelErrorShown ? "2px" : undefined }}>
-                  <option value="" disabled>Pilih rombongan belajar</option>
-                  {rombelData.map((rombel) => {
-                    const label = formatRombel(rombel);
-                    const full = rombel.filled >= rombel.capacity;
-                    const canKeepCurrentClass = modal === "edit" && selected.rombel === rombel.code;
-                    return <option key={rombel.code} value={label} disabled={full && !canKeepCurrentClass}>{label}{full ? " (Penuh)" : ""}</option>;
-                  })}
-                </select>
-                {rombelErrorShown && <span aria-hidden="true" style={{ position: "absolute", right: "var(--space-xl)", top: "50%", display: "flex", transform: "translateY(-50%)", color: "var(--color-error)", pointerEvents: "none" }}><AdminIcon name="danger-triangle-linear" size={14} /></span>}
-              </div>
-              {rombelErrorShown && <small role="alert" style={{ display: "flex", alignItems: "center", gap: "var(--space-xs)", color: "var(--color-error)" }}><AdminIcon name="danger-triangle-linear" size={14} />{fieldErrors.rombel}</small>}
+              </select>
+              <small>{selectedRombel ? `Kapasitas ${selectedRombel.filled}/${selectedRombel.capacity} siswa${selectedRombelIsFull ? " (Penuh)" : `; sisa ${selectedRombel.capacity - selectedRombel.filled} kursi`}.` : "Kapasitas kelas mengikuti master data rombel."}</small>
+              {rombelErrorShown && <small className={s.fieldError} role="alert">{fieldErrors.rombel}</small>}
             </label>
           </div>
           <div className={s.formSectionTitle}>
@@ -452,8 +400,9 @@ export default function SiswaPage() {
               <StatusBadge tone="success">Akun Terhubung</StatusBadge>
             </div>
           ) : (
-            <div style={{ display: "flex", alignItems: "center", gap: "var(--space-sm)", padding: "var(--space-md)", color: "var(--color-text-secondary)", background: "var(--color-background)", border: "var(--border-width-xs) solid var(--color-border)", borderRadius: "var(--radius-m)", fontSize: "var(--text-p12-size)", lineHeight: "var(--text-p12-line)" }}>
-              <AdminIcon name="users-group-rounded-linear" size={18} />Belum ada data orang tua/wali tertaut.
+            <div className={s.linkedStudent}>
+              <span className={s.initialAvatar}><AdminIcon name="users-group-rounded-linear" size={19} /></span>
+              <div><strong>Orang tua/wali belum tertaut</strong><small>Data akan ditampilkan jika sudah tersedia.</small></div>
             </div>
           )}
         </form>

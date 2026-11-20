@@ -212,22 +212,35 @@ export function Pagination({
   total = 3,
   onChange,
   label,
+  variant = "default",
 }: {
   current?: number;
   total?: number;
   onChange?: (page: number) => void;
   label?: string;
+  variant?: "default" | "directory";
 }) {
+  const pages: (number | "ellipsis")[] = variant === "directory"
+    ? total <= 5
+      ? Array.from({ length: total }, (_, index) => index + 1)
+      : current <= 3
+        ? [1, 2, 3, "ellipsis", total]
+        : current >= total - 2
+          ? [1, "ellipsis", total - 2, total - 1, total]
+          : [1, "ellipsis", current - 1, current, current + 1, "ellipsis", total]
+    : Array.from({ length: total }, (_, index) => index + 1);
+
   return (
-    <div className={styles.pagination}>
+    <div className={`${styles.pagination} ${variant === "directory" ? styles.paginationDirectory : ""}`}>
       {label && <span>{label}</span>}
       <div className={styles.pageControls}>
         <button aria-label="Halaman sebelumnya" onClick={() => onChange?.(Math.max(1, current - 1))} disabled={current <= 1}>
           <AdminIcon name="alt-arrow-left-linear" size={15} />
         </button>
-        {Array.from({ length: total }, (_, index) => index + 1).map((page) => (
-          <button key={page} className={current === page ? styles.pageCurrent : ""} onClick={() => onChange?.(page)}>{page}</button>
-        ))}
+        {pages.map((page, index) => page === "ellipsis"
+          ? <span className={styles.pageEllipsis} key={`ellipsis-${index}`}>...</span>
+          : <button key={page} className={current === page ? styles.pageCurrent : ""} onClick={() => onChange?.(page)} aria-current={current === page ? "page" : undefined}>{page}</button>
+        )}
         <button aria-label="Halaman selanjutnya" onClick={() => onChange?.(Math.min(total, current + 1))} disabled={current >= total}>
           <AdminIcon name="alt-arrow-right-linear" size={15} />
         </button>

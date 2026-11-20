@@ -2,9 +2,20 @@
 
 import { useState, type FormEvent } from "react";
 import AdminIcon from "@/app/admin/_components/AdminIcons";
-import AdminDirectoryToolbar from "@/app/admin/_components/AdminDirectoryToolbar";
 import useAdminDirectoryFilter from "@/app/admin/_components/useAdminDirectoryFilter";
-import { AdminStatRow, AdminTableIconButton, Button, Field, InfoBanner, Modal, PageHeading, Pagination, StatusBadge, TableEmpty, adminStyles as s } from "@/app/admin/_components/AdminUI";
+import {
+  ManagementActionButtons,
+  ManagementFormField as Field,
+  ManagementModal as Modal,
+  ManagementPageHeader as PageHeading,
+  ManagementPagination as Pagination,
+  ManagementStatCard,
+  ManagementStatusBadge as StatusBadge,
+  ManagementTable,
+  ManagementToolbar,
+  type ManagementStat,
+} from "@/app/admin/pengguna/_components/ManagementComponents";
+import { Button, InfoBanner, TableEmpty, adminStyles as s } from "@/app/admin/_components/AdminUI";
 
 const teachers = [
   { name: "Drs. Raden H. Sutanto, M.Pd.", nip: "197103151998021004", subject: "Informatika", task: "Kepala Lab Komputer", classes: "8A · 8B · 8C · +2", status: "Aktif (Sandi Diperbarui)", activity: "12 Menit lalu" },
@@ -66,19 +77,22 @@ export default function GuruPage() {
     if (errorCount > 0) return;
     setModal(false);
   };
+  const statistics: ManagementStat[] = [
+    { label: "Total Guru", value: "58", icon: "users-group-rounded-linear", tone: "primary" },
+    { label: "Guru Bersertifikasi", value: "46", icon: "square-academic-cap-linear", tone: "success" },
+    { label: "Wali Kelas Ditugaskan", value: "24", icon: "user-circle-linear", tone: "warning" },
+  ];
 
   return (
     <div className={s.teacherManagementPage}>
       <PageHeading breadcrumbs={["LMS", "Manajemen Pengguna", "Manajemen Guru"]} title="Manajemen Guru" description="Direktori staf pendidik, pembagian tugas mengajar, dan kredensial akun guru SMP Terpadu."
         actions={<><Button variant="outline" tone="amber" icon="download-linear" onClick={() => alert("Pilih file Excel/CSV untuk proses import.")}>Import Data (Excel/CSV)</Button><Button icon="user-plus-linear" onClick={() => { setTouched({}); setSubmitAttempted(false); setModal(true); }}>Tambah Guru Baru</Button></>} />
       {/* Bagian tampilan: statistik guru dan staf. */}
-      <AdminStatRow columns={3} items={[
-        { label: "Total Guru", value: "58", icon: "users-group-rounded-linear", tone: "primary" },
-        { label: "Guru Bersertifikasi", value: "46", icon: "square-academic-cap-linear", tone: "success" },
-        { label: "Wali Kelas Ditugaskan", value: "24", icon: "user-circle-linear", tone: "warning" },
-      ]} />
+      <div className={`${s.statGridThree} ${s.adminStatRow}`}>
+        {statistics.map((item) => <ManagementStatCard key={item.label} item={item} />)}
+      </div>
       {/* Bagian tampilan: filter direktori guru. */}
-      <AdminDirectoryToolbar
+      <ManagementToolbar
         keyword={keyword}
         onKeywordChange={setKeyword}
         searchPlaceholder="Cari nama guru, NIP, atau mata pelajaran..."
@@ -87,8 +101,7 @@ export default function GuruPage() {
         categoryOptions={["Semua Kategori", "Aktif", "Terkunci"]}
       />
       {/* Bagian tampilan: tabel guru, mata pelajaran, tugas, dan rombel yang diampu. */}
-      <div className={`${s.tableWrap} ${s.teacherTableWrap}`}>
-        <table className={`${s.dataTable} ${s.teacherTable} ${s.directoryTable}`}>
+      <ManagementTable className={s.teacherTableWrap} tableClassName={`${s.dataTable} ${s.teacherTable} ${s.directoryTable}`} footer={<Pagination variant="directory" current={page} total={7} onChange={setPage} label="Menampilkan 1-7 dari 46 guru" />}>
           <thead><tr><th>Nama Guru</th><th>NIP</th><th>Mata Pelajaran</th><th>Tugas Tambahan</th><th>Rombel Diampu</th><th>Status &amp; Kredensial</th><th>Aktivitas Terakhir</th><th>Aksi</th></tr></thead>
           <tbody>{filtered.map((teacher) => {
             const subjectTone = subjectTones[teacher.subject] ?? "primary";
@@ -102,12 +115,10 @@ export default function GuruPage() {
             <td>{teacher.task === "-" ? null : teacher.task.startsWith("Wali Kelas") ? <StatusBadge tone="primary" className={`${s.teacherBadge} ${s.teacherHomeroomTask}`}>{teacher.task}</StatusBadge> : <span className={s.teacherTaskTag}>{teacher.task}</span>}</td>
             <td><div className={s.teacherClassList}>{classNames.map((className) => <span key={`${teacher.nip}-${className}`} className={s.teacherClassChip}>{className}</span>)}</div></td>
             <td><StatusBadge tone={statusTone} className={`${s.teacherBadge} ${s.directoryBadge} ${s.directoryStatusBadge} ${s.teacherStatus} ${statusClass}`}>{teacher.status}</StatusBadge></td><td className={s.teacherActivity}>{teacher.activity}</td>
-            <td><div className={s.tableActions}><AdminTableIconButton icon="eye-linear" title="Detail" ariaLabel="Detail" onClick={() => alert(`${teacher.name}\n${teacher.nip}\n${teacher.subject}`)} /><AdminTableIconButton icon="pen-linear" title="Edit" ariaLabel="Edit" onClick={() => setModal(true)} /></div></td>
+            <td><ManagementActionButtons><button type="button" className={s.teacherActionButton} title="Detail" aria-label={`Detail ${teacher.name}`} onClick={() => alert(`${teacher.name}\n${teacher.nip}\n${teacher.subject}`)}><AdminIcon name="eye-linear" size={14} />Detail</button><button type="button" className={s.teacherActionButton} title="Edit" aria-label={`Edit ${teacher.name}`} onClick={() => setModal(true)}><AdminIcon name="pen-linear" size={14} />Edit</button></ManagementActionButtons></td>
           </tr>;
           })}{filtered.length === 0 && <TableEmpty colSpan={8} />}</tbody>
-        </table>
-        <Pagination current={page} total={7} onChange={setPage} label={`Menampilkan 1-${filtered.length} dari 58 guru`} />
-      </div>
+      </ManagementTable>
 
       {/* Bagian tampilan: modal alokasi akun guru, mata pelajaran, tugas tambahan, dan rombel. */}
       {modal && <Modal className={s.teacherModal} layout="studentForm" title="Tambah Guru & Staf" subtitle="Alokasikan akun pendidik baru, tugas pengampu mata pelajaran, dan wali kelas." onClose={() => setModal(false)} footer={<>{displayedErrorCount > 0 && <div style={{ display: "flex", alignItems: "center", gap: "var(--space-sm)", maxWidth: "220px", color: "var(--color-error)", fontSize: "var(--text-l12-size)", lineHeight: "var(--text-l12-line)" }}><AdminIcon name="danger-triangle-linear" size={16} />Pastikan {displayedErrorCount} kolom bermasalah telah diperbaiki</div>}<span className={s.teacherModalFooterSpacer} /><div className={s.teacherModalFooterActions}><Button variant="outline" className={s.teacherCancelButton} onClick={() => setModal(false)}>Batal</Button><Button type="submit" form="teacher-form" icon="diskette-linear" disabled={displayedErrorCount > 0}>Simpan Guru &amp; Staf</Button></div></>}>

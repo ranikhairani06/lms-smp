@@ -25,7 +25,7 @@ export type AdminDashboardData = {
   courses: number;
   active_year: AdminDashboardAcademicYear | null;
   classes: AdminDashboardClass[];
-  alerts: {
+  alerts?: {
     students_need_class_update: number;
   };
 };
@@ -43,9 +43,14 @@ function isAdminDashboardData(value: unknown): value is AdminDashboardData {
     typeof value.teachers !== "number" ||
     typeof value.parents !== "number" ||
     typeof value.courses !== "number" ||
-    !Array.isArray(value.classes) ||
-    !isRecord(value.alerts) ||
-    typeof value.alerts.students_need_class_update !== "number"
+    !Array.isArray(value.classes)
+  ) {
+    return false;
+  }
+
+  if (
+    value.alerts !== undefined &&
+    (!isRecord(value.alerts) || typeof value.alerts.students_need_class_update !== "number")
   ) {
     return false;
   }

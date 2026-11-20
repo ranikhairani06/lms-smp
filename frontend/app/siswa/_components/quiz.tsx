@@ -1,7 +1,6 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { questions } from "./data";
 import { Solar } from "./icon";
 import { Badge, ButtonLink, Card, Heading, Stats } from "./ui";
 import {
@@ -9,16 +8,27 @@ import {
   useQuizAttempt,
   type QuizAttempt as Attempt,
 } from "./quiz-store";
-const title = "Kuis Formatif Bab 1: Logika Komputasional & Dekomposisi Masalah";
+import { StudentEmpty, StudentError, StudentLoading } from "./api-state";
+import { useStudentResource } from "@/lib/useStudentResource";
+import { getStudentAssessment, logStudentExamActivity, submitStudentAssessment } from "@/lib/student-api";
 
 export function QuizIntro() {
   const params = useParams();
-
-  const b = `/siswa/mata-pelajaran/${params.subject}/kuis/${params.quiz}`;
+  const subjectSlug = typeof params.subject === "string" ? params.subject : String(params.subject?.[0] ?? "");
+  const quizId = typeof params.quiz === "string" ? params.quiz : String(params.quiz?.[0] ?? "");
+  const loadAssessment = useCallback(() => getStudentAssessment(quizId), [quizId]);
+  const resource = useStudentResource(loadAssessment);
+  const b = `/siswa/mata-pelajaran/${subjectSlug}/kuis/${quizId}`;
 
   const [token, setToken] = useState("");
   const [error, setError] = useState("");
   const [valid, setValid] = useState(false);
+
+  if (resource.status === "loading") return <StudentLoading title="Memuat asesmen..." />;
+  if (resource.status === "error") return <StudentError resource={resource} />;
+  if (resource.status === "empty") return <StudentEmpty title="Asesmen belum tersedia." />;
+  const { assessment, can_attempt: canAttempt } = resource.data;
+  const title = assessment.title;
 
   const rules = [
     {
@@ -54,16 +64,12 @@ export function QuizIntro() {
         <div className="es-qi-hero-copy">
           <h1>{title}</h1>
 
-          <p>
-            Evaluasi pemahaman konsep berpikir komputasional, abstraksi
-            data, dan penalaran algoritma melalui Computer-Based Test
-            (CBT) Terpadu SMP.
-          </p>
+          <p>{assessment.description ?? "Deskripsi asesmen tidak tersedia dari API."}</p>
         </div>
 
         <div className="es-qi-schedule">
           <span>JADWAL DIMULAI</span>
-          <strong>08:00 – 09:30</strong>
+          <strong>{assessment.start_at ? new Intl.DateTimeFormat("id-ID", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Jakarta" }).format(new Date(assessment.start_at)) : "Jadwal tidak tersedia dari API"}</strong>
         </div>
       </section>
 
@@ -72,31 +78,31 @@ export function QuizIntro() {
         {[
           {
             label: "DURASI UJIAN",
-            value: "45 Menit",
+            value: assessment.duration_minutes ? `${assessment.duration_minutes} Menit` : "—",
             icon: "clock-circle",
             hint: "Timer otomatis & auto-submit aktif",
             tone: "blue",
           },
           {
             label: "TOTAL SOAL",
-            value: `${questions.length} Butir`,
+            value: `${assessment.questions.length} Butir`,
             icon: "document-text",
-            hint: `${questions.length} soal pilihan ganda`,
+            hint: "Jumlah soal berasal dari backend.",
             tone: "sky",
           },
           {
             label: "STANDAR KKM",
-            value: "75.0",
+            value: assessment.passing_score?.toString() ?? "—",
             suffix: "/100 Poin",
             icon: "medal-star",
-            hint: "Ambang batas kelulusan asesmen",
+            hint: "Ambang batas dari backend.",
             tone: "yellow",
           },
           {
             label: "PERCOBAAN",
-            value: "1x Kesempatan",
+            value: `${assessment.maximum_attempt}x Kesempatan`,
             icon: "restart",
-            hint: "1 kali pengerjaan resmi terdaftar",
+            hint: "Batas kesempatan pada asesmen.",
             tone: "yellow",
           },
         ].map((item) => (
@@ -139,14 +145,10 @@ export function QuizIntro() {
             onSubmit={(e) => {
               e.preventDefault();
 
-              if (token.trim().toUpperCase() !== "INF-CBT8") {
-                setError("Token belum sesuai. Gunakan INF-CBT8.");
-                setValid(false);
-                return;
-              }
-
-              setError("");
-              setValid(true);
+              setValid(false);
+              setError(canAttempt
+                ? "Backend belum menyediakan endpoint verifikasi token asesmen."
+                : "Asesmen ini belum dapat dikerjakan pada tingkat kelas Anda.");
             }}
           >
             <div className="es-qi-token-box">
@@ -180,8 +182,7 @@ export function QuizIntro() {
                 <div className="es-qi-token-success" role="status">
                   <Solar name="shield-check" />
                   <span>
-                    Token terverifikasi! Kuis Formatif Bab 1 telah
-                    dibuka untuk kamu.
+                    Asesmen tersedia untuk akun siswa ini.
                   </span>
                 </div>
               )}
@@ -194,7 +195,7 @@ export function QuizIntro() {
             </div>
 
             <div className="es-qi-start">
-              {valid ? (
+              {valid && canAttempt ? (
                 <ButtonLink
                   href={`${b}/kerjakan`}
                   className="es-qi-button"
@@ -348,138 +349,139 @@ export function QuizIntro() {
 export function QuizWork() {
   const params = useParams();
   const router = useRouter();
-  const b = `/siswa/mata-pelajaran/${params.subject}/kuis/${params.quiz}`;
-  const storageKey = `eduspace-demo:${params.subject}:${params.quiz}`;
+  const subjectSlug = typeof params.subject === "string" ? params.subject : String(params.subject?.[0] ?? "");
+  const quizId = typeof params.quiz === "string" ? params.quiz : String(params.quiz?.[0] ?? "");
+  const b = `/siswa/mata-pelajaran/${subjectSlug}/kuis/${quizId}`;
+  const storageKey = `eduspace-student:${subjectSlug}:${quizId}:draft`;
+  const loadAssessment = useCallback(() => getStudentAssessment(quizId), [quizId]);
+  const resource = useStudentResource(loadAssessment);
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [number, setNumber] = useState(0);
   const [marked, setMarked] = useState<number[]>([]);
-  const [remaining, setRemaining] = useState(45 * 60);
+  const [remaining, setRemaining] = useState(0);
   const [loaded, setLoaded] = useState(false);
   const [confirm, setConfirm] = useState(false);
   const [storageError, setStorageError] = useState(false);
   const [savedAt, setSavedAt] = useState("");
+  const [submitError, setSubmitError] = useState("");
+  const submitting = useRef(false);
+  const loggedSession = useRef<number | null>(null);
+  const assessmentResponse = resource.status === "ready" ? resource.data : null;
+  const assessment = assessmentResponse?.assessment ?? null;
+  const questions = assessment?.questions ?? [];
+  const durationSeconds = assessmentResponse?.remaining_seconds ?? (assessment?.duration_minutes ? assessment.duration_minutes * 60 : null);
+
   useEffect(() => {
+    if (!assessmentResponse) return;
     try {
       const raw = sessionStorage.getItem(storageKey);
       if (raw) {
         const saved = JSON.parse(raw) as Attempt;
         if (saved && !saved.submitted) {
           setAnswers(saved.answers || {});
-          setRemaining(Math.max(0, 45 * 60 - (saved.duration || 0)));
+          setRemaining(durationSeconds ?? 0);
+        } else {
+          setRemaining(durationSeconds ?? 0);
         }
-        setAnswers(saved.answers || {});
-        setRemaining(Math.max(0, 45 * 60 - (saved.duration || 0)));
+      } else {
+        setRemaining(durationSeconds ?? 0);
       }
     } catch {
       setStorageError(true);
+      setRemaining(durationSeconds ?? 0);
     }
     setLoaded(true);
-  }, [storageKey, b, router]);
+  }, [assessmentResponse, durationSeconds, storageKey]);
+
   useEffect(() => {
-    if (!loaded) return;
+    if (!loaded || !assessmentResponse?.exam_session || loggedSession.current === assessmentResponse.exam_session.id) return;
+    loggedSession.current = assessmentResponse.exam_session.id;
+    void logStudentExamActivity(assessmentResponse.exam_session.id, "started");
+  }, [assessmentResponse]);
+
+  useEffect(() => {
+    if (!loaded || durationSeconds === null) return;
+    const timer = window.setInterval(() => setRemaining((value) => Math.max(0, value - 1)), 1000);
+    return () => window.clearInterval(timer);
+  }, [durationSeconds, loaded]);
+
+  const submit = useCallback(async () => {
+    if (!assessment || !assessmentResponse?.can_attempt || submitting.current) return;
+    submitting.current = true;
+    setSubmitError("");
+    const payload: Record<number, string | number> = {};
+    questions.forEach((question, index) => {
+      const selected = answers[index];
+      if (selected === undefined) return;
+      if (question.type === "multiple_choice") {
+        const option = question.options[selected];
+        if (option) payload[question.id] = option.id;
+      } else if (question.type === "true_false") {
+        payload[question.id] = selected === 0 ? "true" : "false";
+      }
+    });
     try {
-      sessionStorage.setItem(
-        storageKey,
-        JSON.stringify({
-          answers,
-          submitted: false,
-          duration: 45 * 60 - remaining,
-        }),
-      );
+      const result = await submitStudentAssessment(assessment.id, payload);
+      const attempt: Attempt = {
+        answers,
+        submitted: true,
+        duration: Math.max(0, (durationSeconds ?? 0) - remaining),
+        submittedAt: result.submitted_at,
+        serverScore: result.score,
+        serverStatus: result.status,
+        passingScore: assessment.passing_score,
+      };
+      saveQuizAttempt(subjectSlug, quizId, attempt);
+      sessionStorage.removeItem(storageKey);
+      if (assessmentResponse.exam_session) {
+        void logStudentExamActivity(assessmentResponse.exam_session.id, "submitted");
+      }
+      router.push(`${b}/hasil`);
     } catch {
-      setStorageError(true);
+      setSubmitError("Jawaban belum dapat dikirim. Silakan coba lagi.");
+      submitting.current = false;
     }
-  }, [answers, remaining, storageKey, loaded]);
+  }, [assessment, assessmentResponse, answers, b, durationSeconds, questions, quizId, remaining, router, storageKey, subjectSlug]);
+
   useEffect(() => {
-    if (!loaded) return;
-    const timer = setInterval(
-      () => setRemaining((v) => Math.max(0, v - 1)),
-      1000,
-    );
-    return () => clearInterval(timer);
-  }, [loaded]);
- function submit() {
-  const result: Attempt = {
-    answers,
-    submitted: true,
-    duration: 45 * 60 - remaining,
-    submittedAt: new Date().toISOString(),
-  };
+    if (loaded && durationSeconds !== null && remaining === 0) void submit();
+  }, [durationSeconds, loaded, remaining, submit]);
 
-  saveQuizAttempt(
-    String(params.subject),
-    String(params.quiz),
-    result,
-  );
-
-  sessionStorage.removeItem(storageKey);
-
-  const encoded = Object.keys(answers)
-    .map((k) => `${k}:${answers[Number(k)]}`)
-    .join(",");
-
-  router.push(`${b}/hasil?answers=${encodeURIComponent(encoded)}`);
-}
-  useEffect(() => {
-    if (loaded && remaining === 0)
-      submit(); /* timer submits once when reaching zero */ // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [remaining, loaded]);
-  
   useEffect(() => {
     if (!loaded || Object.keys(answers).length === 0) return;
-
     try {
       const raw = sessionStorage.getItem(storageKey);
       const saved = raw ? (JSON.parse(raw) as Attempt) : null;
-
-      sessionStorage.setItem(
-        storageKey,
-        JSON.stringify({
-          answers,
-          submitted: false,
-          duration: saved?.duration ?? 0,
-        }),
-      );
-
-      setSavedAt(
-        new Intl.DateTimeFormat("en-GB", {
-          timeZone: "Asia/Jakarta",
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-          hour12: false,
-        }).format(new Date()),
-      );
-
+      sessionStorage.setItem(storageKey, JSON.stringify({ answers, submitted: false }));
+      setSavedAt(new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Jakarta", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }).format(new Date()));
       setStorageError(false);
+      const sessionId = assessmentResponse?.exam_session?.id;
     } catch {
       setStorageError(true);
     }
-  }, [answers, loaded, storageKey]);
+  }, [answers, assessmentResponse, loaded, storageKey]);
 
-   const q = questions[number];
+  if (resource.status === "loading") return <StudentLoading title="Memuat soal asesmen..." />;
+  if (resource.status === "error") return <StudentError resource={resource} />;
+  if (resource.status === "empty" || questions.length === 0) return <StudentEmpty title="Soal asesmen belum tersedia." />;
+  if (!assessmentResponse?.can_attempt) return <StudentError resource={{ status: "error", statusCode: 403, message: "Asesmen ini belum dapat dikerjakan pada tingkat kelas Anda." }} />;
 
+  const q = questions[number];
+  if (!q) return <StudentEmpty title="Soal asesmen tidak ditemukan." />;
+  if (!assessment) return <StudentEmpty title="Data asesmen tidak tersedia." />;
+  const options = q.options.length ? q.options.map((option) => ({ text: option.option_text })) :
+    q.type === "true_false" ? [{ text: "Benar" }, { text: "Salah" }] : [];
   const answeredCount = Object.keys(answers).length;
   const unansweredCount = questions.length - answeredCount;
-  const progressPercent = Math.round(
-    (answeredCount / questions.length) * 100,
-  );
-
-  const timeText = [
-    Math.floor(remaining / 3600),
-    Math.floor((remaining % 3600) / 60),
-    remaining % 60,
-  ]
-    .map((value) => String(value).padStart(2, "0"))
-    .join(":");
-
+  const progressPercent = Math.round((answeredCount / questions.length) * 100);
+  const timeText = durationSeconds === null ? "—" : [Math.floor(remaining / 3600), Math.floor((remaining % 3600) / 60), remaining % 60].map((value) => String(value).padStart(2, "0")).join(":");
   return (
     <div className="es-qw">
       {/* Header */}
       <Card className="es-qw-heading">
         <div className="es-qw-heading-copy">
-          <span className="es-qw-subject">Informatika</span>
-          <h1>{title}</h1>
+          <span className="es-qw-subject">Asesmen</span>
+          <h1>{assessment.title}</h1>
         </div>
 
         <div className="es-qw-timer" role="timer">
@@ -502,6 +504,7 @@ export function QuizWork() {
           halaman selama mengerjakan.
         </div>
       )}
+      {submitError && <p role="alert">{submitError}</p>}
 
       <div className="es-qw-columns">
         <div className="es-qw-main">
@@ -513,7 +516,7 @@ export function QuizWork() {
               </span>
 
               <span className="es-qw-weight-badge">
-                Bobot: {Number((100 / questions.length).toFixed(1))} Poin
+                Bobot: {q.points} Poin
               </span>
             </div>
 
@@ -540,7 +543,7 @@ export function QuizWork() {
 
           {/* Pertanyaan dan pilihan */}
           <Card className="es-qw-question-card">
-            <p className="es-qw-question-text">{q.text}</p>
+            <p className="es-qw-question-text">{q.prompt}</p>
 
             <p className="es-qw-question-instruction">
               Pilihlah satu opsi jawaban yang paling tepat:
@@ -551,12 +554,12 @@ export function QuizWork() {
                 Pilih jawaban untuk soal {number + 1}
               </legend>
 
-              {q.options.map((option, index) => (
+              {options.length ? options.map((option, index) => (
                 <label
                   className={`es-qw-option ${
                     answers[number] === index ? "is-selected" : ""
                   }`}
-                  key={option}
+                  key={`${q.id}-${index}`}
                 >
                   <input
                     type="radio"
@@ -574,9 +577,9 @@ export function QuizWork() {
                     {String.fromCharCode(65 + index)}
                   </span>
 
-                  <span>{option}</span>
+                  <span>{option.text}</span>
                 </label>
-              ))}
+              )) : <p>Jenis jawaban ini belum didukung oleh form asesmen saat ini.</p>}
             </fieldset>
           </Card>
 
@@ -599,10 +602,10 @@ export function QuizWork() {
 
               <span>
                 {storageError
-                  ? "Jawaban gagal tersimpan"
+                  ? "Draft gagal tersimpan di perangkat"
                   : savedAt
-                    ? `Jawaban otomatis tersimpan pada ${savedAt} WIB`
-                    : "Pilih jawaban untuk menyimpan"}
+                    ? `Draft tersimpan di perangkat pada ${savedAt} WIB`
+                    : "Jawaban akan tersimpan sebagai draft di perangkat"}
               </span>
             </span>
 
@@ -782,7 +785,7 @@ export function QuizWork() {
               <button
                 type="button"
                 className="es-qw-primary-button"
-                onClick={submit}
+                onClick={() => void submit()}
               >
                 Kumpulkan
               </button>
@@ -795,76 +798,38 @@ export function QuizWork() {
 }
 export function QuizResult() {
   const params = useParams();
-
-  const attempt = useQuizAttempt(
-    String(params.subject),
-    String(params.quiz),
-  );
-
+  const subjectSlug = typeof params.subject === "string" ? params.subject : String(params.subject?.[0] ?? "");
+  const quizId = typeof params.quiz === "string" ? params.quiz : String(params.quiz?.[0] ?? "");
+  const loadAssessment = useCallback(() => getStudentAssessment(quizId), [quizId]);
+  const resource = useStudentResource(loadAssessment);
+  const attempt = useQuizAttempt(subjectSlug, quizId);
   const [filter, setFilter] = useState("semua");
   const [page, setPage] = useState(1);
-
+  const questions = resource.status === "ready" ? resource.data.assessment.questions : [];
   const answers = attempt?.answers || {};
-
-  const correct = questions.filter(
-    (question, index) => answers[index] === question.answer,
-  ).length;
-
-  const answered = questions.filter(
-    (_, index) => answers[index] !== undefined,
-  ).length;
-
-  const wrong = answered - correct;
+  const answered = questions.filter((_, index) => answers[index] !== undefined).length;
   const skipped = questions.length - answered;
-
-  const score = questions.length
-    ? Math.round((correct / questions.length) * 100)
-    : 0;
-
-  const durationText = attempt
-    ? `${Math.floor(attempt.duration / 60)}m ${
-        attempt.duration % 60
-      }s`
-    : "—";
-
-  const pointsPerQuestion = questions.length
-    ? Number((100 / questions.length).toFixed(1))
-    : 0;
-
-  const filteredQuestions = questions
-    .map((question, index) => ({ question, index }))
-    .filter(({ question, index }) => {
-      if (filter === "benar") {
-        return attempt && answers[index] === question.answer;
-      }
-
-      if (filter === "salah") {
-        return attempt && answers[index] !== question.answer;
-      }
-
-      return true;
-    });
-
+  const score = attempt?.serverScore ?? null;
+  const passingScore = attempt?.passingScore ?? (resource.status === "ready" ? resource.data.assessment.passing_score : null);
+  const passed = score !== null && passingScore !== null && score >= passingScore;
+  const durationText = attempt ? `${Math.floor(attempt.duration / 60)}m ${attempt.duration % 60}s` : "—";
+  const filteredQuestions = questions.map((question, index) => ({ question, index }));
   const pageSize = 2;
-  const totalPages = Math.max(
-    1,
-    Math.ceil(filteredQuestions.length / pageSize),
-  );
-
+  const totalPages = Math.max(1, Math.ceil(filteredQuestions.length / pageSize));
   const currentPage = Math.min(page, totalPages);
+  const visibleQuestions = filteredQuestions.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
-  const visibleQuestions = filteredQuestions.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize,
-  );
-
+  if (resource.status === "loading") return <StudentLoading title="Memuat hasil asesmen..." />;
+  if (resource.status === "error") return <StudentError resource={resource} />;
+  if (resource.status === "empty") return <StudentEmpty title="Asesmen tidak ditemukan." />;
+  if (!attempt) return <StudentEmpty title="Hasil asesmen belum tersedia di perangkat ini." description="API backend belum menyediakan endpoint riwayat atau detail hasil untuk memulihkan pengiriman ini." />;
   return (
     <div className="es-qr">
       <Card className="es-qr-heading">
         <div className="es-qr-heading-copy">
           <h1>
             <span>Hasil & Evaluasi:</span>
-            {title}
+            {resource.data.assessment.title}
           </h1>
 
           <div className="es-qr-heading-meta">
@@ -877,7 +842,7 @@ export function QuizResult() {
               <Solar name="user-rounded" />
               <span>
                 Guru Pengampu:{" "}
-                <strong>Hendra Gunawan, S.Kom.</strong>
+                <strong>Informasi pengampu tidak tersedia dari API.</strong>
               </span>
             </p>
           </div>
@@ -914,25 +879,25 @@ export function QuizResult() {
             </span>
 
             <p className="es-qr-score-number">
-              <strong>{attempt ? score : "—"}</strong>
+              <strong>{score ?? "—"}</strong>
               <span>/ 100</span>
             </p>
           </div>
 
           <span
             className={`es-qr-result-status ${
-              !attempt
+              score === null
                 ? "is-neutral"
-                : score >= 75
+                : passed
                   ? "is-passed"
                   : "is-failed"
             }`}
           >
             <Solar name="shield-check" />
 
-            {!attempt
-              ? "BELUM DIKERJAKAN"
-              : score >= 75
+            {score === null
+              ? "MENUNGGU PENILAIAN"
+              : passed
                 ? "TUNTAS MELAMPAUI KKTP"
                 : "BELUM MENCAPAI KKTP"}
           </span>
@@ -943,28 +908,25 @@ export function QuizResult() {
         {[
           {
             label: "AKURASI JAWABAN",
-            value: attempt ? String(correct) : "—",
+            value: "—",
             suffix: `/ ${questions.length} Soal`,
             icon: "check-circle",
             tone: "green",
-            hint: attempt
-              ? `${correct} Benar • ${wrong} Salah • ${skipped} Terlewat`
-              : "Belum ada hasil pengerjaan",
+            hint: "Backend tidak menyediakan rincian benar dan salah per soal.",
           },
           {
             label: "WAKTU PENGERJAAN",
             value: durationText,
             icon: "clock-circle",
             tone: "blue",
-            hint: "Alokasi: 45 Menit",
+            hint: "Durasi pengerjaan dicatat oleh sesi browser ini.",
           },
           {
-            label: "RERATA KELAS VIII B",
-            value: "82.4",
-            suffix: "/ 100",
+            label: "RERATA KELAS",
+            value: "—",
             icon: "users-group-rounded",
             tone: "sky",
-            hint: "Data contoh rerata kelas",
+            hint: "Rerata kelas tidak tersedia dari API.",
           },
         ].map((item) => (
           <Card className="es-qr-stat" key={item.label}>
@@ -1014,6 +976,7 @@ export function QuizResult() {
               key={value}
               className={filter === value ? "is-selected" : ""}
               aria-pressed={filter === value}
+              disabled={value !== "semua"}
               onClick={() => {
                 setFilter(value);
                 setPage(1);
@@ -1027,94 +990,46 @@ export function QuizResult() {
 
       <div className="es-qr-review-list">
         {visibleQuestions.map(({ question, index }) => {
-          const isCorrect =
-            attempt !== null &&
-            answers[index] === question.answer;
-
           const isSkipped = answers[index] === undefined;
-
           return (
             <Card className="es-qr-review-card" key={index}>
               <div className="es-qr-review-top">
                 <div className="es-qr-review-number">
                   <span>{index + 1}</span>
                   <strong>Butir Soal No. {index + 1}</strong>
-                  <small>• Bobot: {pointsPerQuestion} Poin</small>
+                  <small>Bobot: {question.points} Poin</small>
                 </div>
-
-                <span
-                  className={`es-qr-answer-status ${
-                    !attempt
-                      ? "is-neutral"
-                      : isCorrect
-                        ? "is-correct"
-                        : "is-wrong"
-                  }`}
-                >
-                  {!attempt
-                    ? "BELUM DIKERJAKAN"
-                    : isCorrect
-                      ? `BENAR (+${pointsPerQuestion} Poin)`
-                      : isSkipped
-                        ? "TERLEWAT (0 Poin)"
-                        : "SALAH (0 Poin)"}
+                <span className="es-qr-answer-status is-neutral">
+                  {isSkipped ? "BELUM DIJAWAB" : "HASIL PER SOAL TIDAK TERSEDIA DARI API"}
                 </span>
               </div>
-
-              <p className="es-qr-question">{question.text}</p>
-
+              <p className="es-qr-question">{question.prompt}</p>
               <div className="es-qr-options">
                 {question.options.map((option, optionIndex) => {
-                  const isAnswer = optionIndex === question.answer;
                   const isSelected =
                     attempt !== null &&
                     answers[index] === optionIndex;
-                  const isWrongSelection =
-                    isSelected && !isAnswer;
 
                   return (
                     <div
                       className={`es-qr-option ${
-                        isAnswer
-                          ? "is-correct"
-                          : isWrongSelection
-                            ? "is-wrong"
-                            : ""
+                        isSelected ? "is-selected" : ""
                       }`}
-                      key={option}
+                      key={option.id}
                     >
                       <span className="es-qr-option-copy">
                         <Solar
                           name={
-                            isAnswer
-                              ? "check-circle"
-                              : isWrongSelection
-                                ? "close-circle"
-                                : "minus-circle"
+                            isSelected ? "check-circle" : "minus-circle"
                           }
                         />
 
                         <span>
                           {String.fromCharCode(65 + optionIndex)}.{" "}
-                          {option}
+                          {option.option_text}
                         </span>
                       </span>
 
-                      {isAnswer && (
-                        <span className="es-qr-option-note">
-                          <Solar name="check-circle" />
-                          {isSelected
-                            ? "Jawaban Kamu Tepat"
-                            : "Jawaban Benar"}
-                        </span>
-                      )}
-
-                      {isWrongSelection && (
-                        <span className="es-qr-option-note">
-                          <Solar name="close-circle" />
-                          JAWABAN KAMU KURANG TEPAT
-                        </span>
-                      )}
                     </div>
                   );
                 })}
