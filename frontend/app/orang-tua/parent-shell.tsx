@@ -8,7 +8,6 @@ import type { AppNavigationItem } from "@/components/lms/shell/types";
 import { Solar } from "../siswa/_components/icon";
 import { initials, type AuthUser } from "@/lib/auth-types";
 import LogoutButton from "@/components/lms/LogoutButton";
-import { parentSubjectResults } from "./hasil-belajar/data";
 
 const menu = [
   { label: "Dashboard", icon: "home-2", href: "/orang-tua" },
@@ -38,7 +37,7 @@ export default function ParentShell({ children, user }: { children: ReactNode; u
         : menu[0];
   const currentTitle = currentItem.label;
   const currentSubject = pathname.includes("/hasil-belajar/")
-    ? parentSubjectResults.find((subject) => pathname.endsWith("/" + subject.slug))
+    ? pathname.split("/").filter(Boolean).at(-1)?.split("-").map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(" ")
     : undefined;
   const navigation: AppNavigationItem[] = menu.map((item) => ({
     ...item,
@@ -73,13 +72,10 @@ export default function ParentShell({ children, user }: { children: ReactNode; u
                 onClick={() => setNotificationOpen((open) => !open)}
               >
                 <Solar name="bell" />
-                <span className="parent-notification-dot" />
               </button>
               {notificationOpen && (
                 <div className="parent-notification-popover">
                   <strong>Notifikasi</strong>
-                  <p>Tugas Informatika akan dikumpulkan dalam 3 hari.</p>
-                  <p>Nilai Kuis Formatif Bab 1 sudah tersedia.</p>
                 </div>
               )}
             </div>
@@ -114,7 +110,7 @@ export default function ParentShell({ children, user }: { children: ReactNode; u
         <nav className="parent-breadcrumb" aria-label="Breadcrumb">
           <Link href="/orang-tua">LMS</Link>
           <Solar name="alt-arrow-right" />
-          {currentSubject ? <><Link href="/orang-tua/hasil-belajar">Hasil Belajar Siswa</Link><Solar name="alt-arrow-right" /><span aria-current="page">{currentSubject.name}</span></> : <span aria-current="page">{currentTitle}</span>}
+          {currentSubject ? <><Link href="/orang-tua/hasil-belajar">Hasil Belajar Siswa</Link><Solar name="alt-arrow-right" /><span aria-current="page">{currentSubject}</span></> : <span aria-current="page">{currentTitle}</span>}
         </nav>
 
         <div className="parent-page">{children}</div>

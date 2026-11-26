@@ -58,13 +58,13 @@ export function ParentStat({
   );
 }
 
-export function ParentProgressBar({ value, label }: { value: number; label?: string }) {
+export function ParentProgressBar({ value, label }: { value: number | null; label?: string }) {
   return (
     <div className="parent-progress-row">
-      <div className="parent-progress-track" role="progressbar" aria-label={label ?? "Progres"} aria-valuenow={value} aria-valuemin={0} aria-valuemax={100}>
-        <span style={{ width: `${value}%` }} />
+      <div className="parent-progress-track" role="progressbar" aria-label={label ?? "Progres"} aria-valuenow={value ?? 0} aria-valuemin={0} aria-valuemax={100}>
+        <span style={{ width: `${value ?? 0}%` }} />
       </div>
-      <strong>{value}%</strong>
+      <strong>{value === null ? "—" : `${value}%`}</strong>
     </div>
   );
 }
