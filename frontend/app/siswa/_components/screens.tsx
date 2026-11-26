@@ -15,6 +15,7 @@ import {
 import { StudentEmpty, StudentError, StudentLoading } from "./api-state";
 import { ApiError } from "@/lib/api";
 import { useStudentResource } from "@/lib/useStudentResource";
+import { isAllowedUploadExtension, MAX_UPLOAD_FILE_SIZE_BYTES, MAX_UPLOAD_FILE_SIZE_LABEL, uploadAccept, uploadExtensionsLabel } from "@/lib/uploadLimits";
 import {
   completeStudentMaterial,
   getCurrentStudentUser,
@@ -1833,13 +1834,11 @@ export function Assignment() {
   function selectFile(selected?: File) {
     if (!selected) return;
 
-    const extension = selected.name.split(".").pop()?.toLowerCase();
-
     if (
-      !["pdf", "png", "jpg", "jpeg"].includes(extension || "") ||
-      selected.size > 5 * 1024 * 1024
+      !isAllowedUploadExtension(selected.name, "studentAssessment") ||
+      selected.size > MAX_UPLOAD_FILE_SIZE_BYTES
     ) {
-      setError("Gunakan PDF, PNG, atau JPG maksimal 5 MB.");
+      setError(`Gunakan ${uploadExtensionsLabel("studentAssessment")} maksimal ${MAX_UPLOAD_FILE_SIZE_LABEL}.`);
       return;
     }
 
@@ -1968,7 +1967,7 @@ export function Assignment() {
               >
                 <input
                   type="file"
-                  accept=".pdf,.png,.jpg,.jpeg"
+                  accept={uploadAccept("studentAssessment")}
                   onChange={(event) => {
                     selectFile(event.target.files?.[0]);
                     event.target.value = "";
@@ -1993,7 +1992,7 @@ export function Assignment() {
                   <span>PDF</span>
                   <span>PNG</span>
                   <span>JPG</span>
-                  <span className="is-limit">Maks 5 MB</span>
+                  <span className="is-limit">Maks {MAX_UPLOAD_FILE_SIZE_LABEL}</span>
                 </div>
               </label>
 
@@ -2011,7 +2010,7 @@ export function Assignment() {
                       <span>
                         {(file.size / (1024 * 1024)).toFixed(2)} MB
                         {" • "}
-                        "Berkas hanya dipilih di perangkat; belum dikirim ke server."
+                        &quot;Berkas hanya dipilih di perangkat; belum dikirim ke server.&quot;
                       </span>
                     </div>
 

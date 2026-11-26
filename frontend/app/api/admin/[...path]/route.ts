@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { BackendError, backendFetch, SESSION_COOKIE, sessionToken } from "@/lib/backend";
+import { isAllowedUploadExtension, MAX_UPLOAD_FILE_SIZE_BYTES } from "@/lib/uploadLimits";
 
 type Context = { params: Promise<{ path: string[] }> };
 type Endpoint = { pattern: RegExp; methods: string[]; upload?: boolean };
@@ -16,7 +17,6 @@ const endpoints: Endpoint[] = [
   { pattern: /^academic-years\/\d+\/activate$/, methods: ["POST"] },
 ];
 
-const MAX_IMPORT_BYTES = 10 * 1024 * 1024;
 const noStore = { "Cache-Control": "no-store" };
 
 function jsonError(message: string, status: number) {
@@ -61,8 +61,8 @@ async function handle(request: NextRequest, context: Context) {
   const headers = new Headers();
   if (route.upload) {
     const contentLength = Number(request.headers.get("content-length") || 0);
-    if (contentLength > MAX_IMPORT_BYTES + 64 * 1024) {
-      return jsonError("Ukuran file XLSX maksimal 10 MB.", 413);
+    if (contentLength > MAX_UPLOAD_FILE_SIZE_BYTES + 64 * 1024) {
+      return jsonError("File terlalu besar untuk diunggah", 413);
     }
     if (!request.headers.get("content-type")?.toLowerCase().startsWith("multipart/form-data")) {
       return jsonError("Pilih file XLSX untuk diimpor.", 422);
@@ -71,8 +71,8 @@ async function handle(request: NextRequest, context: Context) {
       const form = await request.formData();
       const file = form.get("file");
       if (!(file instanceof File) || file.size === 0) return jsonError("File XLSX tidak boleh kosong.", 422);
-      if (file.size > MAX_IMPORT_BYTES) return jsonError("Ukuran file XLSX maksimal 10 MB.", 413);
-      if (!file.name.toLowerCase().endsWith(".xlsx")) {
+      if (file.size > MAX_UPLOAD_FILE_SIZE_BYTES) return jsonError("File terlalu besar untuk diunggah", 413);
+      if (!isAllowedUploadExtension(file.name, "adminStudentImport")) {
         return jsonError("Format file impor harus XLSX sesuai kontrak backend.", 422);
       }
       body = form;

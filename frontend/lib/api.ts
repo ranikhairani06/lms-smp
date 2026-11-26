@@ -17,7 +17,9 @@ export async function apiRequest<T>(path: string, options: RequestInit = {}): Pr
       503,
     );
   }
-  const data = response.status === 204 ? null : await response.json().catch(() => null);
+  const contentType = response.headers.get("content-type")?.toLowerCase() || "";
+  const isJson = contentType.includes("application/json") || contentType.includes("+json");
+  const data = response.status === 204 || !isJson ? null : await response.json().catch(() => null);
   if (!response.ok) {
     const fieldErrors = normalizeFieldErrors(data?.errors);
     const validation = Object.values(fieldErrors).flat().join(" ");
@@ -50,6 +52,7 @@ function messageForStatus(status: number) {
   if (status === 403) return "Anda tidak memiliki izin untuk melakukan tindakan ini.";
   if (status === 404) return "Data yang diminta tidak ditemukan.";
   if (status === 409) return "Data berubah atau bertentangan. Muat ulang data lalu coba lagi.";
+  if (status === 413) return "File terlalu besar untuk diunggah";
   if (status >= 500) return "Server sedang mengalami gangguan. Silakan coba lagi.";
   return "Permintaan gagal. Silakan coba lagi.";
 }

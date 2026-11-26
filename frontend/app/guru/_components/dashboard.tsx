@@ -6,39 +6,38 @@ import { Card, Heading, Badge, Stats, Action, Button, Dialog, Notice } from "./u
 import { subjectUrl, classUrl } from "./data";
 import { useTeacherData } from "./store";
 import { Solar } from "../../siswa/_components/icon";
+import { useTeacherResource } from "./useTeacherApi";
+import type { TeacherCourse } from "./teacher-api";
 
-const activeAssessments = [
-  { id: "aljabar", name: "Kuis Aljabar 8A", group: "8A", subject: "Matematika", percent: 82, count: "28 / 34 Siswa", deadline: "Hari ini 15:00 WIB" },
-  { id: "logika", name: "Kuis Logika Komputasi 7A", group: "7A", subject: "Informatika", percent: 34, count: "12 / 35 Siswa", deadline: "Besok 10:00 WIB" },
-];
+type DashboardData = { courses?: TeacherCourse[]; need_grading?: unknown; alerts?: unknown[] };
 
-const pendingAssessments = [
-  { title: "Latihan SPLDV (Persamaan Linier) 8A", files: 18 },
-  { title: "Proyek Flowchart (Algoritma) 7A", files: 24 },
-];
+const activeAssessments: { id: string; name: string; group: string; subject: string; percent: number; count: string; deadline: string }[] = [];
 
-const classSchedule = [
-  { group: "8A", subject: "Matematika", students: 34, time: "Senin 07:30 WIB", room: "Ruang 201" },
-  { group: "7A", subject: "Informatika", students: 35, time: "Selasa 09:00 WIB", room: "Lab Komputer" },
-  { group: "9A", subject: "Matematika", students: 32, time: "Rabu 07:30 WIB", room: "Ruang 304" },
-];
+const pendingAssessments: { title: string; files: number }[] = [];
+
+const classSchedule: { group: string; subject: string; students: number; time: string; room: string }[] = [];
 
 export default function Dashboard({ name }: { name: string }) {
   const { data, save } = useTeacherData();
+  const dashboard = useTeacherResource<DashboardData>("dashboard");
   const [closing, setClosing] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const base = subjectUrl();
+  const courseCount = dashboard.data?.courses?.length;
+  const gradingCount = Array.isArray(dashboard.data?.need_grading)
+    ? dashboard.data.need_grading.length
+    : typeof dashboard.data?.need_grading === "number" ? dashboard.data.need_grading : undefined;
 
   return <div className="tg-dashboard">
-    <Heading hero title={`Selamat datang, ${name}!`} description="Kelola pembelajaran dan asesmen siswa" action={<Badge><Solar name="calendar" />Tahun Ajaran 2026/2027 {"\u2022"} Semester Ganjil</Badge>} />
+    <Heading hero title={`Selamat datang, ${name}!`} description="Kelola pembelajaran dan asesmen siswa" action={<Badge><Solar name="calendar" />Tahun Ajaran — {"\u2022"} Semester —</Badge>} />
 
     <Stats items={[
-      { label: "Mata Pelajaran Diampu", value: "2", note: "", icon: "book-2" },
-      { label: "Total Kelas Diampu", value: "8", note: "", icon: "users-group-rounded" },
-      { label: "Perlu Dinilai", value: "42", note: "", icon: "clipboard-text", warning: true },
+      { label: "Mata Pelajaran Diampu", value: courseCount ?? "—", note: "", icon: "book-2" },
+      { label: "Total Kelas Diampu", value: "—", note: "", icon: "users-group-rounded" },
+      { label: "Perlu Dinilai", value: gradingCount ?? "—", note: "", icon: "clipboard-text", warning: true },
     ]} />
 
-    {message && <Notice>{message}</Notice>}
+    {(dashboard.loading || dashboard.error || message) && <Notice tone={dashboard.error ? "error" : "info"}>{dashboard.error || message || "Memuat data dashboard..."}</Notice>}
 
     <div className="tg-columns">
       <div className="tg-stack">
@@ -83,9 +82,9 @@ export default function Dashboard({ name }: { name: string }) {
 
         <Card title="Ujian Terjadwal" action={<Badge tone="info">Terjadwal</Badge>}>
           <div className="tg-subcard tg-soft tg-exam">
-            <h3><span className="tg-exam-icon"><Solar name="documents" /></span>UTS Informatika Kelas VIII</h3>
-            <p className="tg-small"><span><Solar name="calendar" />08 November 2026, 08:00 WIB</span><span><Solar name="clock-circle" />Durasi: 60 menit</span></p>
-            <div className="tg-exam-classes"><span>Rombongan Belajar Peserta:</span><div>{["8A", "8B", "8C"].map(group => <Badge key={group}>{group}</Badge>)}</div></div>
+            <h3><span className="tg-exam-icon"><Solar name="documents" /></span>—</h3>
+            <p className="tg-small"><span><Solar name="calendar" />—</span><span><Solar name="clock-circle" />Durasi: —</span></p>
+            <div className="tg-exam-classes"><span>Rombongan Belajar Peserta:</span><div>—</div></div>
           </div>
           <div className="tg-divider"><Action href={`${base}/asesmen/baru`} secondary><Solar name="settings" />Kelola Ujian</Action></div>
         </Card>

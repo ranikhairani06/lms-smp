@@ -1,9 +1,14 @@
 "use client";
-import { Children, cloneElement, isValidElement, useId, useState, type FormEvent, type ReactNode, type ReactElement } from "react";
+import { Children, cloneElement, isValidElement, useId, useState, useRef, type FormEvent, type ReactNode, type ReactElement } from "react";
 import { Action, Badge, Button, Card, Heading, Notice } from "./ui";
 import { Solar } from "../../siswa/_components/icon";
-import { materials, subjectUrl, taskTitle, type Subject } from "./data";
-import { assessmentKindOf, useTeacherData, type AssessmentKind, type SavedMaterial, type SavedAssessment, type Question } from "./store";
+import { subjectUrl, type Subject } from "./data";
+import { type AssessmentKind, type SavedMaterial, type SavedAssessment, type Question } from "./store";
+import { useTeacherCourse, useTeacherMutation } from "./useTeacherApi";
+import { fieldErrorMessage, gradeFromSubject, type TeacherSection } from "./teacher-api";
+import { ApiError, apiRequest } from "@/lib/api";
+import { isAllowedUploadExtension, MAX_UPLOAD_FILE_SIZE_BYTES, MAX_UPLOAD_FILE_SIZE_LABEL, uploadAccept, uploadExtensionsLabel, uploadFileExtension } from "@/lib/uploadLimits";
+import { useRouter } from "next/navigation";
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
   const id = useId();
@@ -11,59 +16,67 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
 }
 // TODO-DATA: lokasi ruang kelas meniru sampel Figma karena model rombel belum membawa nama ruang.
 function Targets({ subject, selected, change, description = "Alokasikan materi ke kelas binaan", className = "", summaryLabel, shuffle = false, showSelectAll = true, compactLabels = false }: { subject: Subject; selected: string[]; change: (value: string[]) => void; description?: string; className?: string; summaryLabel?: string; shuffle?: boolean; showSelectAll?: boolean; compactLabels?: boolean }) { const studentCount = selected.reduce((sum, group) => sum + (subject.classes.indexOf(group) === 0 ? 34 : 32), 0); return <Card className={className} title="Target Rombongan Belajar" description={description} action={showSelectAll ? <Button type="button" tone="ghost" onClick={() => change(selected.length === subject.classes.length ? [] : subject.classes)}>Pilih Semua</Button> : undefined}><div className="tg-stack">{subject.classes.map((group, index) => <label className="tg-check-row" key={group}><input type="checkbox" checked={selected.includes(group)} onChange={event => change(event.target.checked ? [...selected, group] : selected.filter(value => value !== group))} /><span><strong>Kelas {group}{compactLabels ? "" : " (Reguler)"}</strong><small style={{ display: "block" }}>{compactLabels ? (index === 2 ? "Ruang Multimedia" : `Ruang Lab Komputer ${index + 1}`) : `Lab Komputer ${index + 1}`}</small></span><Badge>{index === 0 ? 34 : 32} Siswa</Badge></label>)}{summaryLabel ? <div className="tg-assessment-target-total"><span><Solar name="users-group-rounded" />{summaryLabel}</span><strong>{studentCount} Siswa</strong></div> : <Notice>{selected.length} rombongan belajar terpilih</Notice>}{shuffle && <div className="tg-assessment-toggle-row tg-assessment-shuffle"><span><strong>Acak nomor urut soal per siswa</strong></span><span className="tg-assessment-switch" aria-hidden="true" /></div>}</div></Card>; }
-const defaultContent = "Bab 5: Logika Percabangan dalam Algoritma Komputer\n\nDalam kehidupan sehari-hari, kita sering dihadapkan pada pilihan bersyarat. Begitu pula pada komputer, instruksi dijalankan berdasarkan pemenuhan kondisi benar (true) atau salah (false).\n\nContoh Pseudocode Sederhana:\nJIKA nilai_siswa >= 75 MAKA\n    status ← Tuntas / Kompeten\nSELAIN ITU\n    status ← Remedial / Perlu Bimbingan\nAKHIR JIKA";
 export function MaterialEditor({ subject, editId }: { subject: Subject; editId?: string }) {
-  const { data, save } = useTeacherData(); const [currentId, setCurrentId] = useState(editId || "new"); const [modified, setModified] = useState<SavedMaterial | null>(null); const [message, setMessage] = useState(""); const [error, setError] = useState(""); const [preview, setPreview] = useState(false);
-  const original = materials.find(item => item.id === editId);
-  const initial: SavedMaterial = { id: currentId, subject: subject.id, title: original?.title || "", description: original?.description || "", topic: "Algoritma & Pemrograman", content: editId ? defaultContent : "", targets: [...subject.classes], files: [], status: "Draf" };
-  const form = modified || data.materials.find(item => item.subject === subject.id && item.id === currentId) || initial;
+  const courseState = useTeacherCourse(subject); const sections = (courseState.course?.sections || []) as TeacherSection[]; const section = sections.length === 1 ? sections[0] : undefined;
+  const createMaterial = useTeacherMutation("POST", `sections/${section?.id || 0}/materials`, async () => { await courseState.reload(); }, async () => { await courseState.reload(); });
+  const currentId = editId || "new"; const [modified, setModified] = useState<SavedMaterial | null>(null); const [message, setMessage] = useState(""); const [error, setError] = useState(""); const [preview, setPreview] = useState(false); const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const targetSubject = { ...subject, classes: [] };
+  const apiMaterial = sections.flatMap(item => item.materials || []).find(item => String(item.id) === editId);
+  const initial: SavedMaterial = { id: currentId, subject: subject.id, title: apiMaterial?.title || "", description: "", topic: "", content: apiMaterial?.body || "", targets: [], files: apiMaterial?.file_path ? [apiMaterial.file_path] : [], status: "—" };
+  const form = modified || initial;
+  const submitError = error || fieldErrorMessage(createMaterial.fieldErrors) || createMaterial.error || "";
   const change = (values: Partial<SavedMaterial>) => { setModified({ ...form, ...values }); setMessage(""); };
-  function persist(publish: boolean) {
+  function persist() {
     setError(""); setMessage("");
+    if (editId) { setError("Perubahan materi tidak dapat disimpan karena API belum menyediakan endpoint edit materi."); return; }
     if (!form.title.trim()) { setError("Judul materi wajib diisi."); return; }
-    if (publish && (!form.content.trim() || !form.targets.length || !form.description.trim())) { setError("Lengkapi deskripsi, isi materi, dan pilih minimal satu rombel sebelum publikasi."); return; }
-    const item = { ...form, id: currentId === "new" ? crypto.randomUUID() : currentId, status: publish ? "Diterbitkan" : "Draf" };
-    try { save({ materials: [...data.materials.filter(value => !(value.subject === subject.id && value.id === item.id)), item] }); setCurrentId(item.id); setModified(item); setMessage(publish ? "Materi diterbitkan pada pratinjau. Data tersimpan di browser ini." : "Draf materi tersimpan di browser ini."); } catch { setError("Materi belum tersimpan. Penyimpanan browser tidak tersedia atau penuh."); }
+    const targetGrade = gradeFromSubject(subject);
+    if (!targetGrade) { setError("Tingkat kelas materi tidak dapat ditentukan dari mata pelajaran ini."); return; }
+    if (!section) { setError(sections.length ? "Materi tidak dapat disimpan karena API memerlukan bagian materi, sedangkan course memiliki lebih dari satu bagian." : courseState.error || "Materi tidak dapat disimpan karena course belum memiliki bagian materi."); return; }
+    const extension = selectedFile ? uploadFileExtension(selectedFile.name) : "";
+    const fileTypes: Record<string, string> = { jpg: "file", jpeg: "file", png: "file", gif: "file", webp: "file", pdf: "pdf", mp3: "audio", wav: "audio", m4a: "audio", aac: "audio", ogg: "audio", mp4: "video", mov: "video", avi: "video", webm: "video", mkv: "video" };
+    if (selectedFile && (!isAllowedUploadExtension(selectedFile.name, "teacherMaterial") || selectedFile.size > MAX_UPLOAD_FILE_SIZE_BYTES)) { setError(`Pilih berkas materi yang diizinkan dengan ukuran maksimal ${MAX_UPLOAD_FILE_SIZE_LABEL}.`); return; }
+    const formData = new FormData();
+    formData.set("title", form.title.trim());
+    formData.set("type", selectedFile ? fileTypes[extension] : "text");
+    formData.set("target_grade", String(targetGrade));
+    if (form.content.trim()) formData.set("body", form.content);
+    if (selectedFile) formData.set("file", selectedFile);
+    void createMaterial.run(formData).then(result => {
+      if (!result) return;
+      setMessage("Materi berhasil disimpan.");
+      setSelectedFile(null);
+    });
   }
-  function addFiles(files: File[]) { const invalid = files.find(file => file.size > 25 * 1024 * 1024 || !/\.(pdf|pptx|docx|zip)$/i.test(file.name)); if (invalid) { setError("Gunakan PDF, PPTX, DOCX, atau ZIP dengan ukuran maksimal 25 MB per berkas."); return; } setError(""); change({ files: [...new Set([...form.files, ...files.map(file => file.name)])] }); }
-  return <><Heading title={editId ? "Edit Materi Pembelajaran" : "Publikasikan Materi Pembelajaran"} description="Susun materi ajar digital, lampiran pendukung, dan sasaran rombongan belajar." /><form className="tg-stack" onSubmit={(event: FormEvent) => { event.preventDefault(); persist(true); }}><div className="tg-columns"><div className="tg-stack"><Card title="Informasi Dasar Materi" description="Identitas modul dan pemetaan capaian kurikulum"><div className="tg-stack"><Field label="Judul Materi Pembelajaran *"><input required maxLength={120} value={form.title} onChange={event => change({ title: event.target.value })} placeholder="Contoh: Pengantar Logika Percabangan & Flowchart" /></Field><div className="tg-form-grid"><Field label="Topik Pembelajaran"><select value={form.topic} onChange={event => change({ topic: event.target.value })}>{["Algoritma & Pemrograman", "Jaringan Komputer", "Sistem Komputer", "Berpikir Komputasional"].map(item => <option key={item}>{item}</option>)}</select></Field><Field label="Mata Pelajaran"><div className="tg-readonly">{subject.name}</div></Field></div><div><h3>Capaian Pembelajaran (CP)</h3><div className="tg-subcard tg-soft"><Badge>CP-AP-01</Badge><p className="tg-small">Memahami konstruksi logika percabangan kondisional untuk menyelesaikan persoalan komputasional sehari-hari.</p><Badge>CP-AP-02</Badge><p className="tg-small">Merancang alur keputusan menggunakan flowchart.</p></div></div><Field label="Deskripsi Singkat Pengantar *"><textarea required maxLength={300} value={form.description} onChange={event => change({ description: event.target.value })} /><small>{form.description.length} / 300 karakter</small></Field></div></Card><Card title="Isi Konten Pembelajaran" description="Susun penjelasan materi dan contoh kode" action={<Button type="button" tone="outline" onClick={() => setPreview(!preview)}>{preview ? "Edit Teks" : "Pratinjau"}</Button>}>{preview ? <article className="tg-document" style={{ whiteSpace: "pre-wrap" }}>{form.content || "Konten materi belum ditulis."}</article> : <Field label="Konten materi *"><textarea className="tg-editor" required value={form.content} onChange={event => change({ content: event.target.value })} placeholder="Tuliskan penjelasan materi di sini..." /></Field>}<p className="tg-small tg-divider">Total kata: {form.content.trim() ? form.content.trim().split(/\s+/).length : 0} · Karakter: {form.content.length}</p></Card></div><aside className="tg-stack"><Targets subject={subject} selected={form.targets} change={targets => change({ targets })} /><Card title="Lampiran Berkas Pendukung" description="Bahan ajar, LKPD, atau panduan praktikum"><div className="tg-dropzone" onDragOver={event => event.preventDefault()} onDrop={event => { event.preventDefault(); addFiles([...event.dataTransfer.files]); }}><strong>Tarik berkas ke sini atau telusuri</strong><label className="tg-button tg-button-outline tg-file-picker">Telusuri Berkas<input aria-label="Pilih lampiran materi" type="file" multiple accept=".pdf,.pptx,.docx,.zip" onChange={event => { addFiles([...(event.target.files || [])]); event.target.value = ""; }} /></label><small>PDF, PPTX, DOCX, ZIP · Maks. 25 MB</small></div><div className="tg-stack tg-divider">{form.files.map(file => <div className="tg-between" key={file}><span className="tg-small" style={{ overflowWrap: "anywhere" }}>{file}</span><Button type="button" tone="ghost" onClick={() => change({ files: form.files.filter(value => value !== file) })} aria-label={`Hapus ${file}`}>Hapus</Button></div>)}<p className="tg-small">Pratinjau menyimpan nama lampiran. Berkas belum diunggah ke server.</p></div></Card></aside></div>{error && <div role="alert"><Notice tone="error">{error}</Notice></div>}{message && <div role="status"><Notice tone="success">{message}</Notice></div>}<div className="tg-form-actions"><Action href={`${subjectUrl(subject.id)}/materi`} secondary>← Kembali ke Materi</Action><div className="tg-actions"><Button type="button" tone="outline" onClick={() => persist(false)}>Simpan sebagai Draf</Button><Button type="submit">Publikasikan Sekarang</Button></div></div></form></>;
+  function addFiles(files: File[]) { if (files.length > 1) { setError("API hanya menerima satu berkas materi per permintaan."); return; } const file = files[0]; if (!file) return; if (!isAllowedUploadExtension(file.name, "teacherMaterial") || file.size > MAX_UPLOAD_FILE_SIZE_BYTES) { setError(`Pilih berkas materi yang diizinkan dengan ukuran maksimal ${MAX_UPLOAD_FILE_SIZE_LABEL}.`); return; } setError(""); setSelectedFile(file); change({ files: [file.name] }); }
+  return <><Heading title={editId ? "Edit Materi Pembelajaran" : "Publikasikan Materi Pembelajaran"} description="Susun materi ajar digital, lampiran pendukung, dan sasaran rombongan belajar." /><form className="tg-stack" onSubmit={(event: FormEvent) => { event.preventDefault(); persist(); }}><div className="tg-columns"><div className="tg-stack"><Card title="Informasi Dasar Materi" description="Identitas modul dan pemetaan capaian kurikulum"><div className="tg-stack"><Field label="Judul Materi Pembelajaran *"><input required maxLength={120} value={form.title} onChange={event => change({ title: event.target.value })} placeholder="Contoh: Pengantar Logika Percabangan & Flowchart" /></Field><div className="tg-form-grid"><Field label="Topik Pembelajaran"><select value={form.topic} onChange={event => change({ topic: event.target.value })}>{["Algoritma & Pemrograman", "Jaringan Komputer", "Sistem Komputer", "Berpikir Komputasional"].map(item => <option key={item}>{item}</option>)}</select></Field><Field label="Mata Pelajaran"><div className="tg-readonly">{subject.name}</div></Field></div><div><h3>Capaian Pembelajaran (CP)</h3><div className="tg-subcard tg-soft"><Badge>CP-AP-01</Badge><p className="tg-small">Memahami konstruksi logika percabangan kondisional untuk menyelesaikan persoalan komputasional sehari-hari.</p><Badge>CP-AP-02</Badge><p className="tg-small">Merancang alur keputusan menggunakan flowchart.</p></div></div><Field label="Deskripsi Singkat Pengantar *"><textarea required maxLength={300} value={form.description} onChange={event => change({ description: event.target.value })} /><small>{form.description.length} / 300 karakter</small></Field></div></Card><Card title="Isi Konten Pembelajaran" description="Susun penjelasan materi dan contoh kode" action={<Button type="button" tone="outline" onClick={() => setPreview(!preview)}>{preview ? "Edit Teks" : "Pratinjau"}</Button>}>{preview ? <article className="tg-document" style={{ whiteSpace: "pre-wrap" }}>{form.content || "Konten materi belum ditulis."}</article> : <Field label="Konten materi *"><textarea className="tg-editor" required value={form.content} onChange={event => change({ content: event.target.value })} placeholder="Tuliskan penjelasan materi di sini..." /></Field>}<p className="tg-small tg-divider">Total kata: {form.content.trim() ? form.content.trim().split(/\s+/).length : 0} · Karakter: {form.content.length}</p></Card></div><aside className="tg-stack"><Targets subject={targetSubject} selected={form.targets} change={targets => change({ targets })} /><Card title="Lampiran Berkas Pendukung" description="Bahan ajar, LKPD, atau panduan praktikum"><div className="tg-dropzone" onDragOver={event => event.preventDefault()} onDrop={event => { event.preventDefault(); addFiles([...event.dataTransfer.files]); }}><strong>Tarik berkas ke sini atau telusuri</strong><label className="tg-button tg-button-outline tg-file-picker">Telusuri Berkas<input aria-label="Pilih lampiran materi" type="file" multiple accept={uploadAccept("teacherMaterial")} onChange={event => { addFiles([...(event.target.files || [])]); event.target.value = ""; }} /></label><small>{`Format: ${uploadExtensionsLabel("teacherMaterial")} · Maks. ${MAX_UPLOAD_FILE_SIZE_LABEL}`}</small></div><div className="tg-stack tg-divider">{form.files.map(file => <div className="tg-between" key={file}><span className="tg-small" style={{ overflowWrap: "anywhere" }}>{file}</span><Button type="button" tone="ghost" onClick={() => { setSelectedFile(null); change({ files: form.files.filter(value => value !== file) }); }} aria-label={`Hapus ${file}`}>Hapus</Button></div>)}<p className="tg-small">Pratinjau menyimpan nama lampiran. Berkas belum diunggah ke server.</p></div></Card></aside></div>{submitError && <div role="alert"><Notice tone="error">{submitError}</Notice></div>}{message && <div role="status"><Notice tone="success">{message}</Notice></div>}<div className="tg-form-actions"><Action href={`${subjectUrl(subject.id)}/materi`} secondary>← Kembali ke Materi</Action><div className="tg-actions"><Button type="button" tone="outline" onClick={() => persist()}>Simpan sebagai Draf</Button><Button type="submit">Publikasikan Sekarang</Button></div></div></form></>;
 }
-const initialQuestions: Question[] = [
-  { id: 2, type: "Pilihan Ganda", text: "Topologi jaringan manakah yang membutuhkan terminator pada kedua ujung kabel utamanya?", weight: 10, options: ["Star", "Bus", "Ring", "Mesh"], answer: "1" },
-  { id: 1, type: "Pilihan Ganda", text: "Perangkat yang menghubungkan beberapa komputer dalam satu jaringan lokal disebut ...", weight: 10, options: ["Modem", "Repeater", "Switch", "Hub"], answer: "2" },
-  { id: 3, type: "Pilihan Ganda", text: "Dalam arsitektur Local Area Network (LAN), perangkat manakah yang meneruskan frame data berdasarkan MAC Address?", weight: 10, options: ["Repeater Penguat Sinyal", "Switch Manageable", "Modem ADSL Fiber", "Hub Pasif Broadcast"], answer: "1" },
-  { id: 4, type: "Pilihan Ganda", text: "Kabel UTP Kategori 6 mendukung kecepatan transfer data hingga ...", weight: 10, options: ["10 Mbps", "100 Mbps", "1 Gbps", "10 Gbps"], answer: "3" },
-  { id: 5, type: "Pilihan Ganda", text: "Fungsi utama port WAN pada router adalah ...", weight: 10, options: ["Menghubungkan ke jaringan internet", "Menghubungkan printer", "Menyimpan data", "Mengatur daya"], answer: "0" },
-  { id: 6, type: "Pilihan Ganda", text: "Perangkat jaringan yang bekerja pada layer Data-Link adalah ...", weight: 10, options: ["Hub", "Switch", "Repeater", "Kabel UTP"], answer: "1" },
-  { id: 7, type: "Benar / Salah", text: "Kabel UTP Kategori 6 mendukung kecepatan transfer data hingga 10 Gbps.", weight: 10, options: ["Benar", "Salah"], answer: "0" },
-  { id: 8, type: "Uraian", text: "Jelaskan perbedaan mendasar cara kerja collision domain pada Hub dan Switch!", weight: 10, options: [], answer: "Hub membagi collision domain ke seluruh port, sedangkan Switch memisahkannya pada setiap port." },
-  { id: 9, type: "Uraian", text: "Sebutkan fungsi port WAN pada router dan berikan satu contoh penggunaannya!", weight: 10, options: [], answer: "Port WAN menghubungkan router ke modem atau jaringan internet." },
-  { id: 10, type: "Unggah Portofolio", text: "Unggah tangkapan layar hasil simulasi topologi jaringan yang telah dibuat.", weight: 10, options: [], answer: "Kelengkapan perangkat dan keberhasilan koneksi." },
-];
-const initialTaskQuestions: Question[] = [
-  { id: 1, type: "Pilihan Ganda", text: "Dalam arsitektur Local Area Network (LAN) di laboratorium sekolah, perangkat jaringan manakah yang bertugas meneruskan frame data ke node tujuan spesifik berdasarkan MAC Address pada layer Data-Link?", weight: 40, options: ["Repeater Penguat Sinyal", "Switch Manageable", "Modem ADSL Fiber", "Hub Pasif Broadcast"], answer: "1" },
-  { id: 2, type: "Uraian", text: "Jelaskan mengapa Topologi Star secara luas lebih dipilih dalam instalasi jaringan lab sekolah daripada Topologi Bus, khususnya ditinjau dari aspek keandalan sistem dan isolasi gangguan (fault tolerance) ketika salah satu kabel workstation murid mengalami kerusakan fisik!", weight: 40, options: [], answer: "Isolasi gangguan kabel, peran sentral switch, dan perbandingan terminator pada bus." },
-  { id: 3, type: "Unggah Portofolio", text: "Rancang skema topologi jaringan hybrid (kombinasi 1 Server, 1 Switch, dan 6 PC Client) pada aplikasi simulator jaringan. Unggah berkas project (.pkt) atau ekspor dokumen konfigurasi (.pdf) dengan mencantumkan nama dan nomor absen.", weight: 20, options: [], answer: "Kelengkapan perangkat dan keberhasilan koneksi." },
-];
 function assessmentDateLabel(value: string, includeYear = false) {
   const [year, month, day] = value.split("-").map(Number);
   if (!year || !month || !day) return value;
   return new Intl.DateTimeFormat("id-ID", { weekday: "long", day: "numeric", month: "short", ...(includeYear ? { year: "numeric" } : {}) }).format(new Date(year, month - 1, day));
 }
 export function AssessmentEditor({ subject, editId, kind = "kuis" }: { subject: Subject; editId?: string; kind?: AssessmentKind }) {
-  const { data, save } = useTeacherData(); const [currentId, setCurrentId] = useState(editId || "new"); const [modified, setModified] = useState<SavedAssessment | null>(null); const [message, setMessage] = useState(""); const [error, setError] = useState("");
-  const savedAssessment = data.assessments.find(item => item.subject === subject.id && item.id === currentId);
-  const formKind = editId ? assessmentKindOf(savedAssessment || { id: editId, type: "" }) : kind;
+  const router = useRouter(); const [currentId, setCurrentId] = useState(editId || "new"); const [modified, setModified] = useState<SavedAssessment | null>(null); const [message, setMessage] = useState(""); const [error, setError] = useState("");
+  const courseState = useTeacherCourse(subject); const sections = (courseState.course?.sections || []) as TeacherSection[]; const section = sections.length === 1 ? sections[0] : undefined;
+  const createAssessment = useTeacherMutation("POST", `sections/${section?.id || 0}/assessments`, async () => { await courseState.reload(); }, async () => { await courseState.reload(); });
+  const submitError = error || fieldErrorMessage(createAssessment.fieldErrors) || createAssessment.error || "";
+  const pendingAssessmentId = useRef<number | null>(null); const sentQuestions = useRef<Set<number>>(new Set()); const creationComplete = useRef(false); const creationInFlight = useRef(false);
+  const apiAssessment = sections.flatMap(item => item.assessments || []).find(item => String(item.id) === editId);
+  const formKind = editId ? apiAssessment?.assessment_type === "practice" ? "kuis" : "tugas" : kind;
   const editing = Boolean(editId);
-  const initial: SavedAssessment = { id: currentId, subject: subject.id, title: formKind === "tugas" ? taskTitle : "Kuis Formatif Bab 4: Perangkat Keras Jaringan", type: formKind === "tugas" ? "Tugas & Kuis Campuran" : "Kuis", kind: formKind, instructions: formKind === "tugas" ? "1. Kerjakan Butir 01 (Pilihan Ganda) dan Butir 02 (Uraian Logika Arsitektur Jaringan) secara mandiri di platform ini.\n2. Pada Butir 03, unduh berkas studi kasus laboratorium lalu simulasikan menggunakan Cisco Packet Tracer / diagram alir gambar tangan rapi.\n3. Format berkas unggahan: PDF/PNG/PKT dengan ukuran berkas maksimum 10MB per siswa." : "Kerjakan seluruh soal dengan teliti dan mandiri. Setiap soal memiliki bobot poin yang berbeda. Pastikan koneksi internet stabil sebelum menekan tombol Mulai.", targets: [...subject.classes], start: "2026-10-28T08:00", end: "2026-10-31T23:59", questions: formKind === "tugas" ? initialTaskQuestions : initialQuestions, status: "Draf" };
-  const form = modified || savedAssessment || initial;
+  const toLocalDateTime = (value?: string | null) => value ? new Date(new Date(value).getTime() - new Date(value).getTimezoneOffset() * 60000).toISOString().slice(0, 16) : "";
+  const apiQuestions: Question[] = (apiAssessment?.questions || []).map(question => ({ id: question.id, type: question.type === "multiple_choice" ? "Pilihan Ganda" : question.type === "true_false" ? "Benar / Salah" : question.type === "file_upload" ? "Unggah Portofolio" : "Uraian", text: question.prompt, weight: question.points, options: (question.options || []).map(option => option.text), answer: String((question.options || []).findIndex(option => option.text === question.correct_answer)) }));
+  const initial: SavedAssessment = { id: currentId, subject: subject.id, title: apiAssessment?.title || "", type: formKind === "tugas" ? "Tugas" : "Kuis", kind: formKind, instructions: apiAssessment?.description || "", targets: [], start: toLocalDateTime(apiAssessment?.start_at), end: toLocalDateTime(apiAssessment?.end_at), questions: apiQuestions, status: apiAssessment?.is_published ? "Diterbitkan" : "Draf" };
+  const form = modified || initial;
+  const targetSubject = { ...subject, classes: [] };
   const [startDate, startTime = "08:00"] = form.start.split("T");
   const [endDate, endTime = "23:59"] = form.end.split("T");
-  const [expandedQuestions, setExpandedQuestions] = useState<number[]>([3, 8]);
+  const [expandedQuestions, setExpandedQuestions] = useState<number[]>([]);
   const [draggedQuestionId, setDraggedQuestionId] = useState<number | null>(null);
   const [dropTargetQuestionId, setDropTargetQuestionId] = useState<number | null>(null);
-  const [previousQuestionOrderIds, setPreviousQuestionOrderIds] = useState<number[] | null>(() => formKind === "kuis" ? initialQuestions.map(question => question.id).sort((a, b) => a - b) : null);
-  const [reorderMessage, setReorderMessage] = useState<string | null>(() => formKind === "kuis" ? "Soal 1 dan Soal 2 ditukar posisinya" : null);
+  const [previousQuestionOrderIds, setPreviousQuestionOrderIds] = useState<number[] | null>(null);
+  const [reorderMessage, setReorderMessage] = useState<string | null>(null);
   const change = (values: Partial<SavedAssessment>) => { setModified({ ...form, ...values }); setMessage(""); };
   const updateQuestion = (id: number, values: Partial<Question>) => change({ questions: form.questions.map(question => question.id === id ? { ...question, ...values } : question) });
   function moveQuestion(draggedId: number, targetId: number | null) {
@@ -95,11 +108,71 @@ export function AssessmentEditor({ subject, editId, kind = "kuis" }: { subject: 
   }).filter(group => group.count > 0);
   function persist(publish: boolean) {
     setError(""); setMessage("");
+    if (editing) { setError("Perubahan asesmen tidak dapat disimpan karena API belum menyediakan endpoint edit asesmen."); return; }
     if (!form.title.trim()) { setError("Judul asesmen wajib diisi."); return; }
-    if (publish && (!form.targets.length || total !== 100 || !form.questions.length || form.questions.some(question => !question.text.trim() || question.weight <= 0 || (["Pilihan Ganda", "Benar / Salah"].includes(question.type) && (question.options.some(option => !option.trim()) || question.answer === ""))) || !form.instructions.trim())) { setError("Lengkapi instruksi dan soal, pilih rombel, serta pastikan total bobot tepat 100 poin."); return; }
+    if (form.questions.some(question => !question.text.trim() || question.weight <= 0 || (["Pilihan Ganda", "Benar / Salah"].includes(question.type) && (question.options.some(option => !option.trim()) || question.answer === "")))) { setError("Lengkapi pertanyaan dan pilihan jawaban sebelum menyimpan."); return; }
+    if (publish && (total !== 100 || !form.questions.length || !form.instructions.trim())) { setError("Lengkapi instruksi dan soal, serta pastikan total bobot tepat 100 poin."); return; }
     if (publish && (!form.start || !form.end || form.end <= form.start)) { setError("Batas akhir harus setelah tanggal mulai pengerjaan."); return; }
-    const item = { ...form, kind: formKind, id: currentId === "new" ? crypto.randomUUID() : currentId, status: publish ? "Diterbitkan" : "Draf" };
-    try { save({ assessments: [...data.assessments.filter(value => !(value.subject === subject.id && value.id === item.id)), item] }); setCurrentId(item.id); setModified(item); setMessage(publish ? "Asesmen diterbitkan pada pratinjau. Belum dikirim ke siswa." : "Draf asesmen tersimpan di browser ini."); } catch { setError("Asesmen belum tersimpan. Penyimpanan browser tidak tersedia atau penuh."); }
+    if (formKind === "tugas") { setError("Jenis tugas belum dapat dipetakan ke assessment_type pada API. Pilih Kuis atau minta pemetaan tipe tugas."); return; }
+    if (!section) { setError(sections.length ? "Asesmen tidak dapat disimpan karena API memerlukan bagian materi, sedangkan course memiliki lebih dari satu bagian." : courseState.error || "Asesmen tidak dapat disimpan karena course belum memiliki bagian materi."); return; }
+    const targetGrade = gradeFromSubject(subject);
+    if (!targetGrade) { setError("Tingkat kelas asesmen tidak dapat ditentukan dari mata pelajaran ini."); return; }
+    if (!form.end || new Date(form.end).getTime() <= Date.now()) { setError("Batas akhir asesmen harus berada setelah waktu sekarang."); return; }
+    if (creationComplete.current) { setMessage("Asesmen dan seluruh soal berhasil disimpan."); return; }
+    if (creationInFlight.current) return;
+    creationInFlight.current = true;
+    void (async () => {
+      try {
+      let assessmentId = pendingAssessmentId.current;
+      if (!assessmentId) {
+        const assessmentResult = await createAssessment.run({
+          title: form.title.trim(),
+          assessment_type: "practice",
+          target_grade: targetGrade,
+          is_published: publish,
+          duration_minutes: 60,
+          end_at: new Date(form.end).toISOString(),
+          start_at: form.start ? new Date(form.start).toISOString() : undefined,
+          description: form.instructions,
+          maximum_attempt: 1,
+        }) as { data?: { id?: number } } | undefined;
+        if (!assessmentResult?.data?.id) { setError(""); return; }
+        assessmentId = assessmentResult.data.id;
+        pendingAssessmentId.current = assessmentId;
+        setCurrentId(String(assessmentId));
+      }
+      for (const question of form.questions) {
+        if (sentQuestions.current.has(question.id)) continue;
+        const type = question.type === "Pilihan Ganda" ? "multiple_choice" : question.type === "Benar / Salah" ? "true_false" : question.type === "Uraian" ? "essay" : question.type === "Unggah Portofolio" ? "file_upload" : null;
+        if (!type) { setError(`Jenis soal ${question.type} tidak didukung API.`); return; }
+        const selectedIndex = Number(question.answer);
+        const options = ["Pilihan Ganda", "Benar / Salah"].includes(question.type)
+          ? question.options.map((text, index) => ({ text, is_correct: index === selectedIndex }))
+          : undefined;
+        const correctAnswer = question.type === "Benar / Salah"
+          ? question.answer === "0"
+          : question.type === "Pilihan Ganda" ? question.options[selectedIndex] : undefined;
+        let result: { data?: unknown } | undefined;
+        try {
+          result = await apiRequest<{ data?: unknown }>(`teacher/assessments/${assessmentId}/questions`, {
+            method: "POST",
+            body: JSON.stringify({ type, prompt: question.text, points: question.weight, ...(correctAnswer === undefined ? {} : { correct_answer: correctAnswer }), ...(options ? { options } : {}) }),
+          });
+        } catch (cause) {
+          if (cause instanceof ApiError && cause.status === 401) router.replace("/login?role=teacher&reason=session-expired");
+          if (cause instanceof ApiError && cause.status === 404) await courseState.reload();
+          setError(cause instanceof ApiError && Object.keys(cause.fieldErrors).length ? fieldErrorMessage(cause.fieldErrors) : cause instanceof Error ? cause.message : "Soal belum dapat disimpan.");
+          return;
+        }
+        if (!result) return;
+        sentQuestions.current.add(question.id);
+      }
+      creationComplete.current = true;
+      setMessage(publish ? "Asesmen dan seluruh soal berhasil diterbitkan." : "Asesmen dan seluruh soal berhasil disimpan sebagai draf.");
+      } finally {
+        creationInFlight.current = false;
+      }
+    })();
   }
   return <form className={`tg-stack tg-assessment-builder ${editing ? "is-editing" : "is-creating"}`} onSubmit={event => { event.preventDefault(); persist(true); }}>
     <header className="tg-assessment-builder-title"><h1>{editing ? `Edit ${formKind === "tugas" ? "Tugas" : "Kuis"}` : `Publikasikan ${formKind === "tugas" ? "Tugas" : "Kuis"} Baru`}</h1></header>
@@ -144,7 +217,7 @@ export function AssessmentEditor({ subject, editId, kind = "kuis" }: { subject: 
           <div className="tg-assessment-question-top"><div className="tg-inline"><span className="tg-assessment-drag" aria-label="Seret untuk mengubah urutan" draggable={formKind === "kuis" && !editing} onDragStart={event => { if (formKind === "kuis" && !editing) { event.dataTransfer.effectAllowed = "move"; event.dataTransfer.setData("text/plain", String(question.id)); setDraggedQuestionId(question.id); } }} onDragEnd={() => { setDraggedQuestionId(null); setDropTargetQuestionId(null); }}>⠿</span><Badge>{String(formKind === "tugas" ? index + 1 : question.id).padStart(2, "0")}</Badge><select className={`tg-assessment-type tg-assessment-type-${index}`} aria-label={`Jenis soal ${index + 1}`} value={question.type} onChange={event => updateQuestion(question.id, { type: event.target.value, options: event.target.value === "Benar / Salah" ? ["Benar", "Salah"] : question.options.length ? question.options : ["", "", "", ""], answer: "" })}><option value="Pilihan Ganda">Pilihan Ganda</option>{formKind === "kuis" && <option value="Benar / Salah">Benar / Salah</option>}<option value="Uraian">Jawaban Singkat</option><option value="Unggah Portofolio">Unggah Berkas</option></select></div><div className="tg-inline">{formKind === "tugas" ? <label className="tg-assessment-weight">Bobot: <input className="tg-grade-input" aria-label={`Bobot soal ${index + 1}`} type="number" min={0} max={10} step={1} value={question.weight / 10} onChange={event => updateQuestion(question.id, { weight: Math.min(100, Math.max(0, Number(event.target.value) * 10)) })} /> Poin</label> : <div className="tg-assessment-point-control"><select aria-label={`Bobot soal ${question.id}`} value={question.weight} onChange={event => updateQuestion(question.id, { weight: Number(event.target.value) })}>{Array.from({ length: 20 }, (_, pointIndex) => (pointIndex + 1) * 5).map(points => <option value={points} key={points}>{points} Poin</option>)}</select><Solar name="alt-arrow-down" /></div>}{formKind === "kuis" && <Button type="button" tone="ghost" aria-label={expandedQuestions.includes(question.id) ? `Ciutkan soal ${index + 1}` : `Buka soal ${index + 1}`} aria-expanded={expandedQuestions.includes(question.id)} onClick={() => setExpandedQuestions(current => current.includes(question.id) ? current.filter(id => id !== question.id) : [...current, question.id])}><Solar name={expandedQuestions.includes(question.id) ? "alt-arrow-up" : "alt-arrow-down"} /></Button>}<Button type="button" tone="ghost" aria-label={`Hapus soal ${index + 1}`} onClick={() => change({ questions: form.questions.filter(item => item.id !== question.id) })}><Solar name="trash-bin-trash" /></Button></div></div>
           {(formKind === "tugas" || expandedQuestions.includes(question.id)) ? <div className="tg-assessment-question-detail">
           <Field label={`Pertanyaan ${index + 1} *`}><textarea className="tg-assessment-question-text" rows={3} required value={question.text} onChange={event => updateQuestion(question.id, { text: event.target.value })} /></Field>
-          {question.type === "Unggah Portofolio" && <span className="tg-assessment-format-note"><Solar name="info-circle" />Format diterima: .PKT, .PDF, .PNG (Maks. 15 MB)</span>}
+          {question.type === "Unggah Portofolio" && <span className="tg-assessment-format-note"><Solar name="info-circle" />{`Format diterima: ${uploadExtensionsLabel("studentAssessment")} (Maks. ${MAX_UPLOAD_FILE_SIZE_LABEL})`}</span>}
           {question.type === "Pilihan Ganda" || question.type === "Benar / Salah" ? <><fieldset className="tg-assessment-options"><legend className="tg-sr-only">Pilihan jawaban, pilih satu kunci yang benar</legend><div className="tg-form-grid">{question.options.map((option, optionIndex) => <label className={`tg-assessment-option ${question.answer === String(optionIndex) ? "is-correct" : ""}`} key={optionIndex}><input aria-label={`Kunci soal ${index + 1}: ${question.type === "Benar / Salah" ? option : String.fromCharCode(65 + optionIndex)}`} type="radio" name={`answer-${question.id}`} checked={question.answer === String(optionIndex)} onChange={() => updateQuestion(question.id, { answer: String(optionIndex) })} /><span className="tg-assessment-option-letter">{question.type === "Benar / Salah" ? option : String.fromCharCode(65 + optionIndex)}</span><textarea required rows={question.answer === String(optionIndex) ? 2 : 1} aria-label={`Soal ${index + 1}, pilihan ${String.fromCharCode(65 + optionIndex)}`} value={option} onChange={event => updateQuestion(question.id, { options: question.options.map((text, i) => i === optionIndex ? event.target.value : text) })} />{question.answer === String(optionIndex) && <small><Solar name="check-circle" />Kunci Jawaban</small>}</label>)}</div></fieldset>{formKind === "kuis" && question.type === "Pilihan Ganda" && <div className="tg-assessment-question-discussion"><strong>Pembahasan Soal (Dapat Dilihat Siswa Setelah Selesai)</strong><p>Switch bekerja pada layer data link (OSI Layer 2) untuk meneruskan data secara selektif ke port tujuan berdasarkan MAC Address, sehingga memisahkan collision domain.</p></div>}</> : <div className="tg-assessment-rubric">
             <div className="tg-assessment-rubric-heading"><strong><Solar name="checklist-minimalistic" />Rubrik Penilaian</strong><span><Solar name="check-circle" />Terpakai {question.weight} / {question.weight} Poin</span></div>
             {/* TODO-DATA: kriteria dan distribusi poin mengikuti contoh visual Figma; rubrik editable lama tetap tersedia di bawah. */}
@@ -160,7 +233,7 @@ export function AssessmentEditor({ subject, editId, kind = "kuis" }: { subject: 
       </Card>
       </div>
       <aside className="tg-stack tg-assessment-builder-aside">
-        <Targets className="tg-assessment-targets" subject={subject} selected={form.targets} change={targets => change({ targets })} description="Tentukan rombel jenjang kelas 8 yang menerima notifikasi tugas:" summaryLabel="Total Akumulasi Siswa" shuffle={formKind === "tugas"} showSelectAll={false} compactLabels />
+        <Targets className="tg-assessment-targets" subject={targetSubject} selected={form.targets} change={targets => change({ targets })} description="Tentukan rombel jenjang kelas 8 yang menerima notifikasi tugas:" summaryLabel="Total Akumulasi Siswa" shuffle={formKind === "tugas"} showSelectAll={false} compactLabels />
         {formKind === "kuis" && <>
         {/* TODO-DATA: pengacakan belum menjadi bagian dari model asesmen. */}
         <Card className="tg-assessment-randomization" title="Pengacakan Soal">
@@ -193,7 +266,7 @@ export function AssessmentEditor({ subject, editId, kind = "kuis" }: { subject: 
         </Card>}
       </aside>
     </div>
-    {error && <div role="alert"><Notice tone="error">{error}</Notice></div>}{message && <div role="status"><Notice tone="success">{message}</Notice></div>}
+    {submitError && <div role="alert"><Notice tone="error">{submitError}</Notice></div>}{message && <div role="status"><Notice tone="success">{message}</Notice></div>}
     <div className="tg-form-actions tg-assessment-builder-actions"><Action href={`${subjectUrl(subject.id)}/asesmen`} secondary><Solar name="arrow-left" />Kembali</Action><div className="tg-actions"><Button type="button" tone="outline" onClick={() => persist(false)}><Solar name="clipboard-check" />Simpan sebagai Draf</Button><Button type="submit"><Solar name="check-circle" />Publikasikan Sekarang</Button></div></div>
   </form>;
 }

@@ -27,6 +27,7 @@ import {
 } from "@/app/admin/_components/AdminUI";
 import { ErrorState, LoadingState } from "@/components/lms/state";
 import { ApiError, apiRequest } from "@/lib/api";
+import { isAllowedUploadExtension, MAX_UPLOAD_FILE_SIZE_BYTES, MAX_UPLOAD_FILE_SIZE_LABEL, uploadAccept, uploadExtensionsLabel } from "@/lib/uploadLimits";
 import { useAdminMutation, useAdminResource } from "@/app/admin/_components/useAdminApi";
 
 
@@ -95,8 +96,8 @@ export default function SiswaPage() {
     setImportError("");
     setImportSuccess("");
     if (!file) return;
-    if (!file.name.toLowerCase().endsWith(".xlsx") || file.size > 10 * 1024 * 1024) {
-      setImportError("Pilih berkas XLSX berukuran maksimal 10 MB.");
+    if (!isAllowedUploadExtension(file.name, "adminStudentImport") || file.size > MAX_UPLOAD_FILE_SIZE_BYTES) {
+      setImportError(`Pilih berkas ${uploadExtensionsLabel("adminStudentImport")} berukuran maksimal ${MAX_UPLOAD_FILE_SIZE_LABEL}.`);
       return;
     }
     setImportBusy(true);
@@ -228,7 +229,7 @@ export default function SiswaPage() {
       />
 
       {/* Bagian tampilan: pemilih CSV serta hasil impor siswa. */}
-      <input ref={csvInputRef} type="file" accept=".xlsx" hidden onChange={(event) => { const input = event.currentTarget; const file = input.files?.[0] ?? null; input.value = ""; void importStudents(file); }} aria-label="Pilih file Excel siswa" />
+      <input ref={csvInputRef} type="file" accept={uploadAccept("adminStudentImport")} hidden onChange={(event) => { const input = event.currentTarget; const file = input.files?.[0] ?? null; input.value = ""; void importStudents(file); }} aria-label="Pilih file Excel siswa" />
       {importError && <InfoBanner tone="danger">{importError}</InfoBanner>}
       {importSuccess && <InfoBanner tone="success">{importSuccess}</InfoBanner>}
       {studentsError && <InfoBanner tone="danger">{studentsError}</InfoBanner>}
