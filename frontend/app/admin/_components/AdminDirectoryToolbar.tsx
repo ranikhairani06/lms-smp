@@ -1,6 +1,6 @@
 "use client";
 
-import { SearchField, SelectField, adminStyles as s } from "./AdminUI";
+import { ExampleBadge, SearchField, SelectField, adminStyles as s } from "./AdminUI";
 
 type AdminDirectoryToolbarProps = {
   keyword: string;
@@ -9,6 +9,8 @@ type AdminDirectoryToolbarProps = {
   category: string;
   onCategoryChange: (value: string) => void;
   categoryOptions: string[];
+  showExampleBadge?: boolean;
+  variant?: "default" | "student";
 };
 
 export default function AdminDirectoryToolbar({
@@ -18,11 +20,14 @@ export default function AdminDirectoryToolbar({
   category,
   onCategoryChange,
   categoryOptions,
+  showExampleBadge = true,
+  variant = "default",
 }: AdminDirectoryToolbarProps) {
   return (
-    <div className={s.toolbar}>
+    <div className={`${s.toolbar} ${s.managementToolbar} ${variant === "student" ? s.managementToolbarStudent : ""}`}>
       <SearchField value={keyword} onChange={onKeywordChange} placeholder={searchPlaceholder} />
       <div className={s.toolbarSpacer} />
+      {showExampleBadge && <ExampleBadge />}
       <SelectField value={category} onChange={onCategoryChange} options={categoryOptions} />
     </div>
   );

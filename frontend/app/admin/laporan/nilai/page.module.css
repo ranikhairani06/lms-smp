@@ -1,0 +1,108 @@
+/* Bagian tampilan: header ekspor dan filter laporan nilai. */
+.exportButton { color: var(--color-primary); background: var(--color-primary-tint); border-color: transparent; }
+.exportButton:hover { background: var(--color-primary-tint); }
+.pageHeader :global([class*="pageDescription"]) { max-width: calc((var(--frame-desktop-width) / 2) - var(--space-md) - var(--space-sm)); }
+/* Bagian tampilan: tipografi judul dan deskripsi khusus header Laporan Nilai. */
+.pageHeader :global([class*="pageTitle"]) { font-size: var(--text-h5-size); line-height: var(--text-h5-line); }
+.pageHeader :global([class*="pageDescription"]) { font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.pageHeader { width: calc(100% + var(--space-sm)); margin-top: calc(var(--space-xl) + var(--space-sm)); margin-left: calc(0px - var(--space-sm)); }
+.filterPanel { padding: var(--space-lg); }
+.filterPanel,
+.reportPanel { width: calc(100% + var(--space-sm)); margin-left: calc(0px - var(--space-sm)); }
+.filterGrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)) auto; align-items: end; gap: var(--space-md); }
+.filterItem { min-width: 0; display: flex; flex-direction: column; gap: var(--space-sm); color: var(--color-text-secondary); font-size: var(--text-l12-size); line-height: var(--text-l12-line); font-weight: var(--font-weight-medium); }
+.filterLabel { display: flex; align-items: center; gap: var(--space-xs); white-space: nowrap; }
+.selectWrap { position: relative; min-width: 0; display: flex; align-items: center; }
+.selectWrap select { width: 100%; min-width: 0; height: calc(var(--space-xl) + var(--space-sm)); appearance: none; padding: 0 var(--space-xl) 0 var(--space-sm); color: var(--color-text-primary); background: var(--color-primary-tint); border: 0; border-radius: var(--radius-s); font: inherit; font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.selectWrap > svg { position: absolute; right: var(--space-sm); pointer-events: none; color: var(--color-text-secondary); }
+.filterActions { display: flex; align-items: end; gap: var(--space-sm); white-space: nowrap; }
+.filterActions :global([class*="button"]) { font-size: var(--text-l16-size); line-height: var(--text-l16-line); }
+.filterActions :global([class*="button_primary"]) { color: var(--color-surface); background: var(--color-primary); border-color: var(--color-primary); }
+.filterActions :global([class*="button_primary"]:hover) { background: var(--color-primary-hover); border-color: var(--color-primary-hover); }
+.applyFilterButton { min-height: var(--space-2xl); }
+.resetButton { min-height: var(--space-2xl); }
+
+/* Bagian tampilan: isi panel dan tabel skor siswa serta ringkasan mapel. */
+.reportPanel { padding: var(--space-lg); }
+.reportPanel + .reportPanel { margin-top: var(--space-lg); }
+.panelTitle { margin: 0 0 var(--space-md); padding: 0; border: 0; }
+.panelTitle h2 { margin: 0; color: var(--color-text-primary); font-size: var(--text-h5-size); line-height: var(--text-h5-line); font-weight: var(--font-weight-bold); }
+.tableWrap { width: 100%; overflow-x: auto; background: transparent; border: 0; border-radius: 0; }
+.gradeTable,
+.subjectTable { width: 100%; min-width: 100%; table-layout: fixed; border-collapse: collapse; }
+.gradeTable col:nth-child(1) { width: 27%; }
+.gradeTable col:nth-child(2) { width: 11%; }
+.gradeTable col:nth-child(3) { width: 6%; }
+.gradeTable col:nth-child(4),
+.gradeTable col:nth-child(5),
+.gradeTable col:nth-child(6) { width: 8%; }
+.gradeTable col:nth-child(7) { width: 10%; }
+.gradeTable col:nth-child(8) { width: 22%; }
+.gradeTable th,
+.subjectTable th { height: var(--space-2xl); padding: var(--space-sm) var(--space-sm); color: var(--color-text-secondary); background: var(--color-primary-tint); font-size: var(--text-l12-size); line-height: var(--text-l12-line); font-weight: var(--font-weight-semibold); text-align: left; vertical-align: middle; }
+.gradeTable th,
+.subjectTable th:not(:first-child):not(:nth-child(6)) { white-space: nowrap; }
+.subjectTable th:first-child,
+.subjectTable th:nth-child(6) { white-space: normal; }
+.gradeTable th:first-child,
+.subjectTable th:first-child { border-radius: var(--radius-s) 0 0 0; }
+.gradeTable th:last-child,
+.subjectTable th:last-child { border-radius: 0 var(--radius-s) 0 0; }
+.gradeTable th > svg,
+.subjectTable th > svg { margin-left: var(--space-xs); vertical-align: middle; color: var(--color-text-disabled); }
+.sortHeading { display: inline-flex; align-items: center; gap: var(--space-xs); white-space: nowrap; }
+.subjectTable th:first-child .sortHeading,
+.subjectTable th:nth-child(6) .sortHeading { max-width: 100%; flex-wrap: wrap; white-space: normal; }
+.gradeTable td,
+.subjectTable td { padding: var(--space-sm); color: var(--color-text-primary); border-top: var(--border-width-xs) solid var(--color-background); font-size: var(--text-p12-size); line-height: var(--text-p12-line); vertical-align: middle; }
+.gradeTable tbody tr { height: calc(var(--space-2xl) + var(--space-lg)); }
+.subjectTable tbody tr { height: calc(var(--space-2xl) + var(--space-xl) + var(--space-sm) + var(--space-xs)); }
+.gradeTable tbody tr:hover,
+.subjectTable tbody tr:hover { background: var(--color-primary-tint); }
+.gradeTable col:nth-child(2),
+.gradeTable col:nth-child(3) { text-align: left; }
+.gradeTable th:nth-child(2),
+.gradeTable th:nth-child(3),
+.gradeTable td:nth-child(2),
+.gradeTable td:nth-child(3) { text-align: left; }
+.numericHeading,
+.numericCell { text-align: right !important; font-variant-numeric: tabular-nums; }
+.numericCell { white-space: nowrap; }
+.numericCell strong { font-weight: var(--font-weight-bold); }
+.studentIdentity,
+.teacherIdentity { min-width: 0; display: flex; align-items: center; gap: var(--space-sm); }
+.studentIdentity > span:last-child,
+.teacherIdentity > span:last-child,
+.subjectIdentity { min-width: 0; display: flex; flex-direction: column; }
+.studentIdentity strong,
+.teacherIdentity strong,
+.subjectIdentity strong { overflow: hidden; color: var(--color-text-primary); font-size: var(--text-l16-size); line-height: var(--text-l16-line); font-weight: var(--font-weight-semibold); text-overflow: ellipsis; white-space: nowrap; }
+.subjectIdentity strong { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; white-space: normal; }
+.teacherIdentity strong { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; white-space: normal; }
+.studentIdentity small,
+.teacherIdentity small,
+.subjectIdentity small { color: var(--color-text-secondary); font-size: var(--text-p12-size); line-height: var(--text-p12-line); white-space: nowrap; }
+.statusPill,
+.assessmentPill { min-height: var(--space-xl); padding: var(--space-xs) var(--space-sm); font-size: var(--text-l12-size); line-height: var(--text-l12-line); white-space: nowrap; }
+.statusPill { gap: var(--space-xs); }
+.statusPill :global(svg) { flex: 0 0 auto; }
+.subjectTable col:nth-child(1) { width: 16%; }
+.subjectTable col:nth-child(2) { width: 24%; }
+.subjectTable col:nth-child(3) { width: 11%; }
+.subjectTable col:nth-child(4) { width: 11%; }
+.subjectTable col:nth-child(5) { width: 16%; }
+.subjectTable col:nth-child(6) { width: 9%; }
+.subjectTable col:nth-child(7) { width: 13%; }
+.moduleCell { white-space: nowrap; }
+.assessmentPill { padding-right: var(--space-sm); padding-left: var(--space-sm); }
+.progressCell { display: flex; align-items: center; gap: var(--space-sm); color: var(--color-text-primary); font-size: var(--text-l12-size); line-height: var(--text-l12-line); font-weight: var(--font-weight-semibold); white-space: nowrap; }
+.progressCell :global([class*="reportProgress"]) { flex: 1 1 auto; min-width: var(--space-2xl); }
+.attentionRow { background: var(--color-warning-tint); }
+.attentionRow:hover { background: var(--color-warning-tint) !important; }
+.pagination { margin-top: var(--space-md); padding: var(--space-sm) 0 0; border-top: 0; background: transparent; }
+.pagination > span { color: var(--color-text-secondary); }
+.pagination > span strong { color: var(--color-text-primary); font-weight: var(--font-weight-bold); }
+.pageControls button { background: transparent; }
+.pageControls button.pageCurrent { background: var(--color-primary); }
+.currentPage { color: var(--color-surface) !important; background: var(--color-primary) !important; }
+

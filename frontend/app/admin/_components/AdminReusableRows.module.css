@@ -1,0 +1,182 @@
+/* Bagian tampilan: baris data reusable, badge, dan item ringkasan admin. */
+.rombelBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--space-xl);
+  padding: var(--space-xs) var(--space-sm);
+  color: var(--color-text-primary);
+  background: var(--color-background);
+  border: var(--border-width-xs) solid var(--color-border);
+  border-radius: var(--radius-xs);
+  font-size: var(--text-l12-size);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--text-l12-line);
+  white-space: nowrap;
+}
+
+.unlockButton {
+  min-height: var(--space-xl);
+  padding: 0 var(--space-sm);
+  border-radius: var(--radius-xs);
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+}
+
+.studentRow,
+.periodRow,
+.parentRow {
+  display: grid;
+  grid-template-columns: inherit;
+  grid-column: 1 / -1;
+  align-items: center;
+  border-bottom: var(--border-width-xs) solid var(--color-background);
+}
+
+.studentRow { min-height: calc(var(--space-2xl) + var(--space-md)); }
+.periodRow { min-height: calc(var(--space-2xl) + var(--space-xl) + var(--space-xl)); }
+.parentRow { min-height: calc(var(--space-2xl) + var(--space-md)); }
+.periodRow,
+.parentRow { border-bottom-color: transparent; }
+.studentRow { min-height: calc(var(--space-2xl) + var(--space-md)); }
+.studentRow:has(.unlockButton) { min-height: calc(var(--space-2xl) + var(--space-xl) + var(--space-md)); }
+
+.cell,
+.periodTitleCell,
+.periodDate,
+.periodRooms,
+.periodActions,
+.parentNameCell {
+  min-width: 0;
+  padding: var(--space-sm);
+  color: var(--color-text-secondary);
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
+}
+
+.strongCell,
+.parentNameCell strong,
+.stackText strong,
+.periodRooms strong {
+  color: var(--color-text-primary);
+  font-size: var(--text-l16-size);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--text-l16-line);
+}
+
+.actionsCell,
+.actionGroup,
+.periodDate,
+.periodTitleCell,
+.periodActions {
+  display: flex;
+  align-items: center;
+}
+
+.actionsCell,
+.periodActions { justify-content: flex-end; }
+.actionsCell { flex-direction: column; gap: var(--space-xs); }
+.actionGroup { justify-content: flex-end; gap: var(--space-xs); }
+
+.periodTitleCell,
+.periodDate { gap: var(--space-sm); }
+.periodIcon {
+  display: grid;
+  flex: 0 0 auto;
+  width: var(--space-xl);
+  height: var(--space-xl);
+  place-items: center;
+  border-radius: var(--radius-s);
+}
+.tone_primary { color: var(--color-primary); background: var(--color-primary-tint); }
+.tone_info { color: var(--color-info); background: var(--color-info-tint); }
+.tone_upcoming { color: var(--color-info); background: var(--color-info-tint); }
+.tone_success { color: var(--color-success); background: var(--color-success-tint); }
+.tone_warning,
+.tone_amber { color: var(--color-warning-dark); background: var(--color-warning-tint); }
+.tone_danger { color: var(--color-error); background: var(--color-error-tint); }
+.tone_neutral { color: var(--color-text-secondary); background: var(--color-background); }
+.periodDate { white-space: nowrap; }
+.periodDate svg { flex: 0 0 auto; }
+.periodRooms,
+.stackText,
+.parentNameCell { display: flex; flex-direction: column; }
+.periodRooms small,
+.stackText small,
+.parentNameCell small {
+  color: var(--color-text-secondary);
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
+}
+.periodActions { gap: var(--space-sm); }
+
+.studentLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  max-width: 100%;
+  padding: var(--space-xs) var(--space-sm);
+  color: var(--color-primary-dark);
+  background: var(--color-primary-tint);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+  white-space: nowrap;
+}
+.studentLink svg { flex: 0 0 auto; }
+
+.classSummaryItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+  background: var(--color-primary-tint);
+  border: var(--border-width-xs) solid var(--color-primary-tint);
+  border-radius: var(--radius-m);
+}
+.classLabel {
+  display: grid;
+  flex: 0 0 auto;
+  width: var(--space-xl);
+  height: var(--space-xl);
+  place-items: center;
+  color: var(--color-primary);
+  background: var(--color-surface);
+  border-radius: var(--radius-s);
+  font-size: var(--text-l16-size);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--text-l16-line);
+}
+.classSummaryItem .stackText { flex: 1 1 auto; }
+.studentCount {
+  flex: 0 0 auto;
+  padding: var(--space-xs) var(--space-sm);
+  color: var(--color-text-primary);
+  background: var(--color-surface);
+  border: var(--border-width-xs) solid var(--color-border);
+  border-radius: var(--radius-s);
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+  white-space: nowrap;
+}
+.detailsLink {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs);
+  color: var(--color-primary);
+  background: transparent;
+  border: 0;
+  font-family: var(--font-family);
+  font-size: var(--text-l12-size);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--text-l12-line);
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.detailsLink:focus-visible { outline: var(--focus-ring); outline-offset: var(--space-xs); }
+.parentActionButton { color: var(--color-text-secondary); background: transparent; border-color: transparent; }
+.parentActionButton:hover { color: var(--color-primary); background: var(--color-primary-tint); border-color: transparent; }
+

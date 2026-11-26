@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/backend";
 import AdminShell from "@/app/admin/_components/AdminShell";
 
@@ -9,5 +10,6 @@ import AdminShell from "@/app/admin/_components/AdminShell";
  */
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   const user = await requireUser("admin");
+  if (user.must_change_password) redirect("/password-update");
   return <AdminShell user={user}>{children}</AdminShell>;
 }

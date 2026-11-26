@@ -33,3 +33,18 @@ export async function GET() {
     );
   }
 }
+
+// Route dashboard yang lebih spesifik menolak metode selain GET secara konsisten.
+function methodNotAllowed() {
+  return NextResponse.json({ message: "Metode permintaan tidak diizinkan." }, {
+    status: 405,
+    headers: { "Cache-Control": "no-store", Allow: "GET" },
+  });
+}
+
+export const POST = methodNotAllowed;
+export const PUT = methodNotAllowed;
+export const PATCH = methodNotAllowed;
+export const DELETE = methodNotAllowed;
+export const OPTIONS = methodNotAllowed;
+export const HEAD = methodNotAllowed;

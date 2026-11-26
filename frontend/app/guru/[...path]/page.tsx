@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/backend";
-import { subjects, classGroups, students } from "../_components/data";
+import { subjects, classGroups } from "../_components/data";
 import { SubjectList, SubjectSummary, MaterialList, AssessmentList } from "../_components/subjects";
 import { MaterialEditor, AssessmentEditor } from "../_components/editors";
 import { Submissions, Grading, AssessmentAnalysis } from "../_components/assessment-results";
@@ -32,10 +32,10 @@ export default async function TeacherRoute({ params, searchParams }: { params: P
       if (path.length === 3) return <AssessmentList key={routeKey} subject={subject} />;
       if (item === "baru" && path.length === 4) return <AssessmentEditor key={routeKey} subject={subject} kind={query.jenis === "tugas" ? "tugas" : "kuis"} />;
       if (action === "edit" && path.length === 5) return <AssessmentEditor key={routeKey} subject={subject} editId={item} />;
-      if (["tugas-01", "kuis-01"].includes(item)) {
+      if (item !== "baru" && action !== "edit") {
         if (action === "pengumpulan" && path.length === 5) return <Submissions key={routeKey} subject={subject} assessment={item} />;
         if (action === "analisis" && path.length === 5) return <AssessmentAnalysis key={routeKey} subject={subject} assessment={item} />;
-        if (action === "nilai" && path.length === 6 && students.some(student => student.id === studentId)) return <Grading key={routeKey} subject={subject} assessment={item} studentId={studentId} />;
+        if (action === "nilai" && path.length === 6 && /^\d+$/.test(studentId)) return <Grading key={routeKey} subject={subject} assessment={item} studentId={studentId} />;
       }
     }
   }

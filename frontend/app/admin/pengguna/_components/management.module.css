@@ -7,3 +7,28 @@
 .actionButtons {
   composes: tableActions from "../../_components/AdminUI.module.css";
 }
+
+/* Bagian tampilan: seluruh tabel direktori memakai ukuran header dan sel yang sama. */
+.managementTable th {
+  padding: var(--space-md);
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+}
+
+.managementTable td {
+  padding: var(--space-md);
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
+}
+
+/* Varian tabel siswa: kartu beradius besar, header netral, dan baris lebih lapang. */
+.studentTableFrame { border-radius: var(--radius-l); }
+.studentDirectoryTable th {
+  padding: var(--space-lg) var(--space-md);
+  background: var(--color-background);
+}
+.studentDirectoryTable td { padding: var(--space-lg) var(--space-md); }
+.studentPagination.studentPagination {
+  background: var(--color-background);
+  border-top: var(--border-width-xs) solid var(--color-border);
+}

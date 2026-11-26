@@ -1,7 +1,6 @@
 "use client";
 
 import type { ComponentProps, ReactNode } from "react";
-import AdminIcon from "@/app/admin/_components/AdminIcons";
 import AdminDirectoryToolbar from "@/app/admin/_components/AdminDirectoryToolbar";
 import {
   Field,
@@ -10,7 +9,6 @@ import {
   Pagination,
   StatCard,
   StatusBadge,
-  adminStyles as s,
   type Tone,
 } from "@/app/admin/_components/AdminUI";
 import styles from "./management.module.css";
@@ -33,21 +31,15 @@ export function ManagementStatCard({
   item: ManagementStat;
   variant?: "directory" | "student";
 }) {
-  if (variant === "student") {
-    return (
-      <div className={s.studentStatCard}>
-        <div className={`${s.statIcon} ${s[`tone_${item.tone}`]}`}>
-          <AdminIcon name={item.icon} size={20} />
-        </div>
-        <div className={s.studentStatContent}>
-          <strong className={s.studentStatValue}>{item.value}</strong>
-          <span className={s.studentStatLabel}>{item.label}</span>
-        </div>
-      </div>
-    );
-  }
-
-  return <StatCard {...item} compact />;
+  // Bagian tampilan: varian siswa menempatkan angka di atas label statistik.
+  return (
+    <StatCard
+      {...item}
+      compact
+      valueFirst={variant === "student"}
+      valueTone={variant === "student" && item.tone === "warning" ? "warning" : variant === "student" && item.tone === "danger" ? "danger" : undefined}
+    />
+  );
 }
 
 export function ManagementToolbar(props: ComponentProps<typeof AdminDirectoryToolbar>) {
@@ -59,15 +51,17 @@ export function ManagementTable({
   tableClassName,
   className = "",
   footer,
+  variant = "default",
 }: {
   children: ReactNode;
   tableClassName: string;
   className?: string;
   footer?: ReactNode;
+  variant?: "default" | "student";
 }) {
   return (
-    <div className={`${styles.tableFrame} ${className}`}>
-      <table className={tableClassName}>{children}</table>
+    <div className={`${styles.tableFrame} ${className} ${variant === "student" ? styles.studentTableFrame : ""}`}>
+      <table className={`${tableClassName} ${styles.managementTable} ${variant === "student" ? styles.studentDirectoryTable : ""}`}>{children}</table>
       {footer}
     </div>
   );

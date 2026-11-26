@@ -4,7 +4,7 @@ export const subjects = [
   { id: "informatika-9", code: "INF-09", name: "Informatika & Literasi Digital Kelas IX", description: "Kecerdasan Buatan Dasar, Keamanan Siber & Dampak Sosial TIK", classes: ["9A", "9B"], students: 66, sessions: 2, progress: 42, target: 78 },
   { id: "matematika-7", code: "MK-07", name: "Matematika Kelas VII", description: "Bilangan Bulat, Aljabar Sederhana & Geometri Pengukuran", classes: ["7C"], students: 34, sessions: 2, progress: 75, target: 75 },
 ];
-export type Subject = typeof subjects[number];
+export type Subject = { id: string; code: string; name: string; description: string; classes: string[]; students: number; sessions: number | null; progress: number | null; target: number | null };
 export const students = [
   { id: "0098421001", name: "Siti Rahma", gender: "P", group: "8A", scores: [95, 92, 98, 94, 96], progress: 90, tasks: 4, activity: "Hari ini, 09:42" },
   { id: "0098421008", name: "Andi Pratama", gender: "L", group: "8A", scores: [88, 84, 90, 85, 86], progress: 80, tasks: 3, activity: "Hari ini, 08:15" },

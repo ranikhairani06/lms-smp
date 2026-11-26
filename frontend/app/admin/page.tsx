@@ -20,6 +20,14 @@ function countLabel(data: AdminDashboardData | undefined, key: "teachers" | "stu
   return data ? data[key].toLocaleString("id-ID") : "—";
 }
 
+function classNameWithoutPrefix(name: string) {
+  return name.replace(/^kelas\s+/i, "");
+}
+
+function percentage(value: number, total: number) {
+  return total > 0 ? `${((value / total) * 100).toLocaleString("id-ID", { maximumFractionDigits: 1 })}%` : "0%";
+}
+
 export default function AdminDashboardPage() {
   const [keyword, setKeyword] = useState("");
   const [level, setLevel] = useState("Semua");
@@ -34,16 +42,19 @@ export default function AdminDashboardPage() {
   }), [dashboard?.classes, keyword, level]);
   const displayedClasses = visibleClasses.slice(0, 5);
   const classUpdateCount = dashboard?.alerts?.students_need_class_update;
+  const availableAccountTotal = dashboard ? dashboard.students + dashboard.parents + dashboard.teachers : 0;
+  const activeClassCount = dashboard?.classes.filter((item) => item.is_active).length;
 
   return (
-    <>
+    <div className={s.dashboardPage}>
       <PageHeading breadcrumbs={["LMS", "Dashboard"]} title="Dashboard Administrator" description="Ringkasan operasional dan data master SMP Terpadu" />
-      {/* Bagian tampilan: empat kartu total pengguna, guru, siswa, dan wali murid. */}
+
+      {/* Statistik yang didukung API dashboard. */}
       <div className={`${s.statGridFour} ${s.dashboardStats}`}>
-        <StatCard label="Total Users" value="—" detail="Total akun tidak tersedia dari API dashboard" icon="users-group-rounded-linear" tone="primary" />
-        <StatCard label="Total Guru" value={countLabel(dashboard, "teachers")} detail="Jumlah guru dari dashboard" icon="user-id-linear" tone="success" />
-        <StatCard label="Total Siswa" value={countLabel(dashboard, "students")} detail={dashboard ? `${dashboard.classes.length} rombel tersedia` : "Data belum tersedia"} icon="square-academic-cap-linear" tone="warning" />
-        <StatCard label="Total Wali Murid" value={countLabel(dashboard, "parents")} detail="Jumlah akun orang tua dari dashboard" icon="users-group-rounded-linear" tone="info" />
+        <StatCard label="Total Users" value="—" icon="users-group-rounded-linear" tone="primary" hideEmptyDetail />
+        <StatCard label="Total Guru" value={`${countLabel(dashboard, "teachers")} Guru`} icon="user-id-linear" tone="success" hideEmptyDetail />
+        <StatCard label="Total Siswa" value={`${countLabel(dashboard, "students")} Siswa`} detail={activeClassCount === undefined ? undefined : `${activeClassCount.toLocaleString("id-ID")} rombel tersedia`} icon="square-academic-cap-linear" tone="warning" hideEmptyDetail />
+        <StatCard label="Total Wali Murid" value={`${countLabel(dashboard, "parents")} Wali`} icon="users-group-rounded-linear" tone="info" hideEmptyDetail />
       </div>
 
       {/* Bagian tampilan: ringkasan kelas aktif dan panel data yang perlu ditindaklanjuti. */}
@@ -64,7 +75,7 @@ export default function AdminDashboardPage() {
             {resource.status === "ready" && displayedClasses.map((item) => (
               <div className={s.classItem} key={item.id}>
                 <span className={s.classCode}>{classCode(item)}</span>
-                <div className={s.classMeta}><strong>{item.name}</strong><small>Informasi wali kelas tidak tersedia dari API.</small></div>
+                <div className={s.classMeta}><strong>Kelas {classNameWithoutPrefix(item.name)}</strong></div>
                 <span className={s.classCount}>{item.students_count.toLocaleString("id-ID")} Siswa</span>
                 <Link href="/admin/master-data/rombel" className={s.textLink}>Rincian <AdminIcon name="arrow-right-linear" size={13} /></Link>
               </div>
@@ -72,39 +83,46 @@ export default function AdminDashboardPage() {
             {resource.status === "ready" && dashboard?.classes.length === 0 && <EmptyState title="Belum ada data kelas" description="Data kelas belum tersedia." />}
             {resource.status === "ready" && dashboard && dashboard.classes.length > 0 && visibleClasses.length === 0 && <p className={s.emptyCell}>Kelas tidak ditemukan.</p>}
           </div>
-          <div className={s.pagination}>
-            <span>{dashboard ? `Menampilkan ${displayedClasses.length} dari ${visibleClasses.length} rombongan belajar` : "Data rombongan belajar belum tersedia"}</span>
+          {dashboard && <div className={s.pagination}>
+            <span>Menampilkan {displayedClasses.length} dari {visibleClasses.length} rombongan belajar SMP</span>
             <Link href="/admin/master-data/rombel" className={s.textLink}>Lihat Seluruh Rombel <AdminIcon name="arrow-right-linear" size={13} /></Link>
-          </div>
+          </div>}
         </Panel>
 
         <div>
           <Panel>
-            <div className={s.panelTitle}><div><h2>Data yang Perlu Ditindaklanjuti</h2><p>Penyimpangan data &amp; validasi administratif</p></div></div>
+            <div className={s.panelTitle}><div><h2>Data yang Perlu Ditindaklanjuti</h2><p>Penyimpangan data &amp; validasi administratif</p></div><span className={s.exampleBadge}>Data contoh</span></div>
             <div className={`${s.attentionItem} ${s.attentionWarning}`}>
               <span className={s.attentionIcon}><AdminIcon name="danger-triangle-linear" size={19} color="var(--color-warning-dark)" /></span>
-              <div className={s.attentionText}><strong>{classUpdateCount === undefined ? "Data siswa yang perlu pembaruan kelas belum tersedia" : `${classUpdateCount.toLocaleString("id-ID")} siswa perlu memperbarui kelas`}</strong><small>Data kelas siswa perlu ditinjau.</small></div>
+              <div className={s.attentionText}>
+                <strong>{classUpdateCount === undefined ? "8 data siswa belum terverifikasi" : `${classUpdateCount.toLocaleString("id-ID")} siswa perlu memperbarui kelas`}</strong>
+                {classUpdateCount === undefined && <small>NISN dan identitas siswa perlu divalidasi.</small>}
+              </div>
               <Link href="/admin/pengguna/siswa" className={s.attentionButton}>Tinjau</Link>
             </div>
             <div className={`${s.attentionItem} ${s.attentionDanger}`}>
               <span className={s.attentionIcon}><AdminIcon name="users-group-rounded-linear" size={19} color="var(--color-error)" /></span>
-              <div className={s.attentionText}><strong>Informasi kapasitas rombel belum tersedia</strong><small>API dashboard belum mengirim status kapasitas kelas.</small></div>
-              <Link href="/admin/master-data/rombel" className={s.attentionButton} style={{ background: "var(--color-error)" }}>Lihat</Link>
+              <div className={s.attentionText}><strong>2 rombel melebihi kapasitas</strong><small>Rombel 9C &amp; 9D terisi lebih dari 36 siswa.</small></div>
+              <Link href="/admin/master-data/rombel" className={`${s.attentionButton} ${s.attentionButtonDanger}`}>Lihat</Link>
             </div>
             <div className={s.pagination}><span /> <Link href="/admin/laporan/aktivitas" className={s.textLink}>Buka Riwayat Lengkap <AdminIcon name="arrow-right-linear" size={13} /></Link></div>
           </Panel>
+
           <Panel>
-            <div className={s.panelTitle}><div><h2>Distribusi Akun per Peran</h2><p>Total seluruh akun dan distribusi admin tidak tersedia dari API dashboard</p></div></div>
-            <div className={s.distributionBar} aria-hidden="true" />
+            <div className={s.panelTitle}><div><h2>Distribusi Akun per Peran</h2><p>Total {dashboard ? availableAccountTotal.toLocaleString("id-ID") : "—"} akun</p></div></div>
+            <div className={s.distributionBar} aria-hidden="true">
+              {dashboard && [dashboard.students, dashboard.parents, dashboard.teachers].map((count, index) => (
+                <span key={index} style={{ width: `${availableAccountTotal ? (count / availableAccountTotal) * 100 : 0}%` }} />
+              ))}
+            </div>
             <div className={s.distributionGrid}>
-              <div className={s.distributionTile}><small><span>● Siswa</span><b>—</b></small><strong>{countLabel(dashboard, "students")}</strong></div>
-              <div className={s.distributionTile}><small><span>● Orang Tua</span><b>—</b></small><strong>{countLabel(dashboard, "parents")}</strong></div>
-              <div className={s.distributionTile}><small><span>● Guru</span><b>—</b></small><strong>{countLabel(dashboard, "teachers")}</strong></div>
-              <div className={s.distributionTile}><small><span>● Admin</span><b>—</b></small><strong>Tidak tersedia</strong></div>
+              <div className={s.distributionTile}><small><span>Siswa</span><b>{dashboard && percentage(dashboard.students, availableAccountTotal)}</b></small><strong>{countLabel(dashboard, "students")}</strong></div>
+              <div className={s.distributionTile}><small><span>Orang Tua</span><b>{dashboard && percentage(dashboard.parents, availableAccountTotal)}</b></small><strong>{countLabel(dashboard, "parents")}</strong></div>
+              <div className={s.distributionTile}><small><span>Guru</span><b>{dashboard && percentage(dashboard.teachers, availableAccountTotal)}</b></small><strong>{countLabel(dashboard, "teachers")}</strong></div>
             </div>
           </Panel>
         </div>
       </div>
-    </>
+    </div>
   );
 }
