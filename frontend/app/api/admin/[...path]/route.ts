@@ -62,10 +62,10 @@ async function handle(request: NextRequest, context: Context) {
   if (route.upload) {
     const contentLength = Number(request.headers.get("content-length") || 0);
     if (contentLength > MAX_IMPORT_BYTES + 64 * 1024) {
-      return jsonError("Ukuran file CSV maksimal 10 MB.", 413);
+      return jsonError("Ukuran file XLSX maksimal 10 MB.", 413);
     }
     if (!request.headers.get("content-type")?.toLowerCase().startsWith("multipart/form-data")) {
-      return jsonError("Pilih file CSV untuk diimpor.", 422);
+      return jsonError("Pilih file XLSX untuk diimpor.", 422);
     }
     try {
       const form = await request.formData();

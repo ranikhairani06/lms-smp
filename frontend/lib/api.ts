@@ -27,12 +27,12 @@ export async function apiRequest<T>(path: string, options: RequestInit = {}): Pr
     const message = response.status === 422
       ? validation || data?.message || messageForStatus(response.status)
       : statusMessage || data?.message || messageForStatus(response.status);
-    throw new ApiError(message, response.status, fieldErrors);
+    throw new ApiError(message, response.status, fieldErrors, data);
   }
   return data as T;
 }
 export class ApiError extends Error {
-  constructor(message: string, public status: number, public fieldErrors: Record<string, string[]> = {}) {
+  constructor(message: string, public status: number, public fieldErrors: Record<string, string[]> = {}, public details?: unknown) {
     super(message);
   }
 }

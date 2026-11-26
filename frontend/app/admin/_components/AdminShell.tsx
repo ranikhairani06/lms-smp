@@ -19,6 +19,8 @@ const userLinks = [
 const masterLinks = [
   { label: "Tahun Ajaran & Semester", href: "/admin/master-data/tahun-ajaran" },
   { label: "Rombongan Belajar", href: "/admin/master-data/rombel" },
+  { label: "Mata Pelajaran", href: "/admin/master-data/mapel" },
+  { label: "Penugasan Guru", href: "/admin/master-data/penugasan" },
 ];
 const reportLinks = [
   { label: "Laporan Aktivitas", href: "/admin/laporan/aktivitas" },

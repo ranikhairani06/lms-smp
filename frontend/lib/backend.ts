@@ -16,7 +16,7 @@ let apiPathWarningLogged = false;
 let missingApiWarningLogged = false;
 
 function backendApiBase() {
-  const configured = process.env.BACKEND_API_URL;
+  const configured = process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_API_URL;
   if (!configured) {
     if (!missingApiWarningLogged) {
       console.warn("BACKEND_API_URL belum dikonfigurasi.");

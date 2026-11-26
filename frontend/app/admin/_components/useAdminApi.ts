@@ -69,6 +69,7 @@ type MutationState<T> = {
   loading: boolean;
   error: string | null;
   fieldErrors: Record<string, string[]>;
+  status: number | null;
 };
 
 // Hook mutation Admin: menangani status kirim, pesan, validasi field, dan reload sukses.
@@ -76,16 +77,19 @@ export function useAdminMutation<T = unknown>(
   method: MutationMethod,
   path: string,
   onSuccess?: (result: T | undefined) => void | Promise<void>,
+  onNotFound?: () => void | Promise<void>,
 ): MutationState<T> {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
+  const [status, setStatus] = useState<number | null>(null);
 
   const run = useCallback(async (body?: unknown) => {
     setLoading(true);
     setError(null);
     setFieldErrors({});
+    setStatus(null);
     try {
       const result = await apiRequest<T>(`admin/${path}`, {
         method,
@@ -95,13 +99,17 @@ export function useAdminMutation<T = unknown>(
       return result;
     } catch (cause) {
       redirectExpired(router, cause);
-      if (cause instanceof ApiError) setFieldErrors(cause.fieldErrors);
+      if (cause instanceof ApiError) {
+        setStatus(cause.status);
+        setFieldErrors(cause.fieldErrors);
+        if (cause.status === 404) await onNotFound?.();
+      }
       setError(cause instanceof Error ? cause.message : "Perubahan belum dapat disimpan. Silakan coba lagi.");
       return undefined;
     } finally {
       setLoading(false);
     }
-  }, [method, onSuccess, path, router]);
+  }, [method, onNotFound, onSuccess, path, router]);
 
-  return { run, loading, error, fieldErrors };
+  return { run, loading, error, fieldErrors, status };
 }
