@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import type { ReactNode } from "react";
-import type { AuthUser } from "@/lib/auth-types";
+import { initials, type AuthUser } from "@/lib/auth-types";
 import LogoutButton from "@/components/lms/LogoutButton";
 import AppShell from "@/components/lms/shell/AppShell";
 import shellStyles from "@/components/lms/shell/AppShell.module.css";
@@ -25,9 +25,8 @@ const reportLinks = [
   { label: "Laporan Nilai", href: "/admin/laporan/nilai" },
 ];
 
-export default function AdminShell({ children }: { children: ReactNode; user: AuthUser }) {
+export default function AdminShell({ children, user }: { children: ReactNode; user: AuthUser }) {
   const pathname = usePathname();
-  const [noticeOpen, setNoticeOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const inUsers = pathname.startsWith("/admin/pengguna");
   const inMaster = pathname.startsWith("/admin/master-data");
@@ -41,14 +40,14 @@ export default function AdminShell({ children }: { children: ReactNode; user: Au
       href: "/admin/pengguna/siswa",
       icon: <AdminIcon name="users-group-rounded-linear" size={24} />,
       active: inUsers,
-      children: userLinks.map((item) => ({ ...item, active: pathname === item.href })),
+      children: inUsers ? userLinks.map((item) => ({ ...item, active: pathname === item.href })) : undefined,
     },
     {
       label: "Master Data",
       href: "/admin/master-data/tahun-ajaran",
       icon: <AdminIcon name="book-bookmark-linear" size={24} />,
       active: inMaster,
-      children: masterLinks.map((item) => ({ ...item, active: pathname === item.href })),
+      children: inMaster ? masterLinks.map((item) => ({ ...item, active: pathname === item.href })) : undefined,
     },
     { label: "Update Data", href: "/admin/update-data", icon: <AdminIcon name="clipboard-check-linear" size={24} />, active: pathname === "/admin/update-data" },
     {
@@ -56,7 +55,7 @@ export default function AdminShell({ children }: { children: ReactNode; user: Au
       href: "/admin/laporan/aktivitas",
       icon: <AdminIcon name="smartphone-linear" size={24} />,
       active: inReports,
-      children: reportLinks.map((item) => ({ ...item, active: pathname === item.href })),
+      children: inReports ? reportLinks.map((item) => ({ ...item, active: pathname === item.href })) : undefined,
     },
     { label: "Profil", href: "/admin/profil", icon: <AdminIcon name="user-circle-linear" size={24} />, active: pathname === "/admin/profil" },
   ];
@@ -71,16 +70,15 @@ export default function AdminShell({ children }: { children: ReactNode; user: Au
   ];
 
   const rightSlot = (
-    <>
+    <div className={s.adminTopbarContent}>
       <div className={s.notificationWrap}>
-        <button className={s.notificationButton} onClick={() => setNoticeOpen((open) => !open)} aria-label="Notifikasi">
-          <AdminIcon name="bell-linear" size={19} /><span>3</span>
-        </button>
-        {noticeOpen && <div className={s.notificationPopover}><strong>Notifikasi</strong><p>8 data siswa memerlukan verifikasi NISN.</p><p>2 rombel melebihi kapasitas.</p><p>Semester Genap tersedia untuk dijadwalkan.</p></div>}
+        <span className={s.notificationButton} aria-label="Notifikasi">
+          <AdminIcon name="bell-linear" size={19} />
+        </span>
       </div>
-      <span className={s.avatarSmall}>AB</span>
-      <strong className={s.adminName}>Admin Bayu</strong>
-    </>
+      <span className={s.avatarSmall}>{initials(user.name)}</span>
+      <strong className={s.adminName}>{user.name}</strong>
+    </div>
   );
 
   return (
@@ -101,7 +99,7 @@ export default function AdminShell({ children }: { children: ReactNode; user: Au
       navigationLabel="Navigasi administrator"
       mobileNavigationLabel="Navigasi admin mobile"
       mainClassName={s.mainArea}
-      className={pathname.startsWith("/admin/pengguna/guru") ? shellStyles.teacherDirectoryShell : ""}
+      className={s.adminShell}
       logout={<LogoutButton><AdminIcon name="logout-2-linear" size={24} /><span className={shellStyles.logoutLabel}>Logout</span></LogoutButton>}
     >
       {children}

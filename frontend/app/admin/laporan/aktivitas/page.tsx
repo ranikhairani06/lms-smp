@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from "react";
 import AdminIcon from "@/app/admin/_components/AdminIcons";
-import { Button, PageHeading, Pagination, Panel, SelectField, StatusBadge, adminStyles as s } from "@/app/admin/_components/AdminUI";
+import { Button, PageHeading, Pagination, Panel, StatusBadge, adminStyles as s } from "@/app/admin/_components/AdminUI";
+import styles from "./page.module.css";
 
 const activityRows = [
   { time: "27 Okt 2026, 22:41", initials: "AB", name: "Admin Bayu", identity: "NIP: 198504122010011008", role: "Super Admin", description: "Mereset sandi Andi Pratama (8B)", status: "Berhasil" },
@@ -28,29 +29,34 @@ export default function LaporanAktivitasPage() {
 
   return (
     <>
-      <PageHeading breadcrumbs={["LMS", "Laporan"]} title="Laporan Aktivitas Pengguna" description="Riwayat aktivitas pengguna di sistem. Hanya dapat dilihat." actions={<Button variant="outline" icon="file-download-linear" onClick={exportLogs}>Ekspor Log (XLS)</Button>} />
+      <PageHeading breadcrumbs={["LMS", "Laporan"]} title="Laporan Aktivitas Pengguna" description="Riwayat aktivitas pengguna di sistem. Hanya dapat dilihat." variant="card" actions={<Button className={styles.exportButton} icon="table-linear" onClick={exportLogs}>Ekspor Log (XLS)</Button>} />
       {/* Bagian tampilan: filter rentang waktu, peran, modul, dan status aktivitas. */}
-      <Panel>
-        <div className={s.filterGrid}>
-          <label className={s.filterItem}><span><AdminIcon name="calendar-linear" size={12} /> Rentang Tanggal</span><select value={range} onChange={(e) => setRange(e.target.value)}><option>7 Hari Terakhir</option><option>30 Hari Terakhir</option><option>Bulan Ini</option><option>Semua Waktu</option></select></label>
-          <label className={s.filterItem}><span><AdminIcon name="users-group-rounded-linear" size={12} /> Peran Pengguna</span><select value={role} onChange={(e) => setRole(e.target.value)}><option>Semua Peran</option><option>Super Admin</option><option>Guru</option><option>Orang Tua</option><option>Siswa</option></select></label>
-          <label className={s.filterItem}><span><AdminIcon name="widget-2-linear" size={12} /> Modul Sistem</span><select value={module} onChange={(e) => setModule(e.target.value)}><option>Semua Modul</option><option>Manajemen Pengguna</option><option>Nilai</option><option>Profil</option><option>Autentikasi</option></select></label>
-          <label className={s.filterItem}><span><AdminIcon name="check-circle-linear" size={12} /> Status</span><select value={status} onChange={(e) => setStatus(e.target.value)}><option>Semua Status</option><option>Berhasil</option><option>Gagal</option></select></label>
-          <div style={{ display: "flex", alignItems: "end", gap: "var(--space-sm)" }}><Button icon="filter-linear">Terapkan Filter</Button><Button variant="ghost" onClick={() => { setRange("7 Hari Terakhir"); setRole("Semua Peran"); setModule("Semua Modul"); setStatus("Semua Status"); }}>Reset</Button></div>
+      <Panel className={styles.filterPanel}>
+        <div className={styles.filterGrid}>
+          <label className={styles.filterItem}><span className={styles.filterLabel}><AdminIcon name="calendar-linear" size={12} /> Rentang Tanggal</span><span className={styles.selectWrap}><select className={styles.filterSelect} value={range} onChange={(e) => setRange(e.target.value)}><option>7 Hari Terakhir</option><option>30 Hari Terakhir</option><option>Bulan Ini</option><option>Semua Waktu</option></select><AdminIcon name="alt-arrow-down-linear" size={16} /></span></label>
+          <label className={styles.filterItem}><span className={styles.filterLabel}><AdminIcon name="users-group-rounded-linear" size={12} /> Peran Pengguna</span><span className={styles.selectWrap}><select className={styles.filterSelect} value={role} onChange={(e) => setRole(e.target.value)}><option>Semua Peran</option><option>Super Admin</option><option>Guru</option><option>Orang Tua</option><option>Siswa</option></select><AdminIcon name="alt-arrow-down-linear" size={16} /></span></label>
+          <label className={styles.filterItem}><span className={styles.filterLabel}><AdminIcon name="widget-2-linear" size={12} /> Modul Sistem</span><span className={styles.selectWrap}><select className={styles.filterSelect} value={module} onChange={(e) => setModule(e.target.value)}><option>Semua Modul</option><option>Manajemen Pengguna</option><option>Nilai</option><option>Profil</option><option>Autentikasi</option></select><AdminIcon name="alt-arrow-down-linear" size={16} /></span></label>
+          <label className={styles.filterItem}><span className={styles.filterLabel}><AdminIcon name="check-circle-linear" size={12} /> Status</span><span className={styles.selectWrap}><select className={styles.filterSelect} value={status} onChange={(e) => setStatus(e.target.value)}><option>Semua Status</option><option>Berhasil</option><option>Gagal</option></select><AdminIcon name="alt-arrow-down-linear" size={16} /></span></label>
+          <div className={styles.filterActions}><Button className={styles.applyFilterButton} icon="slider-horizontal-linear">Terapkan Filter</Button><Button className={styles.resetButton} variant="ghost" icon="refresh-linear" onClick={() => { setRange("7 Hari Terakhir"); setRole("Semua Peran"); setModule("Semua Modul"); setStatus("Semua Status"); }}>Reset</Button></div>
         </div>
+      </Panel>
+      {/* Bagian tampilan: kartu tabel log aktivitas dan judul riwayat. */}
+      <Panel className={styles.activityTablePanel}>
         {/* Bagian tampilan: tabel log aktivitas bersifat hanya-baca. */}
-        <div className={s.panelTitle}><h2><AdminIcon name="history-linear" size={18} /> Tabel Riwayat Aktivitas</h2></div>
-        <div className={s.tableWrap}>
-          <table className={s.dataTable}>
-            <thead><tr><th>Timestamp (WIB)</th><th>Pengguna &amp; Identitas</th><th>Peran</th><th>Deskripsi Aktivitas</th><th>Status</th></tr></thead>
+        <div className={styles.activityTableTitle}><span className={styles.activityTitleIcon}><AdminIcon name="history-linear" size={20} /></span><h2>Tabel Riwayat Aktivitas</h2></div>
+        <div className={`${s.tableWrap} ${styles.activityTableWrap}`}>
+          <table className={`${s.dataTable} ${styles.activityTable}`}>
+            <thead><tr><th><span className={styles.timestampHeading}>Timestamp (WIB)<AdminIcon name="alt-arrow-down-linear" size={12} /></span></th><th>Pengguna &amp; Identitas</th><th>Peran</th><th>Deskripsi Aktivitas</th><th>Status</th></tr></thead>
             <tbody>{filtered.map((row, index) => <tr key={`${row.time}-${index}`}>
-              <td><span style={{ color: "var(--color-text-secondary)" }}><AdminIcon name="clock-circle-linear" size={13} /> {row.time}</span></td>
-              <td><div style={{ display: "flex", alignItems: "center", gap: "var(--space-sm)" }}><span className={s.classCode}>{row.initials}</span><span><span className={s.tableStrong}>{row.name}</span><span className={s.tableSub}>{row.identity}</span></span></div></td>
-              <td><StatusBadge tone={row.role === "Super Admin" ? "primary" : row.role === "Guru" ? "info" : row.role === "Siswa" ? "success" : "warning"}>{row.role}</StatusBadge></td><td>{row.description}</td><td><StatusBadge tone={row.status === "Berhasil" ? "success" : "danger"}>● {row.status}</StatusBadge></td>
+              <td><span className={styles.activityTimestamp}><AdminIcon name="clock-circle-linear" size={13} /> {row.time}</span></td>
+              <td><div className={styles.activityIdentity}><span className={styles.activityAvatar} data-role={row.role}>{row.initials}</span><span className={styles.activityIdentityText}><span className={styles.activityName}>{row.name}</span><span className={s.tableSub}>{row.identity}</span></span></div></td>
+              <td><StatusBadge className={styles.roleBadge} tone={row.role === "Super Admin" ? "primary" : row.role === "Guru" ? "info" : row.role === "Siswa" ? "success" : "warning"}>{row.role}</StatusBadge></td>
+              <td><span className={styles.activityDescription}>{row.description}</span></td>
+              <td><StatusBadge className={styles.activityStatus} tone={row.status === "Berhasil" ? "success" : "danger"}><AdminIcon name="circle-bold" size={10} /> {row.status}</StatusBadge></td>
             </tr>)}</tbody>
           </table>
         </div>
-        <Pagination current={page} total={3} onChange={setPage} label="Menampilkan entri 1 hingga 6 dari total 14.820 log aktivitas" />
+        <Pagination className={styles.activityPagination} controlsClassName={styles.activityPageControls} current={page} total={3} onChange={setPage} label="Menampilkan entri 1 hingga 6 dari total 14.820 log aktivitas" emphasizeLabelNumbers trailingEllipsis />
       </Panel>
     </>
   );

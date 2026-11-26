@@ -2,7 +2,7 @@
 
 import { useMemo, useState, type FormEvent } from "react";
 import AdminIcon from "@/app/admin/_components/AdminIcons";
-import { Button, Field, Modal, PageHeading, Pagination, SearchField, SelectField, StatCard, TableEmpty, adminStyles as s } from "@/app/admin/_components/AdminUI";
+import { Button, Field, ManagementHeaderActions, Modal, PageHeading, Pagination, SearchField, SelectField, StatCard, TableEmpty, adminStyles as s } from "@/app/admin/_components/AdminUI";
 
 const initialClasses = [
   { name: "Kelas 7A", level: "Kelas VII", wali: "Joko Susilo, S.Pd.", nip: "197908202005011008", room: "Ruang 7A (Gedung A Lt. 1)", filled: 35, capacity: 36 },
@@ -57,7 +57,7 @@ export default function RombelPage() {
   return (
     <>
       <PageHeading breadcrumbs={["LMS", "Master Data", "Rombongan Belajar"]} title="Daftar Rombongan Belajar" description="Struktur kelas rombel, penugasan wali kelas, dan kapasitas siswa aktif."
-        actions={<><Button variant="outline" icon="upload-linear" onClick={() => alert("Pilih file Excel/CSV untuk import rombel.")}>Import Data (Excel/CSV)</Button><Button icon="add-circle-linear" onClick={() => show("add")}>Tambah Data Baru</Button></>} />
+        actions={<ManagementHeaderActions onImport={() => alert("Pilih file Excel/CSV untuk import rombel.")} onAdd={() => show("add")} addLabel="Tambah Data Baru" />} />
       {/* Bagian tampilan: kartu total rombel dan kapasitas siswa terisi. */}
       <div className={s.twoCards}>
         <StatCard label="Total Rombel" value="24 Kelas" detail="VII: 8 Rombel  •  VIII: 8 Rombel  •  IX: 8 Rombel" icon="users-group-rounded-linear" tone="primary" />

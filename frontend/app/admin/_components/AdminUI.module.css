@@ -237,6 +237,18 @@
   flex-wrap: nowrap;
   gap: var(--space-sm);
 }
+.managementHeaderActions { display: flex; align-items: center; gap: var(--space-sm); }
+.managementHeaderActions .button {
+  height: 40px;
+  min-height: 40px;
+  padding: 0 var(--space-md);
+  font-size: var(--text-l16-size);
+  line-height: var(--text-l16-line);
+  font-weight: var(--font-weight-semibold);
+  border-radius: var(--radius-s);
+}
+.managementHeaderActions .button_primary { color: var(--color-surface); background: var(--color-primary); border-color: var(--color-primary); }
+.managementHeaderActions .button_primary:hover { background: var(--color-primary-hover); border-color: var(--color-primary-hover); }
 
 /* Ukuran dasar kedua tombol */
 .headingActions .button {
@@ -258,28 +270,6 @@
   white-space: nowrap;
 }
 
-/* Tombol Import Data: outline amber */
-.headingActions .importStudentButton {
-  width: 240px;
-
-  color: var(--color-secondary-dark);
-  background: var(--color-surface);
-  border: 1px solid var(--color-secondary);
-
-  box-shadow: none;
-}
-
-/* Tombol Tambah Siswa: primary blue */
-.headingActions .addStudentButton {
-  width: 168px;
-
-  color: var(--color-surface);
-  background: var(--color-primary);
-  border: 1px solid var(--color-primary);
-
-  box-shadow: none;
-}
-
 /* Ukuran ikon kedua tombol */
 .headingActions .button svg {
   width: 16px;
@@ -287,12 +277,20 @@
   flex-shrink: 0;
 }
 .button { min-height: 38px; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-sm); padding: 0 var(--space-md); border: 1px solid transparent; border-radius: var(--radius-s); font: inherit; font-size: var(--text-l12-size); font-weight: 600; white-space: nowrap; cursor: pointer; transition: background .15s ease, border .15s ease, transform .15s ease; line-height: var(--text-l12-line); }
+.buttonMedium { min-height: calc(var(--space-2xl) - var(--space-xs)); font-size: var(--text-l16-size); line-height: var(--text-l16-line); }
 .button:disabled { opacity: .5; cursor: not-allowed; }
 .button_primary { color: var(--color-surface); background: var(--ad-primary); box-shadow: none; }
 .button_primary:hover { background: var(--ad-primary-hover); }
 .button_secondary { color: var(--ad-text); background: var(--ad-secondary); }
 .button_outline { color: var(--ad-primary); background: var(--color-surface); border-color: var(--ad-primary-light); }
 .button_outline:hover { background: var(--ad-primary-tint); }
+.button_softPrimary { color: var(--color-primary); background: var(--color-primary-tint); border-color: transparent; }
+.button_softPrimary:hover { background: var(--color-primary-tint); }
+.button_primarySolid { color: var(--color-surface); background: var(--color-primary); border-color: var(--color-primary); }
+.button_primarySolid:hover { background: var(--color-primary-hover); border-color: var(--color-primary-hover); }
+.button_dark { color: var(--color-surface); background: var(--color-text-primary); border-color: var(--color-text-primary); }
+.button_dark:hover { background: var(--color-text-secondary); border-color: var(--color-text-secondary); }
+.button_dark:disabled { opacity: 1; }
 .button.button_outline.buttonAmber { color: var(--color-secondary-dark); background: var(--color-surface); border: var(--border-width-xs) solid var(--color-secondary); font-weight: var(--font-weight-semibold); }
 .button.button_outline.buttonAmber:hover { background: var(--color-secondary-tint); }
 .button_ghost { color: var(--ad-muted); background: transparent; border-color: transparent; }
@@ -471,7 +469,16 @@
 .badge_warning, .badge_amber { color: var(--color-warning-dark); background: var(--ad-warning-tint); }
 .badge_danger { color: var(--color-error-dark); background: var(--ad-error-tint); }
 .badge_info { color: var(--color-info-dark); background: var(--ad-info-tint); }
+.badge_upcoming { color: var(--color-info-dark); background: var(--ad-info-tint); }
 .badge_neutral { color: var(--color-text-secondary); background: var(--color-background); }
+/* Varian pill outline untuk status akun pada baris direktori. */
+.statusBadgeOutlined { border: var(--border-width-xs) solid transparent; }
+.statusBadgeOutlined.badge_info { border-color: var(--color-info-light); }
+.statusBadgeOutlined.badge_success { border-color: var(--color-success-light); }
+.statusBadgeOutlined.badge_warning,
+.statusBadgeOutlined.badge_amber { border-color: var(--color-warning-light); }
+.statusBadgeOutlined.badge_danger { border-color: var(--color-error-light); }
+.statusBadgeOutlined.badge_neutral { border-color: var(--color-border); }
 .emptyCell { padding: var(--space-xl) !important; color: var(--color-text-disabled) !important; text-align: center; }
 .pagination {
   display: flex;
@@ -600,6 +607,10 @@
 .fieldLabelRow { display: flex; align-items: center; justify-content: space-between; gap: var(--space-sm); }
 .teacherModal .fieldValidLabel { display: inline-flex; align-items: center; gap: var(--space-xs); color: var(--color-success-dark); font-size: var(--text-l12-size); font-weight: var(--font-weight-medium); line-height: var(--text-l12-line); white-space: nowrap; }
 .fieldControlWrap { position: relative; display: flex; align-items: center; }
+.fieldControlWithActions { gap: var(--space-sm); }
+.fieldControlWithActions.fieldControlWrap > svg { position: static; flex: 0 0 auto; color: var(--color-text-secondary); pointer-events: none; }
+.fieldControlWithActions input { flex: 1 1 auto; min-width: 0; }
+.fieldLeadingIcon { flex: 0 0 auto; color: var(--color-text-secondary); }
 .fieldControlWrap > span, .fieldControlWrap > svg { position: absolute; right: var(--space-sm); color: var(--color-success); pointer-events: none; }
 .teacherModal .fieldControlValid input { border-color: var(--color-success); padding-right: var(--space-xl); }
 .formFull { grid-column: 1 / -1; }
@@ -670,7 +681,7 @@
 .filterGrid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)) auto; gap: var(--space-sm); align-items: end; padding: var(--space-md); margin-bottom: var(--space-md); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-s); }
 .filterItem { display: flex; flex-direction: column; gap: var(--space-xs); color: var(--color-text-secondary); font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
 .filterItem select, .filterItem input { width: 100%; min-height: 36px; padding: var(--space-sm) var(--space-sm); color: var(--ad-text); background: var(--color-primary-tint); border: 1px solid var(--color-border); border-radius: var(--radius-s); font: inherit; font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
-.reportStats { margin-top: var(--space-lg); display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: var(--space-lg); margin-bottom: var(--space-lg); }
+.reportStats { width: calc(100% + var(--space-sm)); margin-top: var(--space-lg); margin-left: calc(0px - var(--space-sm)); display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: var(--space-md); margin-bottom: var(--space-lg); }
 .reportStat { min-height: 105px; padding: var(--space-md); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-s); }
 .reportStat strong { display: block; margin: var(--space-sm) 0 var(--space-xs); font-size: var(--text-h5-size); line-height: var(--text-h5-line); }
 .reportStat small { display: block; color: var(--color-text-secondary); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
@@ -754,7 +765,7 @@
 
 /* Tabel guru: pertahankan lebar baca yang nyaman dan scroll horizontal di wadahnya. */
 .teacherTableWrap { min-width: 0; overflow-x: auto; padding: var(--space-sm); }
-.teacherTable { width: max(100%, 1272px); min-width: max(100%, 1272px); table-layout: fixed; }
+.teacherTable { width: max(100%, 1320px); min-width: max(100%, 1320px); table-layout: fixed; }
 .teacherTable th,
 .teacherTable td { padding: var(--space-md) var(--space-md); }
 .teacherTable th { padding: var(--space-md) var(--space-md); }
@@ -764,15 +775,16 @@
   font-weight: var(--font-weight-semibold);
   letter-spacing: normal;
 }
-.teacherTable td { padding-top: var(--space-lg); padding-bottom: var(--space-lg); overflow-wrap: anywhere; }
-.teacherTable th:nth-child(1) { width: 22%; }
-.teacherTable th:nth-child(2) { width: 13%; }
+.teacherTable td { padding-top: var(--space-md); padding-bottom: var(--space-md); overflow-wrap: anywhere; }
+.teacherTable th:nth-child(1) { width: 20%; }
+.teacherTable th:nth-child(2) { width: 12%; }
 .teacherTable th:nth-child(3) { width: 12%; }
 .teacherTable th:nth-child(4) { width: 10%; }
 .teacherTable th:nth-child(5) { width: 12%; }
-.teacherTable th:nth-child(6) { width: 15%; }
+.teacherTable th:nth-child(6) { width: 14%; }
 .teacherTable th:nth-child(7) { width: 7%; }
-.teacherTable th:nth-child(8) { width: 10%; }
+.teacherTable th:nth-child(8) { width: 13%; }
+.teacherTable td:last-child { white-space: nowrap; overflow-wrap: normal; }
 .teacherTable tbody tr:nth-child(even) { background: var(--color-primary-tint); }
 .teacherTable .teacherName {
   display: block;
@@ -832,6 +844,69 @@
 .teacherActionButton { min-height: calc(var(--text-l12-line) + var(--space-sm)); display: inline-flex; align-items: center; justify-content: center; gap: var(--space-xs); padding: var(--space-xs) var(--space-sm); color: var(--color-text-primary); background: var(--color-primary-tint); border: 0; border-radius: var(--radius-s); font: inherit; font-size: var(--text-l12-size); line-height: var(--text-l12-line); cursor: pointer; white-space: nowrap; }
 .teacherActionButton:hover { color: var(--color-primary-dark); }
 
+/* Direktori guru: pulihkan token yang sebelumnya bergantung pada .adminApp. */
+.teacherManagementPage .pageHeading {
+  background: transparent;
+  border: var(--border-width-xs) solid var(--color-primary-tint);
+  border-radius: var(--radius-m);
+}
+.teacherManagementPage .pageTitle,
+.teacherManagementPage .statValue,
+.teacherManagementPage .tableStrong,
+.teacherManagementPage .searchField input,
+.teacherManagementPage .selectField select { color: var(--color-text-primary); }
+.teacherManagementPage .pageDescription,
+.teacherManagementPage .selectField { color: var(--color-text-secondary); }
+.teacherManagementPage .searchField { background: var(--color-primary-tint); }
+.teacherManagementPage .button_primary { color: var(--color-surface); background: var(--color-primary); }
+.teacherManagementPage .button_primary:hover { background: var(--color-primary-hover); }
+.teacherManagementPage .statCard { background: var(--color-surface); }
+.teacherManagementPage .statIcon { width: 40px; height: 40px; }
+.teacherManagementPage .tone_primary { color: var(--color-primary); background: var(--color-primary-tint); }
+.teacherManagementPage .tone_success { color: var(--color-success); background: var(--color-success-tint); }
+.teacherManagementPage .tone_warning { color: var(--color-warning-dark); background: var(--color-secondary-tint); }
+.teacherManagementPage .badge_primary { color: var(--color-primary-dark); background: var(--color-primary-tint); }
+.teacherManagementPage .badge_info { color: var(--color-info-dark); background: var(--color-info-tint); }
+.teacherManagementPage .badge_success { color: var(--color-success-dark); background: var(--color-success-tint); }
+.teacherManagementPage .badge_warning,
+.teacherManagementPage .badge_amber { color: var(--color-warning-dark); background: var(--color-secondary-tint); }
+.teacherManagementPage .badge_danger { color: var(--color-error-dark); background: var(--color-error-tint); }
+.teacherManagementPage .teacherTable th { background: var(--color-background); }
+
+/* Direktori guru: tandai data statis dan sediakan scrollbar horizontal yang terlihat. */
+.teacherManagementPage .adminStatRow { position: relative; }
+.teacherManagementPage .adminStatRow::before,
+.teacherManagementPage .teacherTableWrap::before {
+  padding: var(--space-xs) var(--space-sm);
+  color: var(--color-text-secondary);
+  background: var(--color-background);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+  content: "Data contoh";
+  white-space: nowrap;
+}
+.teacherManagementPage .adminStatRow::before {
+  position: absolute;
+  top: calc(0px - var(--text-l12-line) - var(--space-sm));
+  right: 0;
+}
+.teacherManagementPage .teacherTableWrap {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: scroll;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) var(--color-background);
+}
+.teacherManagementPage .teacherTableWrap::before {
+  display: table;
+  margin: 0 0 var(--space-sm) auto;
+}
+.teacherManagementPage .teacherTableWrap::-webkit-scrollbar { height: var(--space-sm); }
+.teacherManagementPage .teacherTableWrap::-webkit-scrollbar-track { background: var(--color-background); border-radius: var(--radius-pill); }
+.teacherManagementPage .teacherTableWrap::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: var(--radius-pill); }
+
 /* Toolbar, tabel, relasi siswa, dan pagination khusus direktori orang tua. */
 .parentManagementPage { display: contents; }
 .parentManagementPage .parentTable { min-width: 100%; table-layout: fixed; }
@@ -848,6 +923,47 @@
 .parentManagementPage .parentAdditionalChildren { display: inline-flex; align-items: center; gap: var(--space-xs); padding: var(--space-xs) var(--space-sm); color: var(--color-text-secondary); background: var(--color-primary-tint); border-radius: var(--radius-pill); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
 .parentManagementPage .parentTable .tableActions .iconButton { color: var(--color-text-secondary); background: transparent; border-color: transparent; }
 .parentManagementPage .parentTable .tableActions .iconButton:hover { color: var(--color-primary); background: var(--color-primary-tint); }
+.parentManagementPage .pageTitle,
+.parentManagementPage .breadcrumbActive,
+.parentManagementPage .statValue,
+.parentManagementPage .tableStrong { color: var(--color-text-primary); }
+.parentManagementPage .pageDescription,
+.parentManagementPage .selectField,
+.parentManagementPage .searchField input { color: var(--color-text-secondary); }
+.parentManagementPage .button_primary { color: var(--color-surface); background: var(--color-primary); }
+.parentManagementPage .button_primary:hover { background: var(--color-primary-hover); }
+.parentManagementPage .statCard { background: var(--color-surface); }
+.parentManagementPage .statIcon { width: 40px; height: 40px; }
+.parentManagementPage .tone_primary { color: var(--color-primary); background: var(--color-primary-tint); }
+.parentManagementPage .tone_warning { color: var(--color-warning-dark); background: var(--color-secondary-tint); }
+.parentManagementPage .tone_success { color: var(--color-success); background: var(--color-success-tint); }
+.parentManagementPage .badge_primary { color: var(--color-primary-dark); background: var(--color-primary-tint); }
+.parentManagementPage .badge_success { color: var(--color-success-dark); background: var(--color-success-tint); }
+.parentManagementPage .parentTable th { background: var(--color-background); }
+.parentManagementPage .parentTable td { padding-top: var(--space-md); padding-bottom: var(--space-md); }
+.parentManagementPage .parentTableWrap { position: relative; overflow-x: auto; scrollbar-color: var(--color-border) var(--color-background); }
+.parentManagementPage .parentTableWrap::before,
+.parentManagementPage .adminStatRow::before {
+  padding: var(--space-xs) var(--space-sm);
+  color: var(--color-text-secondary);
+  background: var(--color-background);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+  content: "Data contoh";
+  white-space: nowrap;
+}
+.parentManagementPage .parentTableWrap::before { display: block; width: fit-content; margin: 0 0 var(--space-xs) auto; }
+.parentManagementPage .adminStatRow { position: relative; }
+.parentManagementPage .adminStatRow::before { position: absolute; top: calc(0px - var(--text-l12-line) - var(--space-sm)); right: 0; }
+.parentManagementPage .parentTable { width: 100%; min-width: 1060px; }
+.parentManagementPage .parentTable .directoryBadge { color: var(--color-primary-dark); background: var(--color-primary-tint); }
+.parentManagementPage .parentTable .directoryStatusBadge.badge_success { color: var(--color-success-dark); background: var(--color-success-tint); }
+.parentManagementPage .searchField { background: var(--color-surface); }
+.parentManagementPage .selectField { color: var(--color-text-primary); background: var(--color-surface); }
+.parentManagementPage .parentTableWrap::-webkit-scrollbar { height: var(--space-sm); }
+.parentManagementPage .parentTableWrap::-webkit-scrollbar-track { background: var(--color-background); border-radius: var(--radius-pill); }
+.parentManagementPage .parentTableWrap::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: var(--radius-pill); }
 .paginationDirectory { margin: 0; padding: var(--space-md); background: var(--color-primary-tint); border-top: var(--border-width-xs) solid var(--color-border); }
 .pageEllipsis { width: 27px; display: grid; place-items: center; color: var(--color-text-secondary); }
 
@@ -963,4 +1079,875 @@
   line-height: var(--text-l12-line);
   font-weight: var(--font-weight-medium);
   white-space: nowrap;
+}
+
+/* Top bar Admin: kotak notifikasi dan avatar memakai token global di AppShell. */
+.adminTopbarContent { display: flex; align-items: center; gap: var(--space-sm); }
+.adminTopbarContent .notificationButton { color: var(--color-text-secondary); background: var(--color-info-tint); }
+.adminTopbarContent .avatarSmall { color: var(--color-surface); background: var(--color-primary); }
+
+/* Dashboard Admin: pulihkan warna dan kompakkan komponen di luar pembungkus .adminApp. */
+.dashboardPage .pageTitle,
+.dashboardPage .breadcrumbActive,
+.dashboardPage .statValue,
+.dashboardPage .classCount { color: var(--color-text-primary); }
+.dashboardPage .pageDescription,
+.dashboardPage .panelTitle p { color: var(--color-text-secondary); }
+.dashboardPage .button_outline { color: var(--color-primary); border-color: var(--color-primary-light); }
+.dashboardPage .dashboardStats .statCard {
+  min-height: calc(var(--space-2xl) + var(--space-2xl) + var(--space-xl) + var(--space-xl));
+  background: var(--color-surface);
+}
+.dashboardPage .dashboardStats .statHeader { flex: 1 1 auto; }
+.dashboardPage .dashboardStats .statBody { justify-content: space-between; }
+.dashboardPage .dashboardStats .tone_primary { color: var(--color-primary); background: var(--color-primary-tint); }
+.dashboardPage .dashboardStats .tone_success { color: var(--color-success); background: var(--color-success-tint); }
+.dashboardPage .dashboardStats .tone_warning { color: var(--color-warning-dark); background: var(--color-secondary-tint); }
+.dashboardPage .dashboardStats .tone_info { color: var(--color-info); background: var(--color-info-tint); }
+.dashboardPage .dashboardStats .statDetail { color: var(--color-text-secondary); }
+.dashboardPage .emptyCell { color: var(--color-text-secondary) !important; }
+.dashboardPage .dashboardToolbar .searchField { background: var(--color-surface); }
+
+/* Form Tambah/Edit Siswa: gaya dialog memakai token global, terlingkup pada varian ini. */
+.studentFormModal .modalHeader h2 {
+  color: var(--color-text-primary);
+  font-size: var(--text-h4-size);
+  line-height: var(--text-h4-line);
+  font-weight: var(--font-weight-bold);
+}
+.studentFormModal .modalHeader p { color: var(--color-text-secondary); }
+.studentFormModal .modalContent { color: var(--color-text-primary); }
+.studentFormModal .infoBanner {
+  color: var(--color-primary-dark);
+  background: var(--color-primary-tint);
+  border-color: var(--color-primary-light);
+}
+.studentFormModal .infoBanner strong,
+.studentFormModal .infoBanner p { color: var(--color-primary-dark); }
+.studentFormModal .infoBanner svg { color: var(--color-primary); }
+.studentFormModal .formField { color: var(--color-text-primary); font-weight: var(--font-weight-semibold); }
+.studentFormModal .formField span b { color: var(--color-error); }
+.studentFormModal .formLabelHint { color: var(--color-text-secondary); font-size: var(--text-p12-size); font-weight: var(--font-weight-regular); line-height: var(--text-p12-line); }
+.studentFormModal .formField input,
+.studentFormModal .formField select,
+.studentFormModal .formField textarea {
+  color: var(--color-text-primary);
+  background: var(--color-surface);
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
+  font-weight: var(--font-weight-regular);
+}
+.studentFormModal .formField input:focus,
+.studentFormModal .formField select:focus,
+.studentFormModal .formField textarea:focus { border: var(--border-width-m) solid var(--color-primary-light); }
+.studentFormModal .formField input::placeholder { color: var(--color-text-disabled); }
+.studentFormModal .fieldControlWrap input { padding-right: var(--space-xl); }
+.studentFormModal .fieldControlWrap > svg { color: var(--color-text-secondary); }
+.studentFormModal .fieldControlValid input { border-color: var(--color-success); }
+.studentFormModal .fieldControlValid > svg { color: var(--color-success); }
+.studentFormModal .formFieldInvalid .fieldControlWrap input,
+.studentFormModal .formFieldInvalid .fieldControlWrap input:focus,
+.studentFormModal .formFieldInvalid select,
+.studentFormModal .formFieldInvalid select:focus { border: var(--border-width-m) solid var(--color-error) !important; }
+.studentFormModal .formFieldInvalid .fieldControlWrap > svg { color: var(--color-error); }
+.studentFormModal .formField .fieldError {
+  padding: var(--space-xs) var(--space-sm);
+  color: var(--color-error-dark);
+  background: var(--color-error-tint);
+  border-radius: var(--radius-s);
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
+  font-weight: var(--font-weight-regular);
+}
+.studentFormModal .formGrid.studentFormGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-md); }
+.studentFormModal .studentFormGrid > .formField:nth-child(-n+3),
+.studentFormModal .studentFormGrid > .formField:nth-child(6),
+.studentFormModal .studentFormGrid > .formField:nth-child(7) { grid-column: 1 / -1; }
+.studentFormModal .studentGenderField > span { display: flex; align-items: center; gap: var(--space-xs); }
+.studentFormModal .studentGenderField > span svg { color: var(--color-error); }
+.studentFormModal .studentGenderOptions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-sm); }
+.studentFormModal .studentGenderChoice {
+  position: relative;
+  min-height: calc(var(--space-lg) + var(--space-md));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--space-xl);
+  color: var(--color-text-secondary);
+  background: var(--color-surface);
+  border: var(--border-width-xs) solid var(--color-border);
+  border-radius: var(--radius-s);
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.studentFormModal .studentGenderChoice input {
+  position: absolute;
+  left: var(--space-md);
+  width: var(--space-md);
+  height: var(--space-md);
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  accent-color: var(--color-primary);
+}
+.studentFormModal .studentGenderChoice.studentGenderSelected {
+  color: var(--color-primary);
+  background: var(--color-primary-tint);
+  border: var(--border-width-m) solid var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+}
+.studentFormModal .formFieldInvalid .studentGenderChoice { border-color: var(--color-error); }
+.studentFormModal .formFieldInvalid .studentGenderChoice.studentGenderSelected { border-width: var(--border-width-m); }
+.studentFormModal .studentRombelHeader { display: flex; align-items: center; justify-content: space-between; gap: var(--space-sm); }
+.studentFormModal .studentCapacityBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
+  color: var(--color-warning-dark);
+  background: var(--color-warning-tint);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+  font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
+}
+.studentFormModal .studentRombelField select { padding-right: var(--space-xl); }
+.studentFormModal .studentParentHeader { color: var(--color-text-primary); font-weight: var(--font-weight-bold); }
+.studentFormModal .studentParentHeader .textLink { color: var(--color-primary); font-size: var(--text-l12-size); line-height: var(--text-l12-line); font-weight: var(--font-weight-medium); }
+.studentFormModal .linkedStudent { background: var(--color-primary-tint); border-color: var(--color-primary-light); }
+.studentFormModal .linkedStudent strong { color: var(--color-text-primary); }
+.studentFormModal .linkedStudent small { color: var(--color-text-secondary); }
+.studentFormModal .initialAvatar { color: var(--color-primary); background: var(--color-surface); }
+.studentFormModal .badge_success { color: var(--color-success-dark); background: var(--color-success-tint); }
+.studentFormModal .studentGuardianEmpty {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  color: var(--color-text-secondary);
+  background: var(--color-background);
+  border: var(--border-width-xs) solid var(--color-border);
+  border-radius: var(--radius-m);
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
+}
+.studentFormModal .modalFooter { justify-content: space-between; align-items: center; flex-wrap: wrap; }
+.studentFormModal .studentErrorSummary { max-width: 220px; display: flex; align-items: center; gap: var(--space-sm); color: var(--color-error); font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
+.studentFormModal .studentModalActions { display: flex; align-items: center; gap: var(--space-sm); margin-left: auto; }
+.studentFormModal .button { font-size: var(--text-l12-size); line-height: var(--text-l12-line); font-weight: var(--font-weight-semibold); }
+.studentFormModal .studentCancelButton { color: var(--color-text-primary); background: var(--color-surface); border-color: var(--color-border); }
+.studentFormModal .button_primary { color: var(--color-surface); background: var(--color-primary); }
+.studentFormModal .button_primary:hover { background: var(--color-primary-hover); }
+
+@media (max-width: 420px) {
+  .studentFormModal .studentFormGrid { grid-template-columns: 1fr; }
+}
+
+/* Master tahun ajaran: pulihkan token global pada halaman AppShell dan rapikan ringkasan. */
+.pageHeading:has(+ .yearHero) {
+  margin-bottom: var(--space-lg);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--color-surface);
+  border: var(--border-width-xs) solid var(--color-border);
+  border-radius: var(--radius-m);
+  box-shadow: var(--shadow-1);
+}
+.pageHeading:has(+ .yearHero) .pageTitle { color: var(--color-text-primary); font-size: var(--text-h4-size); line-height: var(--text-h4-line); font-weight: var(--font-weight-bold); }
+.pageHeading:has(+ .yearHero) .pageTitle::after {
+  display: inline-flex;
+  vertical-align: middle;
+  margin-left: var(--space-sm);
+  padding: var(--space-xs) var(--space-sm);
+  color: var(--color-text-secondary);
+  background: var(--color-background);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+  font-weight: var(--font-weight-medium);
+  content: "Data contoh";
+}
+.pageHeading:has(+ .yearHero) .pageDescription { color: var(--color-text-secondary); font-size: var(--text-p16-size); line-height: var(--text-p16-line); }
+.pageHeading:has(+ .yearHero) .button_primary { color: var(--color-surface); background: var(--color-primary); }
+.pageHeading:has(+ .yearHero) .button_primary:hover { background: var(--color-primary-hover); }
+.yearHero { padding: var(--space-xl); }
+.yearHero h2 { color: var(--color-surface); font-size: var(--text-h3-size); line-height: var(--text-h3-line); font-weight: var(--font-weight-bold); }
+.yearHero > div:first-child > .heroTags:first-child::after {
+  align-self: center;
+  padding: var(--space-xs) var(--space-sm);
+  color: var(--color-text-secondary);
+  background: var(--color-surface);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+  content: "Data contoh";
+}
+.yearHero > div:first-child > .heroTags:first-child span:nth-child(2) {
+  color: var(--color-success-dark);
+  background: var(--color-success-tint);
+  border-color: var(--color-success-tint);
+}
+.yearHero .heroTags span { font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
+.yearHero .heroActions .button:first-child { color: var(--color-primary); background: var(--color-surface); border-color: var(--color-primary-light); }
+.yearHero .heroActions .button:first-child:hover { background: var(--color-primary-tint); }
+.yearHero .heroActions .button:last-child { color: var(--color-text-secondary); background: var(--color-border); border-color: var(--color-border); }
+.twoCards { gap: var(--space-lg); }
+.metricCard {
+  position: relative;
+  min-height: calc(var(--space-2xl) + var(--space-2xl) + var(--space-2xl) + var(--space-xl));
+  padding: var(--space-lg);
+  background: var(--color-surface);
+  border-color: var(--color-border);
+  border-radius: var(--radius-m);
+  box-shadow: var(--shadow-1);
+}
+.metricCard small { color: var(--color-text-secondary); font-size: var(--text-l12-size); line-height: var(--text-l12-line); font-weight: var(--font-weight-semibold); }
+.metricCard strong { color: var(--color-text-primary); font-size: var(--text-h4-size); line-height: var(--text-h4-line); font-weight: var(--font-weight-bold); }
+.metricCard:first-child p { color: var(--color-primary); }
+.metricCard:nth-child(2) p {
+  padding: var(--space-sm);
+  color: var(--color-warning-dark);
+  background: var(--color-warning-tint);
+  border: 0;
+  border-radius: var(--radius-s);
+}
+.panel:has(.progressSegments) .panelTitle span { color: var(--color-text-secondary); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.panel:has(.progressSegments) .panelTitle h2::after {
+  display: inline-flex;
+  vertical-align: middle;
+  margin-left: var(--space-sm);
+  padding: var(--space-xs) var(--space-sm);
+  color: var(--color-text-secondary);
+  background: var(--color-background);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+  font-weight: var(--font-weight-medium);
+  content: "Data contoh";
+}
+.panel:has(.progressSegments) .progressSegments { height: var(--space-sm); }
+.panel:has(.progressSegments) .progressSegments span:nth-child(1) { background: var(--color-primary); }
+.panel:has(.progressSegments) .progressSegments span:nth-child(2) { background: var(--color-secondary); }
+.panel:has(.progressSegments) .progressSegments span:nth-child(3) { background: var(--color-background); }
+.panel:has(.progressSegments) .heroTags { gap: var(--space-lg); }
+.panel:has(.progressSegments) .heroTags span { font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.panel:has(.progressSegments) .heroTags span::first-letter { color: var(--color-primary); }
+.panel:has(.progressSegments) .heroTags span:nth-child(2)::first-letter { color: var(--color-secondary); }
+.panel:has(.progressSegments) .heroTags span:nth-child(3)::first-letter { color: var(--color-border); }
+.panel:has(table) .tabs button[aria-pressed="true"] { color: var(--color-primary); }
+.panel:has(table) .searchField { background: var(--color-primary-tint); }
+.panel:has(table) .tableStrong { color: var(--color-text-primary); }
+.panel:has(table) .badge_success { color: var(--color-success-dark); background: var(--color-success-tint); }
+.panel:has(table) .badge_info { color: var(--color-info-dark); background: var(--color-info-tint); }
+.panel:has(table) .button_ghost { color: var(--color-text-primary); background: var(--color-primary-tint); }
+.panel:has(table) .button_primary { color: var(--color-surface); background: var(--color-primary); }
+.panel:has(table) .button_primary:hover { background: var(--color-primary-hover); }
+.panel:has(table) .tableSub:empty { display: none; }
+.dashboardPage .searchField input { color: var(--color-text-primary); }
+.dashboardPage .dashboardToolbar .tabs button[aria-pressed="true"] { color: var(--color-primary); }
+.dashboardPage .classCode { color: var(--color-primary); background: var(--color-primary-tint); }
+.dashboardPage .classCount { background: var(--color-surface); }
+.dashboardPage .textLink { color: var(--color-primary); }
+.dashboardPage .distributionTile small span { display: inline-flex; align-items: center; gap: var(--space-xs); }
+.dashboardPage .distributionTile small span::before { width: var(--space-sm); height: var(--space-sm); border-radius: var(--radius-circle); background: var(--color-primary); content: ""; }
+.dashboardPage .distributionTile:nth-child(2) small span::before { background: var(--color-primary-light); }
+.dashboardPage .distributionTile:nth-child(3) small span::before { background: var(--color-secondary); }
+.dashboardPage .distributionTile:nth-child(1) small b { color: var(--color-primary); }
+.dashboardPage .distributionTile:nth-child(2) small b { color: var(--color-primary-light); }
+.dashboardPage .distributionTile:nth-child(3) small b { color: var(--color-warning-dark); }
+.dashboardPage .attentionButton { color: var(--color-text-primary); background: var(--color-secondary); }
+.dashboardPage .attentionButtonDanger { color: var(--color-surface); background: var(--color-error); }
+.dashboardPage .exampleBadge { padding: var(--space-xs) var(--space-sm); color: var(--color-text-secondary); background: var(--color-background); border-radius: var(--radius-pill); font-size: var(--text-l12-size); line-height: var(--text-l12-line); white-space: nowrap; }
+
+/* Master rombongan belajar: pulihkan warna dan proporsi hanya pada struktur tabel rombel. */
+.pageHeading:has(+ .twoCards + .toolbar + .tableWrap .capacityBar) {
+  padding: var(--space-md) var(--space-lg);
+  background: var(--color-surface);
+  border: var(--border-width-xs) solid var(--color-border);
+  border-radius: var(--radius-m);
+  box-shadow: var(--shadow-1);
+}
+.pageHeading:has(+ .twoCards + .toolbar + .tableWrap .capacityBar) .pageTitle {
+  color: var(--color-text-primary);
+  font-size: var(--text-h4-size);
+  line-height: var(--text-h4-line);
+  font-weight: var(--font-weight-bold);
+}
+.pageHeading:has(+ .twoCards + .toolbar + .tableWrap .capacityBar) .pageTitle::after {
+  display: inline-flex;
+  vertical-align: middle;
+  margin-left: var(--space-sm);
+  padding: var(--space-xs) var(--space-sm);
+  color: var(--color-text-secondary);
+  background: var(--color-background);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+  font-weight: var(--font-weight-medium);
+  content: "Data contoh";
+}
+.pageHeading:has(+ .twoCards + .toolbar + .tableWrap .capacityBar) .pageDescription {
+  color: var(--color-text-secondary);
+  font-size: var(--text-p16-size);
+  line-height: var(--text-p16-line);
+}
+.twoCards:has(+ .toolbar + .tableWrap .capacityBar) .statCard {
+  min-height: calc(var(--space-2xl) + var(--space-2xl) + var(--space-2xl) + var(--space-xl));
+  background: var(--color-surface);
+}
+.twoCards:has(+ .toolbar + .tableWrap .capacityBar) .statIcon.tone_primary { color: var(--color-primary); background: var(--color-primary-tint); }
+.twoCards:has(+ .toolbar + .tableWrap .capacityBar) .statIcon.tone_info { color: var(--color-primary); background: var(--color-primary-tint); }
+.twoCards:has(+ .toolbar + .tableWrap .capacityBar) .statValue {
+  color: var(--color-text-primary);
+  font-size: var(--text-h4-size);
+  line-height: var(--text-h4-line);
+  font-weight: var(--font-weight-bold);
+}
+.twoCards:has(+ .toolbar + .tableWrap .capacityBar) .statDetail { color: var(--color-text-secondary); }
+.twoCards:has(+ .toolbar + .tableWrap .capacityBar) .statCard:first-child .statDetail { padding: var(--space-xs) var(--space-sm); background: var(--color-primary-tint); border: 0; border-radius: var(--radius-s); }
+.toolbar:has(+ .tableWrap .capacityBar) .searchField { background: var(--color-primary-tint); }
+.tableWrap:has(.capacityBar) { border-radius: var(--radius-m); }
+.tableWrap:has(.capacityBar) .dataTable td { padding-top: var(--space-xl); padding-bottom: var(--space-xl); }
+.tableWrap:has(.capacityBar) .tableStrong {
+  color: var(--color-text-primary);
+  font-size: var(--text-l16-size);
+  line-height: var(--text-l16-line);
+  font-weight: var(--font-weight-semibold);
+}
+.tableWrap:has(.capacityBar) .capacityBar { height: var(--space-xs); }
+.tableWrap:has(.capacityBar) .capacityBar span { background: var(--color-primary); }
+.tableWrap:has(.capacityBar) .capacityOver { background: var(--color-error) !important; }
+.tableWrap:has(.capacityBar) .dataTable tbody tr:has(.capacityOver) { background: var(--color-error-tint); }
+.tableWrap:has(.capacityBar) .pageControls button.pageCurrent { color: var(--color-surface); background: var(--color-primary); }
+
+/* Kerangka admin memakai lebar dan jarak sidebar yang sama di seluruh rute. */
+.adminShell.appShell {
+  --shell-sidebar-width: var(--sidebar-width);
+  --shell-menu-item-height: var(--space-2xl);
+  column-gap: var(--space-lg);
+}
+
+/* Header direktori memakai satu skala judul dan deskripsi pada semua role admin. */
+.pageTitle {
+  font-size: var(--text-p18-size);
+  line-height: var(--text-p18-line);
+  font-weight: var(--font-weight-semibold);
+}
+.pageDescription {
+  color: var(--color-text-secondary);
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
+}
+.teacherManagementPage .pageTitle,
+.parentManagementPage .pageTitle {
+  font-size: var(--text-p18-size);
+  line-height: var(--text-p18-line);
+}
+.teacherManagementPage .pageDescription,
+.parentManagementPage .pageDescription {
+  color: var(--color-text-secondary);
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
+}
+
+/* Tombol aksi direktori berbagi ukuran, radius, fokus, dan ritme ikon yang sama. */
+.managementHeaderActions .button {
+  min-height: calc(var(--space-xl) + var(--space-sm));
+  height: calc(var(--space-xl) + var(--space-sm));
+  padding: 0 var(--space-md);
+  border-radius: var(--radius-m);
+  font-size: var(--text-l16-size);
+  line-height: var(--text-l16-line);
+  font-weight: var(--font-weight-semibold);
+}
+.managementHeaderActions .button svg { width: var(--space-md); height: var(--space-md); }
+.managementHeaderActions .button.importDataButton {
+  color: var(--color-secondary-dark);
+  background: var(--color-surface);
+  border: var(--border-width-xs) solid var(--color-secondary);
+}
+.managementHeaderActions .button.importDataButton:hover { background: var(--color-secondary-tint); }
+.managementHeaderActions .button.addButton {
+  color: var(--color-surface);
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+.managementHeaderActions .button.addButton:hover { background: var(--color-primary-hover); border-color: var(--color-primary-hover); }
+
+/* Toolbar pencarian dan kategori memiliki permukaan serta tinggi yang seragam. */
+.managementToolbar { gap: var(--space-md); }
+.managementToolbar .searchField,
+.managementToolbar .selectField {
+  height: calc(var(--space-xl) + var(--space-sm));
+  background: var(--color-surface);
+  border: var(--border-width-xs) solid var(--color-border);
+  border-radius: var(--radius-s);
+}
+.managementToolbar .searchField input { font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.managementToolbar .selectField { font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+
+/* Badge data contoh ditampilkan sebagai komponen nyata di toolbar direktori. */
+.exampleBadge {
+  flex: 0 0 auto;
+  padding: var(--space-xs) var(--space-sm);
+  color: var(--color-text-secondary);
+  background: var(--color-background);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+  white-space: nowrap;
+}
+.teacherManagementPage .adminStatRow::before,
+.teacherManagementPage .teacherTableWrap::before,
+.parentManagementPage .adminStatRow::before,
+.parentManagementPage .parentTableWrap::before { display: none; content: none; }
+
+/* Kartu statistik direktori memakai grid, tinggi, ikon, dan padding bersama. */
+.adminStatRow { gap: var(--space-lg); }
+.statCardCompact {
+  min-height: calc(var(--space-2xl) + var(--space-2xl) + var(--space-md) + var(--space-md));
+  justify-content: flex-start;
+  padding: var(--space-md);
+}
+.statCardCompact .statHeader { align-items: center; }
+.statCardCompact .statIcon { width: var(--space-xl); height: var(--space-xl); }
+.statCardCompact .statDetail { display: none; }
+
+.tableWrap:has(.capacityBar) .pagination { margin-top: 0; padding: var(--space-md); background: var(--color-primary-tint); border-top: 0; }
+
+/* Varian kartu statistik halaman siswa: angka berada di atas label dan memakai warna status. */
+.statCardValueFirst {
+  min-height: calc(var(--space-xl) + var(--space-xl) + var(--space-md) + var(--space-md));
+  justify-content: center;
+  padding: var(--space-sm);
+  background: var(--color-surface);
+  border-color: var(--color-background);
+  box-shadow: var(--shadow-1);
+}
+.statCardValueFirst .statHeader { align-items: center; }
+.statCardValueFirst .statIcon {
+  width: calc(var(--space-xl) + var(--space-sm));
+  height: calc(var(--space-xl) + var(--space-sm));
+  border: var(--border-width-xs) solid transparent;
+}
+.statCardValueFirst .statIcon.tone_primary {
+  color: var(--color-primary);
+  background: var(--color-primary-tint);
+  border-color: var(--color-primary-light);
+}
+.statCardValueFirst .statIcon.tone_success {
+  color: var(--color-success);
+  background: var(--color-success-tint);
+  border-color: var(--color-success-light);
+}
+.statCardValueFirst .statIcon.tone_warning {
+  color: var(--color-warning-dark);
+  background: var(--color-secondary-tint);
+  border-color: var(--color-warning-light);
+}
+.statCardValueFirst .statIcon.tone_danger {
+  color: var(--color-error);
+  background: var(--color-error-tint);
+  border-color: var(--color-error-light);
+}
+.statBodyValueFirst { flex-direction: column-reverse; }
+.statCardValueFirst .statLabel {
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
+  font-weight: var(--font-weight-semibold);
+  text-transform: none;
+}
+.statCardValueFirst .statValue {
+  font-size: var(--text-h4-size);
+  line-height: var(--text-h4-line);
+}
+/* Varian kartu statistik showcase mempertahankan ukuran default StatCard. */
+.statCardShowcase { min-height: calc(var(--space-2xl) + var(--space-2xl) + var(--space-xl) + var(--space-xl) + var(--space-md)); border-color: var(--color-background); border-radius: var(--radius-l); }
+.statCardShowcase:not(:has(.statDetail)) { min-height: calc(var(--space-2xl) + var(--space-2xl) + var(--space-xl)); }
+.statCardShowcase .statIcon { width: calc(var(--space-xl) + var(--space-sm)); height: calc(var(--space-xl) + var(--space-sm)); border-radius: var(--radius-m); }
+.statCardShowcase .statBody { gap: var(--space-xl); padding-top: var(--space-md); }
+.statCardShowcase .statValue { font-size: var(--text-h4-size); line-height: var(--text-h4-line); }
+.statCardShowcase .statDetail { min-height: var(--space-lg); }
+.statValue_warning { color: var(--color-warning-dark); }
+.statValue_danger { color: var(--color-error); }
+
+/* Toolbar siswa berupa strip datar dengan kolom cari dan kategori yang ringkas. */
+.managementToolbarStudent {
+  min-height: calc(var(--space-xl) + var(--space-lg));
+  margin-bottom: var(--space-lg);
+  padding: 0 var(--space-sm);
+  background: var(--color-surface);
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.managementToolbarStudent .searchField {
+  width: calc(var(--space-xl) * 10);
+  min-width: calc(var(--space-xl) * 10);
+  flex: 0 0 calc(var(--space-xl) * 10);
+  background: var(--color-background);
+  border: 0;
+}
+.managementToolbarStudent .searchField input::placeholder { color: var(--color-text-secondary); }
+.managementToolbarStudent .selectField {
+  width: calc(var(--space-xl) * 4 + var(--space-sm) * 3);
+  min-width: calc(var(--space-xl) * 4 + var(--space-sm) * 3);
+  background: var(--color-surface);
+}
+
+/* Tabel siswa memakai header terang dan penekanan nama serta chip kelas sesuai desain. */
+.studentDataTable th {
+  text-align: center;
+  border-bottom: var(--border-width-xs) solid var(--color-border);
+}
+.studentDataTable .tableStrong {
+  font-size: var(--text-p16-size);
+  line-height: var(--text-p16-line);
+  font-weight: var(--font-weight-bold);
+}
+.studentDataTable .levelTag {
+  color: var(--color-text-primary);
+  background: var(--color-background);
+  border: var(--border-width-xs) solid var(--color-border);
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+  font-weight: var(--font-weight-semibold);
+}
+.studentActionButton {
+  width: calc(var(--space-xl) + var(--space-sm));
+  height: calc(var(--space-xl) - var(--space-xs));
+}
+
+/* Badge status dan aksi tabel siswa mengikuti tampilan direktori pada desain. */
+.studentStatusPill {
+  border: var(--border-width-xs) solid transparent;
+  font-weight: var(--font-weight-regular);
+}
+.studentStatusPill.badge_info {
+  color: var(--color-primary);
+  background: var(--color-primary-tint);
+  border-color: var(--color-primary-light);
+}
+.studentStatusPill.badge_danger {
+  color: var(--color-error-dark);
+  background: var(--color-error-tint);
+}
+.studentStatusPill.badge_neutral { border-color: var(--color-border); }
+.studentRowActions { align-items: center; }
+.studentLockedActions {
+  flex-direction: column;
+  align-items: flex-start;
+}
+.studentIconActions { display: flex; align-items: center; gap: var(--space-xs); }
+.studentResetAction { display: none; }
+.studentUnlockButton {
+  min-height: calc(var(--space-xl) - var(--space-xs));
+  padding: var(--space-xs) var(--space-sm);
+  color: var(--color-surface);
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  border-radius: var(--radius-xs);
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+}
+.studentUnlockButton:hover { background: var(--color-primary-hover); border-color: var(--color-primary-hover); }
+
+/* Footer siswa menonjolkan angka dan memakai kontrol halaman berukuran seragam. */
+.studentPagination.paginationDirectory {
+  background: var(--color-background);
+  border-top: var(--border-width-xs) solid var(--color-border);
+}
+.studentPagination > span strong {
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-bold);
+}
+.studentPagination .pageControls button {
+  width: var(--space-xl);
+  height: var(--space-xl);
+}
+
+/* Kartu Update Data membungkus judul dan banner sinkronisasi mandiri. */
+.pageHeadingCard {
+  margin-bottom: var(--space-lg);
+  padding: var(--space-lg);
+  background: var(--color-surface);
+  border: var(--border-width-xs) solid var(--color-border);
+  border-radius: var(--radius-l);
+  box-shadow: var(--shadow-1);
+}
+.pageHeadingCard .pageHeading {
+  align-items: flex-start;
+  margin-bottom: 0;
+}
+/* Jarak tambahan hanya dipakai ketika card header memuat konten di bawah judul. */
+.pageHeadingCard:has(> .pageHeading + *) .pageHeading {
+  margin-bottom: var(--space-md);
+}
+.pageHeadingCard .pageTitle {
+  color: var(--color-text-primary);
+  font-size: var(--text-h4-size);
+  line-height: var(--text-h4-line);
+  font-weight: var(--font-weight-bold);
+}
+.pageHeadingCard .pageDescription {
+  max-width: calc(var(--space-xl) * 33);
+  color: var(--color-text-secondary);
+  font-size: var(--text-p16-size);
+  line-height: var(--text-p16-line);
+}
+.updateSyncBanner {
+  align-items: center;
+  margin-bottom: 0;
+  padding: var(--space-md);
+  background: var(--color-info-tint);
+  border: 0;
+  border-radius: var(--radius-s);
+}
+.updateSyncBanner strong {
+  color: var(--color-info-dark);
+  font-size: var(--text-l16-size);
+  line-height: var(--text-l16-line);
+  font-weight: var(--font-weight-bold);
+}
+.updateSyncBanner p {
+  color: var(--color-info-dark);
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
+  white-space: nowrap;
+}
+.updateSyncIcon {
+  width: var(--space-xl);
+  height: var(--space-xl);
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  color: var(--color-info);
+  background: var(--color-surface);
+  border-radius: var(--radius-circle);
+}
+
+/* Stat card Update Data menampilkan informasi ringkas dengan footer terpisah. */
+.statCardUpdateData {
+  min-height: calc(var(--space-2xl) * 4);
+  justify-content: space-between;
+  gap: var(--space-lg);
+  padding: var(--space-md);
+  background: var(--color-surface);
+  border-color: var(--color-background);
+  box-shadow: var(--shadow-1);
+}
+.statCardUpdateData .statHeader {
+  display: grid;
+  grid-template-columns: calc(var(--space-xl) + var(--space-sm)) minmax(0, 1fr);
+  grid-template-rows: calc(var(--space-xl) + var(--space-sm)) auto;
+  align-items: start;
+  column-gap: var(--space-md);
+  row-gap: var(--space-lg);
+}
+.statCardUpdateData .statIcon {
+  width: calc(var(--space-xl) + var(--space-sm));
+  height: calc(var(--space-xl) + var(--space-sm));
+  grid-column: 1;
+  grid-row: 1;
+}
+.statCardUpdateData .statBody {
+  display: contents;
+}
+/* Label statistik Update Data tetap ringkas dan tegas di atas nilainya. */
+.statCardUpdateData .statLabel {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: center;
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+  font-weight: var(--font-weight-bold);
+}
+.statCardUpdateData .tone_primary { color: var(--color-primary); background: var(--color-primary-tint); }
+.statCardUpdateData .tone_success { color: var(--color-success); background: var(--color-success-tint); }
+.statCardUpdateData .tone_warning { color: var(--color-warning-dark); background: var(--color-secondary-tint); }
+.statCardUpdateData .statValue {
+  grid-column: 2;
+  grid-row: 2;
+  color: var(--color-text-primary);
+  font-size: var(--text-h4-size);
+  line-height: var(--text-h4-line);
+  font-weight: var(--font-weight-bold);
+}
+.statValueWithNote {
+  display: flex;
+  grid-column: 2;
+  grid-row: 2;
+  align-items: baseline;
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  gap: var(--space-xs);
+}
+.statCardUpdateData .statValueWithNote small {
+  color: var(--color-text-primary);
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
+  font-weight: var(--font-weight-medium);
+}
+.statCardUpdateData .statDetail {
+  min-height: var(--text-p12-line);
+  margin-top: 0;
+  padding-top: var(--space-md);
+  color: var(--color-text-secondary);
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
+  white-space: nowrap;
+}
+
+/* Varian report memakai padding lega dan jarak internal rapat untuk ringkasan nilai. */
+.statCardReport { min-height: calc(var(--space-2xl) * 4 - var(--space-xs)); padding: var(--space-lg); gap: var(--space-sm); border-radius: var(--radius-l); }
+.statCardReport .statHeader { row-gap: var(--space-md); }
+.statCardReport .statLabel { white-space: nowrap; }
+.statCardUpdateData .statValueFullWidth { grid-column: 1 / -1; }
+@media (max-width: 80rem) {
+  .statCardReport { padding: var(--space-md); }
+  .statCardReport .statValueFullWidth { font-size: var(--text-h5-size); line-height: var(--text-h5-line); }
+  .statCardReport .statDetail { width: calc(100% + var(--space-md) + var(--space-xs)); margin-left: calc(0px - var(--space-xs)); }
+}
+
+/* Warna footer statistik khusus bila konteks laporan menyatakan statusnya. */
+.statDetail_success,
+.statCardUpdateData .statDetail_success { color: var(--color-success-dark); }
+.statDetail_warning,
+.statCardUpdateData .statDetail_warning { color: var(--color-warning-dark); }
+.statDetail_danger,
+.statCardUpdateData .statDetail_danger { color: var(--color-error-dark); }
+.statDetail_info,
+.statCardUpdateData .statDetail_info { color: var(--color-info-dark); }
+
+/* Identitas laporan memakai avatar inisial pastel yang konsisten. */
+.reportAvatar { width: var(--space-xl); height: var(--space-xl); flex: 0 0 auto; display: inline-grid; place-items: center; border-radius: var(--radius-circle); font-size: var(--text-l12-size); line-height: var(--text-l12-line); font-weight: var(--font-weight-semibold); }
+.reportAvatar_primary { color: var(--color-primary); background: var(--color-primary-tint); }
+.reportAvatar_info { color: var(--color-info-dark); background: var(--color-info-tint); }
+.reportAvatar_warning { color: var(--color-warning-dark); background: var(--color-warning-tint); }
+.reportAvatar_danger { color: var(--color-error-dark); background: var(--color-error-tint); }
+.reportAvatar_success { color: var(--color-success-dark); background: var(--color-success-tint); }
+.scoreChip { display: inline-flex; padding: var(--space-xs) var(--space-sm); color: var(--color-error); background: var(--color-error-tint); border-radius: var(--radius-xs); font-weight: var(--font-weight-bold); font-variant-numeric: tabular-nums; }
+.reportProgress { width: 100%; height: var(--space-xs); display: block; overflow: hidden; background: var(--color-primary-tint); border-radius: var(--radius-pill); }
+.reportProgress > span { height: 100%; display: block; border-radius: inherit; }
+.reportProgress_primary { background: var(--color-primary); }
+.reportProgress_warning { background: var(--color-warning); }
+
+/* Tabel Update Data memakai satu panel, lebar kolom tetap, dan pill satu baris. */
+.updateDataTablePanel { padding: var(--space-lg); }
+.updateDataToolbar {
+  gap: var(--space-md);
+  margin: 0 0 var(--space-md);
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+}
+.updateDataToolbar .searchField {
+  width: calc(var(--space-xl) * 10);
+  min-width: calc(var(--space-xl) * 10);
+  height: calc(var(--space-xl) + var(--space-xs));
+  background: var(--color-background);
+  border: 0;
+}
+.updateDataToolbar .searchField input::placeholder { color: var(--color-text-secondary); }
+.updateDataTabs {
+  gap: var(--space-xs);
+  padding: var(--space-xs);
+  background: var(--color-background);
+  border-radius: var(--radius-s);
+  white-space: nowrap;
+}
+.updateDataTabs button {
+  padding: var(--space-xs) var(--space-sm);
+  background: transparent;
+  border-radius: var(--radius-xs);
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+}
+.updateDataTabs button[aria-pressed="true"] {
+  color: var(--color-warning-dark);
+  background: var(--color-warning-tint);
+  font-weight: var(--font-weight-semibold);
+}
+.updateDataTableWrap {
+  overflow-x: auto;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+}
+.updateDataTable {
+  width: 100%;
+  min-width: calc(var(--space-xl) * 35);
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.updateDataTable th {
+  height: calc(var(--space-2xl) + var(--space-lg));
+  padding: var(--space-sm) var(--space-md);
+  color: var(--color-text-secondary);
+  background: var(--color-primary-tint);
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+  font-weight: var(--font-weight-bold);
+  text-align: left;
+}
+.updateDataTable th:first-child { border-top-left-radius: var(--radius-s); }
+.updateDataTable th:last-child { border-top-right-radius: var(--radius-s); }
+.updateDataTable th:nth-child(1), .updateDataTable td:nth-child(1) { width: 28%; }
+.updateDataTable th:nth-child(2), .updateDataTable td:nth-child(2) { width: 13%; }
+.updateDataTable th:nth-child(3), .updateDataTable td:nth-child(3) { width: 10%; }
+.updateDataTable th:nth-child(4), .updateDataTable td:nth-child(4) { width: 17%; }
+.updateDataTable th:nth-child(5), .updateDataTable td:nth-child(5) { width: 19%; }
+.updateDataTable th:nth-child(6), .updateDataTable td:nth-child(6) { width: 13%; }
+.updateDataTable td {
+  height: calc(var(--space-2xl) + var(--space-lg));
+  padding: var(--space-md);
+  border-top: var(--border-width-xs) solid var(--color-background);
+  text-align: left;
+  vertical-align: middle;
+}
+.updateStudentIdentity { display: flex; align-items: center; gap: var(--space-sm); }
+.updateStudentMeta { display: block; min-width: 0; }
+.updateDataTable .tableStrong {
+  display: block;
+  color: var(--color-text-primary);
+  font-size: var(--text-p16-size);
+  line-height: var(--text-p16-line);
+  font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
+}
+.updateDataTable .tableSub {
+  margin-top: var(--space-xs);
+  font-size: var(--text-p12-size);
+  line-height: var(--text-p12-line);
+  white-space: nowrap;
+}
+.updateStudentAvatar {
+  width: calc(var(--space-xl) + var(--space-xs));
+  height: calc(var(--space-xl) + var(--space-xs));
+  border-radius: var(--radius-circle);
+  font-weight: var(--font-weight-medium);
+}
+.updateDataTable tbody tr:nth-child(3n + 1) .updateStudentAvatar,
+.updateDataTable tbody tr:nth-child(3n + 2) .updateStudentAvatar { color: var(--color-primary); background: var(--color-primary-tint); }
+.updateDataTable tbody tr:nth-child(3n) .updateStudentAvatar { color: var(--color-warning-dark); background: var(--color-warning-tint); }
+.updateDataPill {
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--text-l12-size);
+  line-height: var(--text-l12-line);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
+.updateDataPagination {
+  margin-top: var(--space-md);
+  padding: var(--space-md) 0 0;
+}
+.updateDataPagination > span strong {
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-bold);
 }

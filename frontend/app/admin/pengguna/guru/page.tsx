@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
 import AdminIcon from "@/app/admin/_components/AdminIcons";
 import useAdminDirectoryFilter from "@/app/admin/_components/useAdminDirectoryFilter";
+import useCsvImport from "@/app/admin/_components/useCsvImport";
 import {
   ManagementActionButtons,
   ManagementFormField as Field,
@@ -15,7 +17,7 @@ import {
   ManagementToolbar,
   type ManagementStat,
 } from "@/app/admin/pengguna/_components/ManagementComponents";
-import { Button, InfoBanner, TableEmpty, adminStyles as s } from "@/app/admin/_components/AdminUI";
+import { Button, InfoBanner, ManagementHeaderActions, TableEmpty, adminStyles as s } from "@/app/admin/_components/AdminUI";
 
 const teachers = [
   { name: "Drs. Raden H. Sutanto, M.Pd.", nip: "197103151998021004", subject: "Informatika", task: "Kepala Lab Komputer", classes: "8A · 8B · 8C · +2", status: "Aktif (Sandi Diperbarui)", activity: "12 Menit lalu" },
@@ -41,6 +43,8 @@ const subjectTones: Record<string, "primary" | "info" | "success" | "warning" | 
 };
 
 export default function GuruPage() {
+  const router = useRouter();
+  const csvInputRef = useRef<HTMLInputElement>(null);
   const [modal, setModal] = useState(false);
   const [form, setForm] = useState({ name: "", nip: "", subject: "", task: "", homeroom: "", classes: [] as string[], email: "", phone: "" });
   const [touched, setTouched] = useState<Partial<Record<"name" | "nip" | "subject" | "task" | "homeroom" | "classes" | "email" | "phone", boolean>>>({});
@@ -51,6 +55,16 @@ export default function GuruPage() {
     getSearchText: getTeacherSearchText,
     matchesCategory: matchesTeacherCategory,
     initialCategory: "Semua Kategori",
+  });
+  const csvImport = useCsvImport({
+    endpoint: undefined,
+    entityLabel: "data guru",
+    onSuccess: () => {
+      setKeyword("");
+      setCategory("Semua Kategori");
+      setPage(1);
+      router.refresh();
+    },
   });
   const toggleClass = (item: string) => setForm((current) => ({ ...current, classes: current.classes.includes(item) ? current.classes.filter((value) => value !== item) : [...current.classes, item] }));
   const nameIsValid = form.name.trim().length > 0;
@@ -86,7 +100,12 @@ export default function GuruPage() {
   return (
     <div className={s.teacherManagementPage}>
       <PageHeading breadcrumbs={["LMS", "Manajemen Pengguna", "Manajemen Guru"]} title="Manajemen Guru" description="Direktori staf pendidik, pembagian tugas mengajar, dan kredensial akun guru SMP Terpadu."
-        actions={<><Button variant="outline" tone="amber" icon="download-linear" onClick={() => alert("Pilih file Excel/CSV untuk proses import.")}>Import Data (Excel/CSV)</Button><Button icon="user-plus-linear" onClick={() => { setTouched({}); setSubmitAttempted(false); setModal(true); }}>Tambah Guru Baru</Button></>} />
+        actions={<ManagementHeaderActions onImport={() => csvInputRef.current?.click()} onAdd={() => { setTouched({}); setSubmitAttempted(false); setModal(true); }} addLabel="Tambah Guru Baru" importing={csvImport.loading} />} />
+      {/* Bagian tampilan: pemilih CSV serta hasil impor guru. */}
+      <input ref={csvInputRef} type="file" accept=".csv,text/csv" hidden onChange={(event) => { const input = event.currentTarget; const file = input.files?.[0] ?? null; input.value = ""; void csvImport.importFile(file); }} aria-label="Pilih file CSV guru" />
+      {csvImport.error && <InfoBanner tone="danger">{csvImport.error}</InfoBanner>}
+      {csvImport.success && <InfoBanner tone="success">{csvImport.success}</InfoBanner>}
+      {csvImport.rowErrorSummary && <InfoBanner tone="warning">Sebagian baris tidak diimpor: {csvImport.rowErrorSummary}</InfoBanner>}
       {/* Bagian tampilan: statistik guru dan staf. */}
       <div className={`${s.statGridThree} ${s.adminStatRow}`}>
         {statistics.map((item) => <ManagementStatCard key={item.label} item={item} />)}

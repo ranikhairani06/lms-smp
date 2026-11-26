@@ -12,19 +12,70 @@ export class BackendError extends Error {
   }
 }
 
-export async function backendRequest<T>(path: string, options: RequestInit = {}, token?: string): Promise<T> {
-  const base = process.env.BACKEND_API_URL;
-  if (!base) throw new BackendError("Alamat backend belum dikonfigurasi.", 503);
+let apiPathWarningLogged = false;
+let missingApiWarningLogged = false;
+
+function backendApiBase() {
+  const configured = process.env.BACKEND_API_URL;
+  if (!configured) {
+    if (!missingApiWarningLogged) {
+      console.warn("BACKEND_API_URL belum dikonfigurasi.");
+      missingApiWarningLogged = true;
+    }
+    throw new BackendError("Alamat backend belum dikonfigurasi.", 503);
+  }
+
+  const base = new URL(configured);
+  const parts = base.pathname.split("/").filter(Boolean);
+  const apiCount = parts.filter((part) => part.toLowerCase() === "api").length;
+  const endsWithApi = parts.at(-1)?.toLowerCase() === "api";
+  if (!apiPathWarningLogged && (apiCount > 1 || !endsWithApi)) {
+    // Diagnostik hanya menyebut bentuk path; URL backend tidak pernah dicatat.
+    console.warn("Konfigurasi BACKEND_API_URL perlu satu segmen /api di akhir.");
+    apiPathWarningLogged = true;
+  }
+  const normalizedParts = parts.filter((part) => part.toLowerCase() !== "api");
+  base.pathname = `/${[...normalizedParts, "api"].join("/")}`;
+  base.search = "";
+  base.hash = "";
+  return base.toString().replace(/\/$/, "");
+}
+
+function backendUrl(path: string) {
+  const base = backendApiBase();
+  return `${base}/${path.replace(/^\/+/, "")}`;
+}
+
+// Fetch mentah dipakai proxy Admin agar status dan body validasi backend tetap utuh.
+export async function backendFetch(path: string, options: RequestInit = {}, token?: string) {
+  const url = backendUrl(path);
   const headers = new Headers(options.headers);
   headers.set("Accept", "application/json");
-  if (options.body) headers.set("Content-Type", "application/json");
   if (token) headers.set("Authorization", `Bearer ${token}`);
-  let response: Response;
+  if (options.body && !(options.body instanceof FormData) && !headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
   try {
-    response = await fetch(`${base.replace(/\/$/, "")}/${path}`, {
-      ...options, headers, cache: "no-store", redirect: "error", signal: AbortSignal.timeout(15000),
+    return await fetch(url, {
+      ...options,
+      headers,
+      cache: "no-store",
+      redirect: "error",
+      signal: AbortSignal.timeout(15000),
     });
   } catch {
+    throw new BackendError("Backend tidak dapat dihubungi. Pastikan server Laravel sedang berjalan.", 503);
+  }
+}
+
+export async function backendRequest<T>(path: string, options: RequestInit = {}, token?: string): Promise<T> {
+  const headers = new Headers(options.headers);
+  headers.set("Accept", "application/json");
+  let response: Response;
+  try {
+    response = await backendFetch(path, { ...options, headers }, token);
+  } catch (error) {
+    if (error instanceof BackendError) throw error;
     throw new BackendError("Backend tidak dapat dihubungi. Pastikan server Laravel sedang berjalan.", 503);
   }
   if (response.status === 204) return undefined as T;

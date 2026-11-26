@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
 import AdminIcon from "@/app/admin/_components/AdminIcons";
 import useAdminDirectoryFilter from "@/app/admin/_components/useAdminDirectoryFilter";
+import useCsvImport from "@/app/admin/_components/useCsvImport";
 import {
   ManagementActionButtons,
   ManagementFormField as Field,
@@ -15,7 +17,7 @@ import {
   ManagementToolbar,
   type ManagementStat,
 } from "@/app/admin/pengguna/_components/ManagementComponents";
-import { AdminTableIconButton, Button, TableEmpty, adminStyles as s } from "@/app/admin/_components/AdminUI";
+import { AdminTableIconButton, Button, InfoBanner, ManagementHeaderActions, TableEmpty, adminStyles as s } from "@/app/admin/_components/AdminUI";
 
 type ParentDirectoryItem = { name: string; relation: string; child: string; additionalChildren: number; phone: string; status: string; access: string };
 
@@ -32,6 +34,8 @@ const getParentSearchText = (parent: typeof parents[number]) => `${parent.name} 
 const matchesParentCategory = (parent: typeof parents[number], category: string) => category === "Semua Kategori" || parent.relation === category;
 
 export default function OrangTuaPage() {
+  const router = useRouter();
+  const csvInputRef = useRef<HTMLInputElement>(null);
   const [modal, setModal] = useState(false);
   const [page, setPage] = useState(1);
   const [form, setForm] = useState({ name: "", relation: "Ayah Kandung", phone: "", email: "", address: "", student: "Andi Pratama • 8B" });
@@ -62,6 +66,16 @@ export default function OrangTuaPage() {
     matchesCategory: matchesParentCategory,
     initialCategory: "Semua Kategori",
   });
+  const csvImport = useCsvImport({
+    endpoint: undefined,
+    entityLabel: "data orang tua/wali",
+    onSuccess: () => {
+      setKeyword("");
+      setCategory("Semua Kategori");
+      setPage(1);
+      router.refresh();
+    },
+  });
   const statistics: ManagementStat[] = [
     { label: "Total Akun Orang Tua / Wali", value: "782", icon: "users-group-rounded-linear", tone: "primary" },
     { label: "Penautan Peserta Didik", value: "94.6%", icon: "link-linear", tone: "warning" },
@@ -71,7 +85,12 @@ export default function OrangTuaPage() {
   return (
     <div className={s.parentManagementPage}>
       <PageHeading breadcrumbs={["LMS", "Manajemen Pengguna", "Manajemen Orang Tua (Wali)"]} title="Manajemen Orang Tua (Wali Murid)" description="Pengelolaan data akun wali murid terverifikasi, penautan akun siswa, dan nomor kontak darurat."
-        actions={<><Button variant="outline" tone="amber" icon="upload-linear" onClick={() => alert("Pilih file Excel/CSV untuk proses import.")}>Import Data (Excel/CSV)</Button><Button icon="user-plus-linear" onClick={() => setModal(true)}>Tambah Orang Tua/Wali</Button></>} />
+        actions={<ManagementHeaderActions onImport={() => csvInputRef.current?.click()} onAdd={() => setModal(true)} addLabel="Tambah Orang Tua/Wali" importing={csvImport.loading} />} />
+      {/* Bagian tampilan: pemilih CSV serta hasil impor akun orang tua/wali. */}
+      <input ref={csvInputRef} type="file" accept=".csv,text/csv" hidden onChange={(event) => { const input = event.currentTarget; const file = input.files?.[0] ?? null; input.value = ""; void csvImport.importFile(file); }} aria-label="Pilih file CSV orang tua atau wali" />
+      {csvImport.error && <InfoBanner tone="danger">{csvImport.error}</InfoBanner>}
+      {csvImport.success && <InfoBanner tone="success">{csvImport.success}</InfoBanner>}
+      {csvImport.rowErrorSummary && <InfoBanner tone="warning">Sebagian baris tidak diimpor: {csvImport.rowErrorSummary}</InfoBanner>}
       {/* Bagian tampilan: ringkasan akun orang tua dan status penautan peserta didik. */}
       <div className={`${s.statGridThree} ${s.adminStatRow}`}>
         {statistics.map((item) => <ManagementStatCard key={item.label} item={item} />)}
@@ -80,13 +99,13 @@ export default function OrangTuaPage() {
       <ManagementToolbar
         keyword={keyword}
         onKeywordChange={setKeyword}
-        searchPlaceholder="Cari nama guru, NIP, atau mata pelajaran..."
+        searchPlaceholder="Cari nama orang tua/wali, nomor HP, atau siswa..."
         category={category}
         onCategoryChange={setCategory}
         categoryOptions={["Semua Kategori", "Ayah Kandung", "Ibu Kandung", "Wali Murid"]}
       />
       {/* Bagian tampilan: direktori akun wali dan daftar siswa yang tertaut. */}
-      <ManagementTable tableClassName={`${s.dataTable} ${s.directoryTable} ${s.parentTable}`} footer={<Pagination variant="directory" current={page} total={131} onChange={setPage} label="Menampilkan 1-7 dari 782 orang tua/wali" />}>
+      <ManagementTable className={s.parentTableWrap} tableClassName={`${s.dataTable} ${s.directoryTable} ${s.parentTable}`} footer={<Pagination variant="directory" current={page} total={131} onChange={setPage} label="Menampilkan 1-7 dari 782 orang tua/wali" />}>
           <thead><tr><th>Nama Orang Tua / Wali</th><th>Siswa Terhubung &amp; Kelas</th><th>Nomor HP</th><th>Status Akun</th><th>Terakhir Akses</th><th>Aksi</th></tr></thead>
           <tbody>{filtered.map((parent) => <tr key={parent.name}>
             <td><span className={s.tableStrong}>{parent.name}</span><span className={s.tableSub}>{parent.relation}</span></td>
