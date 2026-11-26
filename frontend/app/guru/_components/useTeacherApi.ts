@@ -42,6 +42,7 @@ export function useTeacherResource<T>(path: string, enabled = true): ResourceSta
     } catch (cause) {
       if (current !== requestId.current) return;
       redirectExpired(router, cause);
+      if (cause instanceof ApiError && cause.status === 404) router.refresh();
       setError(cause instanceof Error ? cause.message : "Data belum dapat dimuat. Silakan coba lagi.");
       setEmpty(false);
     } finally {
@@ -66,13 +67,13 @@ export function useTeacherMutation<T = unknown>(method: MutationMethod, path: st
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const [status, setStatus] = useState<number | null>(null);
 
-  const run = useCallback(async (body?: BodyInit | unknown) => {
+  const run = useCallback(async (body?: BodyInit | unknown, pathOverride?: string) => {
     setLoading(true);
     setError(null);
     setFieldErrors({});
     setStatus(null);
     try {
-      const result = await apiRequest<T>(`teacher/${path}`, {
+      const result = await apiRequest<T>(`teacher/${pathOverride || path}`, {
         method,
         ...(body === undefined ? {} : { body: body instanceof FormData ? body : JSON.stringify(body) }),
       });

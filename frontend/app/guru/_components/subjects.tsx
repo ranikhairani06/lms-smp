@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
@@ -15,9 +15,9 @@ export function SubjectList() {
   const resource = useTeacherResource<TeacherCourse[]>("courses");
   const rows = (resource.data || []).flatMap(course => {
     const template = subjects.find(subject => courseForSubject([course], subject));
-    return template ? [{ ...template, name: course.name, code: "—", description: course.description || "", classes: [], students: course.students_count ?? 0, sessions: null, progress: null, target: null }] : [];
+    return template ? [{ ...template, name: course.name, code: "—", description: course.description || "", classes: [], students: course.students_count, sessions: null, progress: null, target: null }] : [];
   }).filter(subject => `${subject.name} ${subject.code}`.toLowerCase().includes(search.toLowerCase()) && (!grade || subject.id.endsWith(`-${grade}`)));
-  const totalStudents = resource.data?.reduce((sum, course) => sum + (course.students_count ?? 0), 0);
+  const totalStudents: number | null = null;
 
   return <div className="tg-subject-list">
     <Heading hero title="Mata Pelajaran" description="Daftar mata pelajaran yang diampu pada Tahun Ajaran —" action={<Badge><Solar name="calendar" />Tahun Ajaran — {"\u2022"} Semester —</Badge>} />
@@ -36,7 +36,7 @@ export function SubjectList() {
           </div>
           <div className="tg-between tg-subject-classes">
             <div className="tg-inline tg-small"><span>Rombel:</span>{subject.classes.map(group => <Link className="tg-subject-group" key={group} href={classUrl(group)}><Badge>{group}</Badge></Link>)}</div>
-            <Badge>{subject.students} Siswa Total</Badge>
+            <Badge>{subject.students ?? "—"} Siswa Total</Badge>
           </div>
           <Progress value={subject.progress} label="Progres Materi Semester" emptyLabel="—" />
           <div className="tg-between tg-divider tg-subject-updated"><small><Solar name="clock-circle" />—</small><Action href={subjectUrl(subject.id)}>Buka Mata Pelajaran <Solar name="arrow-right" /></Action></div>
@@ -58,17 +58,8 @@ export function SubjectTabs({ subject, tab = "" }: { subject: Subject; tab?: str
   return <Tabs active={base + tab} items={uniqueItems} className="tg-subject-tabs" />;
 }
 export function SubjectSummary({ subject, teacher }: { subject: Subject; teacher: string }) {
-  const base = subjectUrl(subject.id); const courseState = useTeacherCourse(subject); const apiCourse = courseState.course; const courseSections = (apiCourse?.sections || []) as TeacherSection[]; const apiAssessments = courseSections.flatMap(section => section.assessments || []) as TeacherAssessment[]; const apiMaterials = courseSections.flatMap(section => section.materials || []) as TeacherMaterial[]; const latestMaterial = apiMaterials.at(-1); const [semester, setSemester] = useState("Ganjil"); const [cp, setCp] = useState(false); const [message, setMessage] = useState("");
-  const titles = semester === "Ganjil" ? [
-    { element: "Berpikir Komputasional", title: "Dekomposisi" },
-    { element: "Teknologi Informasi & Komunikasi", title: "Aplikasi..." },
-    { element: "Sistem Komputer", title: "Mekanisme..." },
-    { element: "Jaringan Komputer & Internet", title: "Perangkat..." },
-  ] : [
-    { element: "Analisis Data", title: "Pengolahan Data" },
-    { element: "Dampak Sosial Informatika", title: "Etika Digital" },
-    { element: "Praktik Lintas Bidang", title: "Proyek Informatika" },
-  ];
+  const base = subjectUrl(subject.id); const courseState = useTeacherCourse(subject); const apiCourse = courseState.course; const courseSections = (apiCourse?.sections || []) as TeacherSection[]; const apiAssessments = courseSections.flatMap(section => section.assessments || []) as TeacherAssessment[]; const apiMaterials = courseSections.flatMap(section => section.materials || []) as TeacherMaterial[]; const latestMaterial = [...apiMaterials].sort((a, b) => (b.created_at || "").localeCompare(a.created_at || ""))[0]; const activeAssessment = apiAssessments.find(item => item.is_published); const [semester, setSemester] = useState("Ganjil"); const [cp, setCp] = useState(false); const [message, setMessage] = useState("");
+  const titles: { element: string; title: string }[] = [];
   return <div className="tg-subject-summary">
     <Heading title={`Detail Mata Pelajaran ${apiCourse?.name || "—"}`} action={<Button onClick={() => setCp(true)}>Kelola Capaian Pembelajaran (CP)</Button>} />
     <SubjectTabs subject={subject} />
@@ -91,19 +82,19 @@ export function SubjectSummary({ subject, teacher }: { subject: Subject; teacher
         <div className="tg-divider tg-stack tg-summary-task">
           <div className="tg-between"><h3>Tugas & Asesmen Berjalan</h3><Link className="tg-link" href={`${base}/asesmen`}>Lihat Semua Tugas <Solar name="arrow-right" /></Link></div>
           <div className="tg-subcard tg-soft">
-            <p className="tg-summary-deadline"><Solar name="clock-circle" />Hari ini, 23:59 WIB</p>
-            <h3>{apiAssessments[0]?.title || "—"}</h3><p className="tg-small">{apiAssessments[0]?.description || "—"}</p>
+            <p className="tg-summary-deadline"><Solar name="clock-circle" />{displayDate(activeAssessment?.end_at)}</p>
+            <h3>{activeAssessment?.title || "—"}</h3><p className="tg-small">{activeAssessment?.description || "—"}</p>
             <div className="tg-summary-collection">
               <div className="tg-between tg-small"><span>Progres Pengumpulan</span><strong>— / — Siswa Terkumpul</strong></div>
               <div className="tg-track" role="progressbar" aria-label="Progres Pengumpulan" aria-valuenow={0} aria-valuemin={0} aria-valuemax={100}><span style={{ width: "0%" }} /></div>
               <div className="tg-between tg-small"><span /><strong>—</strong></div>
             </div>
           </div>
-          <Action href={`${base}/asesmen/tugas-01/pengumpulan`}><Solar name="clipboard-check" />Periksa Tugas</Action>
+          <Action href={`${base}/asesmen`}><Solar name="clipboard-check" />Periksa Tugas</Action>
         </div>
       </Card>
       <aside className="tg-stack">
-        <Card title="Distribusi Nilai & Ketuntasan" action={<Badge tone="success">Sangat Memuaskan</Badge>}>
+        <Card title="Distribusi Nilai & Ketuntasan" action={<Badge tone="muted">—</Badge>}>
           <strong className="tg-grade-total">— <small>/ 100 Rata-rata Gabungan</small></strong>
           <div className="tg-summary-chart-label tg-label">Distribusi Nilai Siswa</div><Chart values={[]} labels={[]} maxBarHeight={56} />
           <div className="tg-stack tg-divider tg-summary-groups"><h3>Rincian Rombongan Belajar</h3></div>
@@ -116,7 +107,7 @@ export function SubjectSummary({ subject, teacher }: { subject: Subject; teacher
               <p className="tg-small">{latestMaterial ? `${displayDate(latestMaterial.created_at)} · ${latestMaterial.type}` : "—"}</p>
               <div className="tg-summary-module-actions">
                 <span className="tg-summary-read-status"><Solar name="check-circle" /><span className="tg-summary-read-label">—</span></span>
-                <Action href={`${base}/materi/bab-4/edit`} secondary>Lihat Modul <Solar name="arrow-right" /></Action>
+                <Action href={`${base}/materi`} secondary>Lihat Modul <Solar name="arrow-right" /></Action>
               </div>
             </div>
           </div>

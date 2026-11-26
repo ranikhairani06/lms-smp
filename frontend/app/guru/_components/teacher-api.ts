@@ -1,4 +1,5 @@
 import type { Subject } from "./data";
+import { apiRequest } from "@/lib/api";
 
 export type TeacherSection = {
   id: number;
@@ -22,6 +23,7 @@ export type TeacherAssessment = {
   questions?: TeacherQuestion[];
   course?: { id?: number; name?: string };
 };
+export type TeacherAssessmentType = TeacherAssessment["assessment_type"];
 export type TeacherCourse = {
   id: number;
   name: string;
@@ -34,10 +36,23 @@ export type TeacherSubmission = {
   created_at?: string;
   score?: number | null;
   feedback?: string | null;
+  student?: { id: number; nisn?: string; user?: { name?: string }; class_room?: { name?: string } | null };
   assessment?: TeacherAssessment;
   course?: TeacherCourse;
   answers?: unknown[];
 };
+
+export function submissionClassName(submission: TeacherSubmission) {
+  return submission.student?.class_room?.name?.replace(/^Kelas\s+/i, "") || "";
+}
+
+export function submissionStudentName(submission: TeacherSubmission) {
+  return submission.student?.user?.name || "—";
+}
+
+export function submissionStudentNumber(submission: TeacherSubmission) {
+  return submission.student?.nisn || "—";
+}
 
 const roman = (grade: string) => ({ "7": "vii", "8": "viii", "9": "ix" }[grade] || "");
 function normalized(value: string) { return value.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
@@ -72,6 +87,49 @@ export function unwrapData<T>(response: unknown): T {
 
 export function fieldErrorMessage(errors: Record<string, string[]>) {
   return Object.entries(errors).map(([field, messages]) => `${field}: ${messages.join(" ")}`).join(" ");
+}
+
+const courseSectionIds = new Map<number, number>();
+const courseSectionRequests = new Map<number, Promise<number>>();
+
+export async function ensureTeacherCourseSection(courseId: number, courseName: string, sections: TeacherSection[]) {
+  if (sections.length > 1) throw new Error("Aksi tidak dapat dilakukan karena course memiliki lebih dari satu section.");
+  if (sections.length === 1) {
+    courseSectionIds.set(courseId, sections[0].id);
+    return sections[0].id;
+  }
+  const savedId = courseSectionIds.get(courseId);
+  if (savedId) return savedId;
+  const pendingRequest = courseSectionRequests.get(courseId);
+  if (pendingRequest) return pendingRequest;
+  const title = courseName.trim().slice(0, 255);
+  if (!title) throw new Error("Nama course tidak tersedia untuk membuat section.");
+  const request = apiRequest<{ data?: { id?: number } }>(`teacher/courses/${courseId}/sections`, {
+    method: "POST",
+    body: JSON.stringify({ title }),
+  }).then(response => {
+    const id = response?.data?.id;
+    if (!id) throw new Error("Section course belum dapat dibuat.");
+    courseSectionIds.set(courseId, id);
+    return id;
+  }).finally(() => {
+    courseSectionRequests.delete(courseId);
+  });
+  courseSectionRequests.set(courseId, request);
+  return request;
+}
+
+const assessmentTypeByUiLabel: Record<string, TeacherAssessmentType> = {
+  Latihan: "practice",
+  Kuis: "practice",
+  Tugas: "practice",
+  UTS: "midterm",
+  UAS: "final",
+  "Ujian Harian": "daily_exam",
+};
+
+export function assessmentTypeForUiLabel(label: string) {
+  return assessmentTypeByUiLabel[label];
 }
 
 export function displayDate(value?: string | null) {

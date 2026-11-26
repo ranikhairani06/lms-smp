@@ -6,14 +6,15 @@ import { Action, Badge, Button, Card, Chart, Dialog, Empty, Heading, Notice, Pro
 import { exportCsv, subjectUrl, type Subject } from "./data";
 import { Solar } from "../../siswa/_components/icon";
 import { useTeacherResource, useTeacherMutation } from "./useTeacherApi";
-import { displayDate, fieldErrorMessage, type TeacherSubmission } from "./teacher-api";
+import { displayDate, fieldErrorMessage, submissionClassName, submissionStudentName, submissionStudentNumber, type TeacherSubmission } from "./teacher-api";
 
 function submissionAttachment(): string | undefined { return undefined; }
 
 export function Submissions({ subject, assessment }: { subject: Subject; assessment: string }) {
-  const base = `${subjectUrl(subject.id)}/asesmen/${assessment}`; const resource = useTeacherResource<TeacherSubmission[]>("submissions"); const [search, setSearch] = useState(""); const [group, setGroup] = useState(""); const [remind, setRemind] = useState(""); const availableGroups: string[] = [];
+  const base = `${subjectUrl(subject.id)}/asesmen/${assessment}`; const resource = useTeacherResource<TeacherSubmission[]>("submissions"); const [search, setSearch] = useState(""); const [group, setGroup] = useState(""); const [remind, setRemind] = useState("");
   const submissions = (resource.data || []).filter(item => String(item.assessment?.id) === assessment);
-  const rows = submissions.map(item => ({ submission: item, id: "—", name: "—", group: "—", tasks: 1, scores: [], progress: 0, activity: "—" })).filter(student => `${student.name} ${student.id}`.toLowerCase().includes(search.toLowerCase()) && !group);
+  const availableGroups = [...new Set(submissions.map(submissionClassName).filter(Boolean))];
+  const rows = submissions.map(item => ({ submission: item, id: submissionStudentNumber(item), name: submissionStudentName(item), group: submissionClassName(item) || "—", tasks: 1, scores: [], progress: 0, activity: "—" })).filter(student => `${student.name} ${student.id}`.toLowerCase().includes(search.toLowerCase()) && (!group || student.group === group));
   const gradedCount = submissions.filter(item => typeof item.score === "number").length;
   const waitingCount = submissions.length - gradedCount;
   // TODO-DATA: nomor absen hanya contoh tampilan dari desain.
@@ -28,7 +29,7 @@ export function Submissions({ subject, assessment }: { subject: Subject; assessm
 export function Grading({ subject, assessment, studentId }: { subject: Subject; assessment: string; studentId: string }) {
   const router = useRouter(); const resource = useTeacherResource<TeacherSubmission[]>("submissions"); const submission = resource.data?.find(item => String(item.id) === studentId && String(item.assessment?.id) === assessment);
   const gradeMutation = useTeacherMutation("POST", `submissions/${studentId}/grade`, async () => { await resource.reload(); }, async () => { await resource.reload(); });
-  const student = { id: "—", name: "—", group: "—", scores: [], progress: 0, tasks: 0, activity: "—" };
+  const student = { id: submission ? submissionStudentNumber(submission) : "—", name: submission ? submissionStudentName(submission) : "—", group: submission ? submissionClassName(submission) || "—" : "—", scores: [], progress: 0, tasks: 0, activity: "—" };
   const scoreItems = (submission?.assessment?.questions || []).map(question => ({ title: question.prompt, max: question.points, criteria: [] as string[], type: question.type }));
   const [modified, setModified] = useState<{ scores: number[]; feedback: string } | null>(null); const form = modified || { scores: [], feedback: submission?.feedback || "" };
   const [message, setMessage] = useState(""); const [documentPage, setDocumentPage] = useState(1); const [zoom, setZoom] = useState(100); const [highlight, setHighlight] = useState(false);
@@ -171,7 +172,7 @@ export function AssessmentAnalysis({ subject, assessment }: { subject: Subject; 
   const resource = useTeacherResource<TeacherSubmission[]>("submissions"); const [search, setSearch] = useState(""); const [status, setStatus] = useState(""); const [publication, setPublication] = useState(false);
   const base = `${subjectUrl(subject.id)}/asesmen/${assessment}`;
   const submissions = (resource.data || []).filter(item => String(item.assessment?.id) === assessment);
-  const allRows = submissions.map(item => ({ submission: item, id: "—", name: "—", group: "—", score: typeof item.score === "number" ? item.score : null }));
+  const allRows = submissions.map(item => ({ submission: item, id: submissionStudentNumber(item), name: submissionStudentName(item), group: submissionClassName(item) || "—", score: typeof item.score === "number" ? item.score : null }));
   const scores = allRows.map(row => row.score).filter((score): score is number => score !== null);
   const passingScore = submissions[0]?.assessment?.passing_score;
   const rows = allRows.filter(row => `${row.name} ${row.id}`.toLowerCase().includes(search.toLowerCase()) && (!status || (typeof passingScore === "number" && (status === "remedial" ? (row.score ?? -1) < passingScore : status === "excellent" ? (row.score ?? -1) >= 90 : (row.score ?? -1) >= passingScore))));

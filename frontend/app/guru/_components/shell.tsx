@@ -10,7 +10,9 @@ import { initials, type AuthUser } from "@/lib/auth-types";
 import { Solar } from "../../siswa/_components/icon";
 import { Dialog } from "./ui";
 import { subjects, subjectUrl, classUrl } from "./data";
+import { courseForSubject, type TeacherCourse, type TeacherSubmission } from "./teacher-api";
 import { useTeacherData } from "./store";
+import { useTeacherResource } from "./useTeacherApi";
 
 const menu = [
   { label: "Dashboard", href: "/guru", icon: "home-2" },
@@ -30,6 +32,11 @@ export default function TeacherShell({ user, children }: { user: AuthUser; child
   const [logout, setLogout] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const { data } = useTeacherData();
+  const notificationDashboard = useTeacherResource<{ alerts?: unknown[] }>("dashboard");
+  const notificationCourses = useTeacherResource<TeacherCourse[]>("courses");
+  const notificationSubmissions = useTeacherResource<TeacherSubmission[]>("submissions");
+  const alerts = Array.isArray(notificationDashboard.data?.alerts) ? notificationDashboard.data.alerts : [];
+  const unreadNotificationCount = alerts.filter((_, index) => !data.read.includes(`alert-${index}`)).length + (notificationSubmissions.data || []).filter(item => !data.read.includes(`submission-${item.id}`)).length;
   const active = menu.slice(1).find(item => path.startsWith(item.href)) || menu[0];
   const title = notificationRoute ? "Notifikasi" : active.label;
   const parts = path.split("/").filter(Boolean);
@@ -37,11 +44,15 @@ export default function TeacherShell({ user, children }: { user: AuthUser; child
   const subject = subjects.find(item => item.id === parts[2]);
   if (subject) {
     const base = subjectUrl(subject.id);
-    crumbs.push({ label: subject.name, href: base });
+    const apiCourse = courseForSubject(notificationCourses.data || [], subject);
+    crumbs.push({ label: apiCourse?.name || "—", href: base });
     const newAssessmentRoute = parts[3] === "asesmen" && parts[4] === "baru";
     const manualGradingRoute = parts[3] === "asesmen" && parts[5] === "nilai" && Boolean(parts[6]);
     if (parts[3] && !newAssessmentRoute && !manualGradingRoute) crumbs.push({ label: parts[3] === "materi" ? "Daftar Materi" : taskListRoute ? "Daftar Tugas" : "Daftar Asesmen", href: taskListRoute ? `${base}/asesmen?tugas` : `${base}/${parts[3]}` });
-    if (manualGradingRoute) crumbs.push({ label: parts[4] === "kuis-01" ? "Kuis 01" : "Tugas 01", href: `${base}/asesmen/${parts[4]}/pengumpulan` });
+    if (manualGradingRoute) {
+      const assessmentTitle = notificationSubmissions.data?.find(item => String(item.assessment?.id) === parts[4])?.assessment?.title;
+      crumbs.push({ label: assessmentTitle || "—", href: `${base}/asesmen/${parts[4]}/pengumpulan` });
+    }
     if (parts[4] && !manualGradingRoute) crumbs.push({ label: newAssessmentRoute ? "Tambah Asesmen" : parts[4] === "baru" ? "Tambah Baru" : parts[3] === "materi" ? "Edit Materi" : parts[5] === "edit" ? "Edit Asesmen" : parts[5] === "pengumpulan" ? "Pengumpulan" : parts[5] === "analisis" ? "Analisis Hasil" : "Penilaian", href: path });
     if (manualGradingRoute) crumbs.push({ label: "Nilai Asesmen Manual", href: path });
   } else if (parts[1] === "kelas" && parts[2]) {
@@ -70,7 +81,7 @@ export default function TeacherShell({ user, children }: { user: AuthUser; child
           <Link className={`tg-icon-button ${dashboardRoute ? "tg-notification" : ""}`} href="/guru/notifikasi" aria-label="Notifikasi guru">
             <Solar name="bell" />
             {/* TODO-DATA: jumlah notifikasi contoh mengikuti desain Figma. */}
-            {data.read.length < 4 && (dashboardRoute ? <span className="tg-notification-count">3</span> : <span className="tg-dot" />)}
+            {unreadNotificationCount > 0 && (dashboardRoute ? <span className="tg-notification-count">{unreadNotificationCount}</span> : <span className="tg-dot" />)}
           </Link>
           <Link href="/guru/profil" className="tg-user">
             <span className="tg-avatar">{initials(user.name)}</span>

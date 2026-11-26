@@ -34,4 +34,4 @@ export function Dialog({ title, children, onClose }: { title: string; children: 
   useEffect(() => { const dialog = ref.current; dialog?.showModal(); return () => dialog?.close(); }, []);
   return <dialog className="tg-dialog" ref={ref} aria-labelledby={titleId} onCancel={onClose} onClick={event => { if (event.target === event.currentTarget) onClose(); }}><div className="tg-between"><h2 id={titleId}>{title}</h2><button className="tg-icon-button" aria-label="Tutup dialog" onClick={onClose}><Solar name="close-circle" /></button></div>{children}</dialog>;
 }
-export function Period() { return <Badge><Solar name="calendar" />Tahun Ajaran 2026/2027 · Ganjil</Badge>; }
+export function Period() { return <Badge><Solar name="calendar" />Tahun Ajaran — · Semester —</Badge>; }
