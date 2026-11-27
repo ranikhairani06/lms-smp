@@ -2306,16 +2306,25 @@
  
   .tg-mobile-logout {
     display: flex;
-    margin-top: var(--space-md);
-    padding: var(--space-sm) 0;
-    border: 0;
+    position: fixed;
+    right: var(--space-md);
+    bottom: calc(var(--space-sm) + var(--space-2xl) + var(--space-xl) + var(--space-sm));
+    z-index: 49;
+    min-height: var(--space-2xl);
+    margin: 0;
+    padding: var(--space-sm) var(--space-md);
+    color: var(--color-error);
+    background: var(--color-surface);
+    border: var(--border-width-xs) solid var(--color-border);
+    border-radius: var(--radius-pill);
+    box-shadow: var(--shadow-1);
   }
  
   .tg-grid-2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
- 
+
 @media (max-width: 640px) {
   .tg-topbar { padding: var(--space-md); }
   .tg-user > span:last-child { display: none; }

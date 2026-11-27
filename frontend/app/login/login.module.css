@@ -605,23 +605,14 @@
   }
 
   .layout {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--space-lg);
   }
 
   .hero {
-    padding: var(--space-xl) var(--space-lg);
+    display: none;
   }
 
-  .heroCopy h2 {
-    font-size: var(--text-h4-size);
-    line-height: var(--text-h4-line);
-  }
-
-  .illustration {
-    transform: scale(0.85);
-    transform-origin: center top;
-  }
 }
 
 @media (max-width: 680px) {
