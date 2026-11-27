@@ -9397,3 +9397,33 @@
   height: 40px;
   flex-basis: 40px;
 }
+
+/* Mode pengerjaan kuis menyembunyikan shell LMS, baik fullscreen maupun fallback. */
+body .student-app.es-quiz-fullscreen {
+  display: block;
+  min-height: 100vh;
+  padding: 0;
+}
+
+body .student-app.es-quiz-fullscreen > header,
+body .student-app.es-quiz-fullscreen > aside {
+  display: none;
+}
+
+body .student-app.es-quiz-fullscreen > main {
+  display: block;
+  grid-column: auto;
+  grid-row: auto;
+  min-height: 100vh;
+}
+
+body .student-app.es-quiz-fullscreen > main > div:first-child {
+  min-height: 100vh;
+  padding: 0;
+}
+
+body .student-app.es-quiz-fullscreen > main > footer,
+body .student-app.es-quiz-fullscreen > main > nav,
+body .student-app.es-quiz-fullscreen > main > div:not(:first-child) {
+  display: none;
+}

@@ -20,6 +20,7 @@ export default function AppShell({
   menuIcon,
   navigationLabel = "Navigasi utama",
   mobileNavigationLabel = "Navigasi mobile",
+  showMobileLogout = true,
   logout,
   children,
   mainId,
@@ -41,6 +42,7 @@ export default function AppShell({
       <main id={mainId} className={`${styles.mainArea} ${mainClassName}`}>
         <div className={styles.mainContent}>{children}</div>
         <footer className={`${styles.footer} ${footerClassName}`}>{footer}</footer>
+        {showMobileLogout && logout && mobileNavigation.length > 0 && <div className={styles.mobileLogout}>{logout}</div>}
         {mobileNavigation.length > 0 && <AppMobileNav items={mobileNavigation} label={mobileNavigationLabel} columns={mobileNavigationColumns} className={mobileNavigationMode === "teacher" ? styles.teacherMobileNav : ""} />}
       </main>
     </div>

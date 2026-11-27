@@ -91,6 +91,7 @@ export default function TeacherShell({ user, children }: { user: AuthUser; child
       }}
       footer={<>LMS SMP Terpadu â€¢ Sistem Administrasi &amp; Pembelajaran Terpadu</>}
       mobileNavigation={mobileNavigation}
+      showMobileLogout={false}
       collapsed={collapsed}
       onToggleCollapse={() => setCollapsed(!collapsed)}
       menuIcon={<Solar name="hamburger-menu" />}

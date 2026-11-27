@@ -135,6 +135,7 @@
 .bottomNav.bottomNav4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .bottomNav.bottomNav5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 .bottomNav.bottomNav6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.mobileLogout { display: none; }
 
 @media (max-width: 820px) {
   .tabletMobileNavigation.appShell { display: block; padding: var(--space-sm); }
@@ -146,6 +147,12 @@
   .tabletMobileNavigation .bottomNav { position: fixed; right: var(--space-sm); bottom: var(--space-sm); left: var(--space-sm); z-index: 50; display: grid; gap: var(--space-xs); padding: var(--space-sm) var(--space-xs); background: var(--color-surface); border: var(--border-width-xs) solid var(--color-border); border-radius: var(--radius-m); box-shadow: var(--shadow-1); }
   .tabletMobileNavigation .bottomNav a { min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-xs); padding: var(--space-xs); color: var(--color-text-secondary); border-radius: var(--radius-s); text-decoration: none; font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
   .tabletMobileNavigation .bottomNav .bottomNavActive { color: var(--color-primary); background: var(--color-primary-tint); font-weight: var(--font-weight-semibold); }
+  .tabletMobileNavigation .mainContent { padding-bottom: calc(var(--space-2xl) + var(--space-2xl) + var(--space-xl) + var(--space-lg)); }
+  .mobileLogout { position: fixed; right: var(--space-md); bottom: calc(var(--space-sm) + var(--space-2xl) + var(--space-xl) + var(--space-sm)); z-index: 49; justify-content: flex-end; }
+  .tabletMobileNavigation .mobileLogout,
+  .teacherMobileShell .mobileLogout { display: flex; }
+  .appShell .mobileLogout button { display: flex; align-items: center; justify-content: center; gap: var(--space-sm); min-height: var(--space-2xl); margin: 0; padding: var(--space-sm) var(--space-md); color: var(--color-error); background: var(--color-surface); border: var(--border-width-xs) solid var(--color-border); border-radius: var(--radius-pill); box-shadow: var(--shadow-1); font-size: var(--text-l12-size); line-height: var(--text-l12-line); cursor: pointer; }
+  .appShell .mobileLogout button:disabled { opacity: .55; cursor: not-allowed; }
 }
 
 @media (max-width: 820px), (max-height: 560px) {
@@ -158,6 +165,7 @@
   .teacherMobileShell .bottomNav { position: fixed; right: var(--space-sm); bottom: var(--space-sm); left: var(--space-sm); z-index: 50; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--space-xs); padding: var(--space-sm) var(--space-xs); background: var(--color-surface); border: var(--border-width-xs) solid var(--color-border); border-radius: var(--radius-m); box-shadow: var(--shadow-1); }
   .teacherMobileShell .bottomNav a { min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-xs); padding: var(--space-xs); color: var(--color-text-secondary); border-radius: var(--radius-s); text-decoration: none; font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
   .teacherMobileShell .bottomNav .bottomNavActive { color: var(--color-primary); background: var(--color-primary-tint); font-weight: var(--font-weight-semibold); }
+  .teacherMobileShell .mainContent { padding-bottom: calc(var(--space-2xl) + var(--space-2xl) + var(--space-xl) + var(--space-lg)); }
 }
 
 @media (max-height: 799px) {
@@ -203,7 +211,55 @@
   .fullWidthMobileNavigation .bottomNav { right: 0; bottom: 0; left: 0; padding-bottom: calc(var(--space-sm) + env(safe-area-inset-bottom)); border-right: 0; border-bottom: 0; border-left: 0; border-radius: 0; box-shadow: none; }
 }
 
+@media (max-width: 760px) {
+  .appShell:not(.narrowMobileNavigation) .mobileLogout { display: flex; }
+  .appShell:not(.narrowMobileNavigation) .mainContent { padding-bottom: calc(var(--space-2xl) + var(--space-2xl) + var(--space-xl) + var(--space-lg)); }
+}
+
+@media (max-width: 640px) {
+  .narrowMobileNavigation .mobileLogout { display: flex; }
+  .narrowMobileNavigation .mainContent { padding-bottom: calc(var(--space-2xl) + var(--space-2xl) + var(--space-xl) + var(--space-lg)); }
+}
+
 @media (max-width: 640px) {
   .topbarTitleWithIcon { gap: var(--space-sm); }
   .topbarTitleWithIcon svg { width: 20px; height: 20px; flex-basis: 20px; }
+}
+
+/* Compact menu labels on mobile and tablet without changing desktop typography. */
+@media (max-width: 820px) {
+  .tabletMobileNavigation .bottomNav a,
+  .teacherMobileShell .bottomNav a,
+  .narrowMobileNavigation .bottomNav a,
+  .bottomNav a {
+    display: grid;
+    grid-template-rows: var(--space-lg) var(--space-lg);
+    align-content: center;
+    justify-items: center;
+    gap: var(--space-xs);
+    font-size: calc(var(--text-l12-size) - var(--border-width-m));
+    line-height: calc(var(--text-l12-line) - var(--border-width-m));
+    text-align: center;
+  }
+
+  .tabletMobileNavigation .bottomNav a > svg,
+  .teacherMobileShell .bottomNav a > svg,
+  .narrowMobileNavigation .bottomNav a > svg,
+  .bottomNav a > svg {
+    align-self: center;
+    justify-self: center;
+  }
+
+  .tabletMobileNavigation .bottomNav a > span,
+  .teacherMobileShell .bottomNav a > span,
+  .narrowMobileNavigation .bottomNav a > span,
+  .bottomNav a > span {
+    display: flex;
+    min-width: 0;
+    min-height: var(--space-lg);
+    align-items: center;
+    justify-content: center;
+    line-height: inherit;
+    text-align: center;
+  }
 }

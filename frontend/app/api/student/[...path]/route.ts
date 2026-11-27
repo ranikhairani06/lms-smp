@@ -11,6 +11,7 @@ const endpointMethods: Array<{ pattern: RegExp; methods: string[] }> = [
   { pattern: /^courses\/\d+\/enroll$/, methods: ["POST"] },
   { pattern: /^materials\/\d+\/complete$/, methods: ["POST"] },
   { pattern: /^assessments\/\d+$/, methods: ["GET"] },
+  { pattern: /^assessments\/\d+\/draft$/, methods: ["PUT"] },
   { pattern: /^assessments\/\d+\/submit$/, methods: ["POST"] },
   { pattern: /^exam-sessions\/\d+\/logs$/, methods: ["POST"] },
   { pattern: /^profile$/, methods: ["GET"] },

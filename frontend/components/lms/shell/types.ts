@@ -37,6 +37,7 @@ export type AppShellProps = {
   menuIcon?: ReactNode;
   navigationLabel?: string;
   mobileNavigationLabel?: string;
+  showMobileLogout?: boolean;
   logout?: ReactNode;
   children: ReactNode;
   mainId?: string;

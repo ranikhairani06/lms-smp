@@ -1,5 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { MouseEvent } from "react";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { Solar } from "./icon";
 import { Badge, ButtonLink, Card, Heading, Stats } from "./ui";
@@ -10,10 +12,11 @@ import {
 } from "./quiz-store";
 import { StudentEmpty, StudentError, StudentLoading } from "./api-state";
 import { useStudentResource } from "@/lib/useStudentResource";
-import { getStudentAssessment, logStudentExamActivity, submitStudentAssessment } from "@/lib/student-api";
+import { getStudentAssessment, logStudentExamActivity, saveStudentAssessmentDraft, submitStudentAssessment } from "@/lib/student-api";
 
 export function QuizIntro() {
   const params = useParams();
+  const router = useRouter();
   const subjectSlug = typeof params.subject === "string" ? params.subject : String(params.subject?.[0] ?? "");
   const quizId = typeof params.quiz === "string" ? params.quiz : String(params.quiz?.[0] ?? "");
   const loadAssessment = useCallback(() => getStudentAssessment(quizId), [quizId]);
@@ -22,7 +25,6 @@ export function QuizIntro() {
 
   const [token, setToken] = useState("");
   const [error, setError] = useState("");
-  const [valid, setValid] = useState(false);
 
   if (resource.status === "loading") return <StudentLoading title="Memuat asesmen..." />;
   if (resource.status === "error") return <StudentError resource={resource} />;
@@ -145,7 +147,6 @@ export function QuizIntro() {
             onSubmit={(e) => {
               e.preventDefault();
 
-              setValid(false);
               setError(canAttempt
                 ? "Backend belum menyediakan endpoint verifikasi token asesmen."
                 : "Asesmen ini belum dapat dikerjakan pada tingkat kelas Anda.");
@@ -167,7 +168,6 @@ export function QuizIntro() {
                   required
                   onChange={(e) => {
                     setToken(e.target.value);
-                    setValid(false);
                     setError("");
                   }}
                 />
@@ -178,15 +178,6 @@ export function QuizIntro() {
                 </button>
               </div>
 
-              {valid && (
-                <div className="es-qi-token-success" role="status">
-                  <Solar name="shield-check" />
-                  <span>
-                    Asesmen tersedia untuk akun siswa ini.
-                  </span>
-                </div>
-              )}
-
               {error && (
                 <p className="es-qi-token-error" role="alert">
                   {error}
@@ -195,14 +186,23 @@ export function QuizIntro() {
             </div>
 
             <div className="es-qi-start">
-              {valid && canAttempt ? (
-                <ButtonLink
+              {canAttempt ? (
+                <Link
                   href={`${b}/kerjakan`}
-                  className="es-qi-button"
+                  className="es-button es-button-primary es-qi-button"
+                  onClick={(event: MouseEvent<HTMLAnchorElement>) => {
+                    event.preventDefault();
+                    document.querySelector(".student-app")?.classList.add("es-quiz-fullscreen");
+                    const requestFullscreen = document.documentElement.requestFullscreen;
+                    if (requestFullscreen) {
+                      void requestFullscreen.call(document.documentElement).catch(() => undefined);
+                    }
+                    router.push(`${b}/kerjakan`);
+                  }}
                 >
                   Mulai Ujian Sekarang
                   <Solar name="alt-arrow-right" />
-                </ButtonLink>
+                </Link>
               ) : (
                 <button
                   type="button"
@@ -346,6 +346,25 @@ export function QuizIntro() {
     </div>
   );
 }
+
+function toAssessmentAnswers(
+  questions: { id: number; type: string; options: { id: number }[] }[],
+  answers: Record<number, number>,
+): Record<number, string | number> {
+  const payload: Record<number, string | number> = {};
+  questions.forEach((question, index) => {
+    const selected = answers[index];
+    if (selected === undefined) return;
+    if (question.type === "multiple_choice") {
+      const option = question.options[selected];
+      if (option) payload[question.id] = option.id;
+    } else if (question.type === "true_false") {
+      payload[question.id] = selected === 0 ? "true" : "false";
+    }
+  });
+  return payload;
+}
+
 export function QuizWork() {
   const params = useParams();
   const router = useRouter();
@@ -366,10 +385,46 @@ export function QuizWork() {
   const [submitError, setSubmitError] = useState("");
   const submitting = useRef(false);
   const loggedSession = useRef<number | null>(null);
+  const lastSavedDraft = useRef<Record<number, string | number>>({});
+  const draftQueue = useRef<Promise<void>>(Promise.resolve());
+  const draftTimer = useRef<number | null>(null);
   const assessmentResponse = resource.status === "ready" ? resource.data : null;
   const assessment = assessmentResponse?.assessment ?? null;
   const questions = assessment?.questions ?? [];
   const durationSeconds = assessmentResponse?.remaining_seconds ?? (assessment?.duration_minutes ? assessment.duration_minutes * 60 : null);
+
+  useEffect(() => {
+    const shell = document.querySelector(".student-app");
+    shell?.classList.add("es-quiz-fullscreen");
+    const restoreShell = () => {
+      if (!document.fullscreenElement) shell?.classList.remove("es-quiz-fullscreen");
+    };
+    document.addEventListener("fullscreenchange", restoreShell);
+    return () => {
+      document.removeEventListener("fullscreenchange", restoreShell);
+      shell?.classList.remove("es-quiz-fullscreen");
+      if (document.fullscreenElement) void document.exitFullscreen().catch(() => undefined);
+    };
+  }, [subjectSlug, quizId]);
+
+  useEffect(() => {
+    if (!assessment?.anti_copy_paste) return;
+    const preventClipboard = (event: ClipboardEvent) => event.preventDefault();
+    const preventClipboardShortcut = (event: KeyboardEvent) => {
+      const key = event.key.toLowerCase();
+      if ((event.ctrlKey || event.metaKey) && ["c", "x", "v"].includes(key)) event.preventDefault();
+    };
+    document.addEventListener("copy", preventClipboard);
+    document.addEventListener("cut", preventClipboard);
+    document.addEventListener("paste", preventClipboard);
+    document.addEventListener("keydown", preventClipboardShortcut);
+    return () => {
+      document.removeEventListener("copy", preventClipboard);
+      document.removeEventListener("cut", preventClipboard);
+      document.removeEventListener("paste", preventClipboard);
+      document.removeEventListener("keydown", preventClipboardShortcut);
+    };
+  }, [assessment?.anti_copy_paste]);
 
   useEffect(() => {
     if (!assessmentResponse) return;
@@ -400,27 +455,45 @@ export function QuizWork() {
   }, [assessmentResponse]);
 
   useEffect(() => {
+    if (!loaded || !assessment || !assessmentResponse?.can_attempt || Object.keys(answers).length === 0 || submitting.current) return;
+    const payload = toAssessmentAnswers(questions, answers);
+    if (JSON.stringify(payload) === JSON.stringify(lastSavedDraft.current)) return;
+    if (draftTimer.current !== null) window.clearTimeout(draftTimer.current);
+    draftTimer.current = window.setTimeout(() => {
+      draftTimer.current = null;
+      draftQueue.current = draftQueue.current
+        .catch(() => undefined)
+        .then(async () => {
+          await saveStudentAssessmentDraft(assessment.id, payload);
+          lastSavedDraft.current = payload;
+          setSubmitError("");
+        })
+        .catch(() => {
+          setSubmitError("Draft belum tersimpan ke server. Jawaban lokal masih tersedia.");
+        });
+    }, 700);
+    return () => {
+      if (draftTimer.current !== null) window.clearTimeout(draftTimer.current);
+    };
+  }, [answers, assessment, assessmentResponse?.can_attempt, loaded, questions]);
+
+  useEffect(() => {
     if (!loaded || durationSeconds === null) return;
     const timer = window.setInterval(() => setRemaining((value) => Math.max(0, value - 1)), 1000);
     return () => window.clearInterval(timer);
   }, [durationSeconds, loaded]);
 
-  const submit = useCallback(async () => {
+  const submit = useCallback(async (timeExpired = false) => {
     if (!assessment || !assessmentResponse?.can_attempt || submitting.current) return;
     submitting.current = true;
+    if (draftTimer.current !== null) {
+      window.clearTimeout(draftTimer.current);
+      draftTimer.current = null;
+    }
     setSubmitError("");
-    const payload: Record<number, string | number> = {};
-    questions.forEach((question, index) => {
-      const selected = answers[index];
-      if (selected === undefined) return;
-      if (question.type === "multiple_choice") {
-        const option = question.options[selected];
-        if (option) payload[question.id] = option.id;
-      } else if (question.type === "true_false") {
-        payload[question.id] = selected === 0 ? "true" : "false";
-      }
-    });
     try {
+      await draftQueue.current;
+      const payload = timeExpired ? lastSavedDraft.current : toAssessmentAnswers(questions, answers);
       const result = await submitStudentAssessment(assessment.id, payload);
       const attempt: Attempt = {
         answers,
@@ -444,7 +517,7 @@ export function QuizWork() {
   }, [assessment, assessmentResponse, answers, b, durationSeconds, questions, quizId, remaining, router, storageKey, subjectSlug]);
 
   useEffect(() => {
-    if (loaded && durationSeconds !== null && remaining === 0) void submit();
+    if (loaded && durationSeconds !== null && remaining === 0) void submit(true);
   }, [durationSeconds, loaded, remaining, submit]);
 
   useEffect(() => {
