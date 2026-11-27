@@ -55,6 +55,8 @@ export type StudentAssessmentSummary = {
   description: string | null;
   target_grade: number;
   is_exam: boolean;
+  require_fullscreen?: boolean;
+  anti_copy_paste?: boolean;
   duration_minutes: number | null;
   start_at: string | null;
   end_at: string | null;
@@ -186,6 +188,8 @@ function isMaterial(value: unknown): value is StudentMaterial {
 function isAssessmentSummary(value: unknown): value is StudentAssessmentSummary {
   return isRecord(value) && isNumber(value.id) && isNumber(value.section_id) && isString(value.title) &&
     isNullableString(value.description) && isNumber(value.target_grade) && typeof value.is_exam === "boolean" &&
+    (value.require_fullscreen === undefined || typeof value.require_fullscreen === "boolean") &&
+    (value.anti_copy_paste === undefined || typeof value.anti_copy_paste === "boolean") &&
     (value.duration_minutes === null || isNumber(value.duration_minutes)) && isNullableString(value.start_at) &&
     isNullableString(value.end_at) && isNumber(value.maximum_attempt) &&
     (value.passing_score === null || isNumber(value.passing_score));
@@ -266,6 +270,13 @@ export async function submitStudentAssessment(assessmentId: number, answers: Rec
   }), (value): value is StudentSubmission => isRecord(value) && isNumber(value.id) && isNumber(value.assessment_id) &&
     isNumber(value.student_id) && isNumber(value.attempt_no) && isString(value.submitted_at) &&
     (value.score === null || isNumber(value.score)) && isString(value.status) && isNullableString(value.feedback), "hasil asesmen");
+}
+
+export async function saveStudentAssessmentDraft(assessmentId: number, answers: Record<number, string | number>): Promise<void> {
+  await apiRequest(`student/assessments/${assessmentId}/draft`, {
+    method: "PUT",
+    body: JSON.stringify({ answers }),
+  });
 }
 
 export async function logStudentExamActivity(examSessionId: number, event: string, detail?: string): Promise<void> {
