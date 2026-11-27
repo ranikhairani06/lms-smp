@@ -15,6 +15,12 @@ const endpoints: Endpoint[] = [
   { pattern: /^students\/\d+\/reset-password$/, methods: ["POST"] },
   { pattern: /^students\/import$/, methods: ["POST"], upload: true },
   { pattern: /^academic-years\/\d+\/activate$/, methods: ["POST"] },
+  { pattern: /^audit-logs$/, methods: ["GET"] },
+  { pattern: /^grades\/report$/, methods: ["GET"] },
+  { pattern: /^grades\/export$/, methods: ["GET"] },
+  { pattern: /^semesters$/, methods: ["GET", "POST"] },
+  { pattern: /^semesters\/\d+$/, methods: ["PUT", "PATCH", "DELETE"] },
+  { pattern: /^semesters\/\d+\/activate$/, methods: ["POST"] },
 ];
 
 const noStore = { "Cache-Control": "no-store" };
@@ -103,6 +109,14 @@ async function handle(request: NextRequest, context: Context) {
     if (response.status === 204) return new NextResponse(null, { status: 204, headers: noStore });
     if (response.status >= 500) {
       return jsonError("Backend mengalami gangguan. Silakan coba lagi.", 502);
+    }
+    if (endpoint === "grades/export" && response.ok) {
+      const headers = new Headers(noStore);
+      const contentType = response.headers.get("content-type");
+      const contentDisposition = response.headers.get("content-disposition");
+      if (contentType) headers.set("Content-Type", contentType);
+      if (contentDisposition) headers.set("Content-Disposition", contentDisposition);
+      return new NextResponse(response.body, { status: response.status, headers });
     }
     const responseBody = await response.text();
     if (response.status === 401) (await cookies()).delete(SESSION_COOKIE);

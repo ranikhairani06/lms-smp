@@ -2,23 +2,67 @@
 
 import { useMemo, useState } from "react";
 import AdminIcon from "@/app/admin/_components/AdminIcons";
-import { PageHeading, Panel, Pagination, SearchField, StatCard, StatusBadge, adminStyles as s } from "@/app/admin/_components/AdminUI";
+import { Button, PageHeading, Panel, Pagination, SearchField, StatCard, StatusBadge, adminStyles as s } from "@/app/admin/_components/AdminUI";
+import { useAdminResource } from "@/app/admin/_components/useAdminApi";
+import { EmptyState, ErrorState, LoadingState } from "@/components/lms/state";
 
-const updateRows = [
-  { initials: "RA", name: "Rafi Ahmad Prasetyo", nisn: "009853301230", level: "Kelas VII", recorded: "7C", detected: "Seharusnya VIII", wali: "Rina Marlina, M.Pd.", status: "Belum Login" },
-  { initials: "DA", name: "Dimas Arya Putra", nisn: "0098511209", level: "Kelas VII", recorded: "7A", detected: "Seharusnya VIII", wali: "Joko Susilo, S.Pd.", status: "Belum Login" },
-  { initials: "NP", name: "Nabila Putri Ramadhani", nisn: "0098314452", level: "Kelas VIII", recorded: "8B", detected: "Seharusnya IX", wali: "Hendra Gunawan, S.Kom.", status: "Belum Login" },
-  { initials: "FM", name: "Farhan Maulana Arifin", nisn: "0098898822", level: "Kelas VIII", recorded: "8A", detected: "Seharusnya IX", wali: "Siti Nurhaliza, M.Pd.", status: "Belum Login" },
-  { initials: "CA", name: "Cantika Aurelia Putri", nisn: "00985651239", level: "Kelas VIII", recorded: "8B", detected: "Seharusnya IX", wali: "Hendra Gunawan, S.Kom.", status: "Belum Login" },
-  { initials: "SR", name: "Siti Rahma", nisn: "0098421001", level: "Kelas VIII", recorded: "8A", detected: "Sesuai", wali: "Hendra Gunawan, S.Kom.", status: "Sudah Diperbarui" },
-  { initials: "AP", name: "Andi Pratama", nisn: "0098471204", level: "Kelas VIII", recorded: "8B", detected: "Sesuai", wali: "Hendra Gunawan, S.Kom.", status: "Sudah Diperbarui" },
-];
+type Student = {
+  id: number;
+  nisn: string;
+  user?: { name?: string | null } | null;
+  class_room?: { name?: string | null; grade_level?: number | null } | null;
+};
+
+type AdminDashboard = {
+  active_year?: { id: number; name: string; start_year: number } | null;
+  alerts?: { students_need_class_update?: number };
+};
+
+function initials(name: string) {
+  return name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || "—";
+}
+
+function gradeLabel(level?: number | null) {
+  if (level === 7) return "Kelas VII";
+  if (level === 8) return "Kelas VIII";
+  if (level === 9) return "Kelas IX";
+  return "—";
+}
 
 export default function UpdateDataPage() {
+  const studentResource = useAdminResource<Student[]>("students");
+  const dashboardResource = useAdminResource<AdminDashboard>("dashboard");
   const [keyword, setKeyword] = useState("");
-  const [tab, setTab] = useState("Semua (149)");
+  const [tab, setTab] = useState("Semua");
   const [page, setPage] = useState(1);
-  const visible = useMemo(() => updateRows.filter((row) => `${row.name} ${row.nisn}`.toLowerCase().includes(keyword.toLowerCase()) && (tab.startsWith("Belum") ? row.status === "Belum Login" : tab.startsWith("Sudah") ? row.status === "Sudah Diperbarui" : true)), [keyword, tab]);
+  const students = useMemo(() => studentResource.data ?? [], [studentResource.data]);
+  const rows = useMemo(() => students.map((student) => {
+    const name = student.user?.name?.trim() || "—";
+    return {
+      initials: initials(name),
+      name,
+      nisn: student.nisn || "—",
+      level: gradeLabel(student.class_room?.grade_level),
+      recorded: student.class_room?.name || "—",
+      detected: "—",
+      wali: "—",
+      status: "—",
+    };
+  }), [students]);
+  const filtered = useMemo(() => rows.filter((row) => {
+    const matchesKeyword = `${row.name} ${row.nisn}`.toLowerCase().includes(keyword.toLowerCase());
+    // The students endpoint does not provide class-update status, so the status tabs
+    // intentionally return no unsupported matches instead of inferring from login state.
+    const matchesStatus = tab === "Semua";
+    return matchesKeyword && matchesStatus;
+  }), [keyword, rows, tab]);
+  const pageSize = 7;
+  const pageRows = filtered.slice((page - 1) * pageSize, page * pageSize);
+  const pendingCount = dashboardResource.data?.alerts?.students_need_class_update;
+  const activeYear = dashboardResource.data?.active_year;
+  const loading = studentResource.loading || dashboardResource.loading;
+  const error = studentResource.error ?? dashboardResource.error;
+  const retry = async () => { await Promise.all([studentResource.reload(), dashboardResource.reload()]); };
 
   return (
     <>
@@ -28,33 +72,50 @@ export default function UpdateDataPage() {
         description="Pantau siswa yang belum memperbarui profil setelah pergantian tahun ajaran. Perubahan kelas tersimpan otomatis saat siswa memperbarui profilnya."
         variant="card"
         below={(
-          /* Bagian tampilan: banner informasi sinkronisasi mandiri siswa. */
           <div className={`${s.infoBanner} ${s.info_info} ${s.updateSyncBanner}`}>
             <span className={s.updateSyncIcon}><AdminIcon name="info-circle-bold" size={19} /></span>
             <div><strong>Sinkronisasi Mandiri Siswa</strong><p>Admin tidak perlu mengubah data satu per satu. Siswa diminta memperbarui profil saat login ke akun masing-masing.</p></div>
           </div>
         )}
       />
-      {/* Bagian tampilan: statistik perhatian khusus, kelengkapan data, dan periode aktif. */}
       <div className={s.statGridThree}>
-        <StatCard variant="updateData" label="Perhatian Khusus" value="7 Siswa" detail="Siswa belum memperbarui konfirmasi kelas" icon="clock-circle-broken" tone="primary" />
-        <StatCard variant="updateData" label="Kelengkapan Data" value="142 Siswa" valueNote="Sudah Diperbarui" detail="Data otomatis tersinkronisasi ke daftar rombel baru" icon="check-circle-linear" tone="success" />
-        <StatCard variant="updateData" label="Periode Akademik Aktif" value="2026/2027 Ganjil" detail="Periode aktif berjalan sejak 15 Juli 2026." icon="clipboard-clock-linear" tone="warning" />
+        <StatCard variant="updateData" label="Perhatian Khusus" value={pendingCount === undefined ? "—" : `${pendingCount} Siswa`} detail={pendingCount === undefined ? undefined : "Siswa belum memperbarui konfirmasi kelas"} icon="clock-circle-broken" tone="primary" />
+        <StatCard variant="updateData" label="Kelengkapan Data" value="—" icon="check-circle-linear" tone="success" />
+        <StatCard variant="updateData" label="Periode Akademik Aktif" value={activeYear?.name ?? "—"} icon="clipboard-clock-linear" tone="warning" />
       </div>
-      {/* Bagian tampilan: filter status pembaruan profil siswa. */}
       <Panel className={s.updateDataTablePanel}>
-        <div className={`${s.toolbar} ${s.updateDataToolbar}`}><SearchField value={keyword} onChange={setKeyword} placeholder="Cari nama atau NISN..." /><div className={s.toolbarSpacer} /><div className={`${s.filterTabs} ${s.updateDataTabs}`}>{["Semua (149)", "Belum Memperbarui (7)", "Sudah Diperbarui (142)"].map((item) => <button key={item} aria-pressed={tab === item} onClick={() => setTab(item)}>{item}</button>)}</div></div>
-        {/* Bagian tampilan: tabel perbandingan tingkat tercatat dan tingkat yang seharusnya. */}
-        <div className={`${s.tableWrap} ${s.updateDataTableWrap}`}>
-          <table className={`${s.dataTable} ${s.updateDataTable}`}>
-            <thead><tr><th>Siswa</th><th>Tingkat Tercatat</th><th>Rombel Tercatat</th><th>Terdeteksi</th><th>Wali Kelas</th><th>Status</th></tr></thead>
-            <tbody>{visible.map((row) => <tr key={row.nisn}>
-              <td><div className={s.updateStudentIdentity}><span className={`${s.classCode} ${s.updateStudentAvatar}`}>{row.initials}</span><span className={s.updateStudentMeta}><span className={s.tableStrong}>{row.name}</span><span className={s.tableSub}>NISN: {row.nisn}</span></span></div></td>
-              <td><span className={s.levelTag}>{row.level}</span></td><td>{row.recorded}</td><td><StatusBadge className={s.updateDataPill} tone={row.detected === "Sesuai" ? "success" : "warning"}>{row.detected === "Sesuai" && <AdminIcon name="check-linear" size={14} />}{row.detected !== "Sesuai" && <AdminIcon name="info-circle-linear" size={14} />}{row.detected}</StatusBadge></td><td>{row.wali}</td><td><StatusBadge className={s.updateDataPill} tone={row.status === "Sudah Diperbarui" ? "success" : "warning"}>{row.status}</StatusBadge></td>
-            </tr>)}</tbody>
-          </table>
+        <div className={`${s.toolbar} ${s.updateDataToolbar}`}>
+          <SearchField value={keyword} onChange={(value) => { setKeyword(value); setPage(1); }} placeholder="Cari nama atau NISN..." />
+          <div className={s.toolbarSpacer} />
+          <div className={`${s.filterTabs} ${s.updateDataTabs}`}>
+            {["Semua", "Belum Memperbarui", "Sudah Diperbarui"].map((item) => (
+              <button key={item} aria-pressed={tab === item} onClick={() => { setTab(item); setPage(1); }}>
+                {item === "Semua" ? `Semua (${rows.length})` : item}
+              </button>
+            ))}
+          </div>
         </div>
-        <Pagination className={s.updateDataPagination} current={page} total={15} onChange={setPage} label={`Menampilkan 7 dari 149 siswa`} emphasizeLabelNumbers />
+        {loading && <LoadingState title="Memuat data siswa..." />}
+        {!loading && error && <ErrorState title={error} action={<Button variant="outline" onClick={() => void retry()}>Coba Lagi</Button>} />}
+        {!loading && !error && filtered.length === 0 && <EmptyState title={rows.length === 0 ? "Belum ada data siswa" : "Tidak ada data yang cocok"} description={rows.length === 0 ? "Data siswa belum tersedia." : "Ubah kata pencarian atau filter status."} />}
+        {!loading && !error && pageRows.length > 0 && (
+          <>
+            <div className={`${s.tableWrap} ${s.updateDataTableWrap}`}>
+              <table className={`${s.dataTable} ${s.updateDataTable}`}>
+                <thead><tr><th>Siswa</th><th>Tingkat Tercatat</th><th>Rombel Tercatat</th><th>Terdeteksi</th><th>Wali Kelas</th><th>Status</th></tr></thead>
+                <tbody>{pageRows.map((row, index) => <tr key={`${row.nisn}-${index}`}>
+                  <td><div className={s.updateStudentIdentity}><span className={`${s.classCode} ${s.updateStudentAvatar}`}>{row.initials}</span><span className={s.updateStudentMeta}><span className={s.tableStrong}>{row.name}</span><span className={s.tableSub}>NISN: {row.nisn}</span></span></div></td>
+                  <td><span className={s.levelTag}>{row.level}</span></td>
+                  <td>{row.recorded}</td>
+                  <td><StatusBadge className={s.updateDataPill} tone="neutral">{row.detected}</StatusBadge></td>
+                  <td>{row.wali}</td>
+                  <td><StatusBadge className={s.updateDataPill} tone="neutral">{row.status}</StatusBadge></td>
+                </tr>)}</tbody>
+              </table>
+            </div>
+            <Pagination className={s.updateDataPagination} current={page} total={Math.max(1, Math.ceil(filtered.length / pageSize))} onChange={setPage} label={`Menampilkan ${filtered.length ? (page - 1) * pageSize + 1 : 0}-${Math.min(page * pageSize, filtered.length)} dari ${filtered.length} siswa`} emphasizeLabelNumbers />
+          </>
+        )}
       </Panel>
     </>
   );
