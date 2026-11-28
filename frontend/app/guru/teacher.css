@@ -2927,35 +2927,9 @@
 .tg-assessment-question-card .tg-assessment-option.is-correct > textarea { min-height: var(--text-p12-line); color: var(--color-primary); font-size: var(--text-p12-size); line-height: var(--text-p12-line); font-weight: var(--font-weight-semibold); }
 .tg-assessment-question-card .tg-assessment-option.is-correct small { font-size: var(--text-l12-size); line-height: var(--text-l12-line); font-weight: var(--font-weight-semibold); }
 .tg-assessment-question-card .tg-assessment-option.is-correct small svg { width: var(--space-md); height: var(--space-md); }
-.tg-assessment-rubric { display: flex; flex-direction: column; gap: var(--space-sm); padding: var(--space-sm); background: var(--color-background); border: var(--border-width-xs) solid var(--color-border); border-radius: var(--radius-m); }
-.tg-assessment-rubric-heading { display: flex; align-items: center; justify-content: space-between; gap: var(--space-sm); }
-.tg-assessment-rubric-heading strong,
-.tg-assessment-rubric-heading > span { display: inline-flex; align-items: center; gap: var(--space-xs); font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
-.tg-assessment-rubric-heading strong svg { width: var(--space-md); height: var(--space-md); color: var(--color-primary); }
-.tg-assessment-rubric-heading > span { padding: var(--space-xs) var(--space-sm); color: var(--color-success-dark); background: var(--color-success-tint); border: var(--border-width-xs) solid var(--color-success-light); border-radius: var(--radius-pill); }
-.tg-assessment-rubric-heading > span svg { width: var(--space-sm); height: var(--space-sm); }
-.tg-assessment-rubric-samples { display: flex; flex-direction: column; gap: var(--space-sm); }
-.tg-assessment-rubric-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: var(--space-sm); min-height: var(--space-2xl); padding: var(--space-sm); background: var(--color-surface); border: var(--border-width-xs) solid var(--color-border); border-radius: var(--radius-s); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
-.tg-assessment-rubric-row > span:first-child,
-.tg-assessment-rubric-row > span:last-child { color: var(--color-text-secondary); }
-.tg-assessment-rubric-row > strong { min-width: var(--space-2xl); padding: var(--space-xs); text-align: center; background: var(--color-background); border-radius: var(--radius-xs); }
-.tg-assessment-rubric-row small { color: var(--color-text-secondary); font-weight: var(--font-weight-regular); }
-.tg-assessment-rubric-input { min-height: var(--space-xl); font-size: var(--text-p12-size); }
-.tg-assessment-rubric .tg-field > label { position: static; width: auto; height: auto; clip: auto; overflow: visible; }
-.tg-assessment-add-criterion { display: inline-flex; align-items: center; gap: var(--space-xs); width: max-content; padding: var(--space-xs) var(--space-sm); color: var(--color-primary); background: transparent; border: 0; font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
-.tg-assessment-add-criterion svg { width: var(--space-md); height: var(--space-md); }
-/* Soal uraian dan unggah: skala kartu ringkas sesuai panel rubrik pada desain. */
 .tg-assessment-question-card-secondary { gap: var(--space-sm); padding: var(--space-md); }
 .tg-assessment-question-card-secondary .tg-assessment-question-top .tg-badge { color: var(--color-text-primary); background: var(--color-primary-tint); }
 .tg-assessment-question-card-secondary .tg-assessment-question-text { height: calc(var(--text-p12-line) * 3); min-height: calc(var(--text-p12-line) * 3); overflow: hidden; line-height: var(--text-p12-line); }
-.tg-assessment-question-card-secondary .tg-assessment-rubric { gap: var(--space-sm); padding: var(--space-sm); background: var(--color-primary-tint); border-radius: var(--radius-m); }
-.tg-assessment-question-card-secondary .tg-assessment-rubric-heading strong { font-size: var(--text-l12-size); line-height: var(--text-l12-line); font-weight: var(--font-weight-semibold); }
-.tg-assessment-question-card-secondary .tg-assessment-rubric-heading > span { padding: var(--space-xs) var(--space-sm); font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
-.tg-assessment-question-card-secondary .tg-assessment-rubric-samples { gap: var(--space-sm); }
-.tg-assessment-question-card-secondary .tg-assessment-rubric-row { min-height: var(--space-xl); padding: var(--space-sm); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
-.tg-assessment-question-card-secondary .tg-assessment-rubric-row > strong { min-width: var(--space-xl); padding: var(--space-xs); }
-.tg-assessment-question-card-secondary .tg-assessment-rubric-input { min-height: var(--space-2xl); padding: var(--space-sm); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
-.tg-assessment-question-card-secondary .tg-assessment-add-criterion { padding: var(--space-xs) var(--space-sm); font-size: var(--text-l12-size); line-height: var(--text-l12-line); }
 .tg-assessment-format-note { display: inline-flex; align-items: center; gap: var(--space-xs); width: max-content; max-width: 100%; padding: var(--space-xs) var(--space-sm); color: var(--color-text-secondary); background: var(--color-primary-tint); border-radius: var(--radius-s); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
 .tg-assessment-format-note svg { width: var(--space-sm); height: var(--space-sm); }
 .tg-assessment-builder-aside { gap: var(--space-lg); }
