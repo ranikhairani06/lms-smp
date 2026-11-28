@@ -8,8 +8,99 @@ import { ApiError, apiRequest } from "@/lib/api";
 import { EmptyState, ErrorState, LoadingState } from "@/components/lms/state";
 import styles from "./page.module.css";
 
-type AuditLog = { id: number; user?: { id: number; name?: string | null; username?: string | null; role?: string | null } | null; event: string; entity_type?: string | null; entity_id?: number | null; detail?: string | null; created_at: string };
+type AuditLog = { id: number; user?: { id: number; name?: string | null; username?: string | null; role?: string | null } | null; event: string; entity_type?: string | null; entity_id?: number | null; detail?: string | Record<string, unknown> | null; created_at: string };
 type AuditPage = { data: AuditLog[]; current_page: number; last_page: number; total: number; per_page: number };
+
+const EVENT_LABELS: Record<string, string> = {
+  api_login: "Login ke sistem",
+  login: "Login ke sistem",
+  api_logout: "Logout dari sistem",
+  logout: "Logout dari sistem",
+  login_failed: "Percobaan login gagal",
+  api_login_failed: "Percobaan login gagal",
+  failed_login: "Percobaan login gagal",
+  auth_failed: "Autentikasi gagal",
+  password_changed: "Mengubah kata sandi",
+  password_updated: "Mengubah kata sandi",
+  student_password_reset: "Mereset kata sandi siswa",
+  teacher_password_reset: "Mereset kata sandi guru",
+  parent_password_reset: "Mereset kata sandi orang tua",
+  academic_year_activated: "Mengaktifkan tahun ajaran",
+  semester_activated: "Mengaktifkan semester",
+  assessment_submitted: "Mengumpulkan tugas/ujian",
+  exam_auto_submitted: "Pengumpulan ujian otomatis",
+  students_imported: "Mengimpor data siswa",
+};
+
+const DETAIL_KEY_LABELS: Record<string, string> = {
+  username: "Username",
+  email: "Email",
+  role: "Peran",
+  reason: "Alasan",
+  message: "Pesan",
+  status: "Status",
+  name: "Nama",
+  ip: "IP",
+  ip_address: "IP",
+  device_name: "Perangkat",
+  count: "Jumlah",
+  total: "Total",
+};
+
+function formatEventLabel(event?: string | null): string {
+  const key = typeof event === "string" ? event.trim() : "";
+  if (!key) return "";
+  const normalized = key.toLowerCase();
+  if (EVENT_LABELS[normalized]) return EVENT_LABELS[normalized];
+  const words = key.replace(/^api_/i, "").replace(/[_-]+/g, " ").trim();
+  return words ? words.charAt(0).toUpperCase() + words.slice(1) : "";
+}
+
+function formatDetailValue(value: unknown): string {
+  if (value === null || value === undefined) return "";
+  if (typeof value === "string") return value.trim();
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  if (Array.isArray(value)) return value.map(formatDetailValue).filter(Boolean).join(", ");
+  if (typeof value === "object") {
+    return Object.entries(value as Record<string, unknown>)
+      .map(([key, item]) => {
+        const formatted = formatDetailValue(item);
+        if (!formatted) return "";
+        const label = DETAIL_KEY_LABELS[key.toLowerCase()] ?? key.replace(/[_-]+/g, " ").replace(/^./, (char) => char.toUpperCase());
+        return `${label}: ${formatted}`;
+      })
+      .filter(Boolean)
+      .join(", ");
+  }
+  return "";
+}
+
+function formatDetail(detail: unknown): string {
+  if (detail === null || detail === undefined) return "";
+  if (typeof detail === "string") {
+    const trimmed = detail.trim();
+    if (!trimmed) return "";
+    if ((trimmed.startsWith("{") && trimmed.endsWith("}")) || (trimmed.startsWith("[") && trimmed.endsWith("]"))) {
+      try {
+        return formatDetailValue(JSON.parse(trimmed));
+      } catch {
+        return trimmed;
+      }
+    }
+    return trimmed;
+  }
+  return formatDetailValue(detail);
+}
+
+function formatActivityDescription(row: AuditLog): string {
+  const eventLabel = formatEventLabel(row.event);
+  const detailText = formatDetail(row.detail);
+  if (eventLabel && detailText) {
+    if (eventLabel.toLowerCase() === detailText.toLowerCase()) return eventLabel;
+    return `${eventLabel} (${detailText})`;
+  }
+  return eventLabel || detailText || "—";
+}
 
 function normalizeAuditPage(value: unknown): AuditPage {
   const response = value && typeof value === "object" ? value as Record<string, unknown> : {};
@@ -85,7 +176,7 @@ export default function LaporanAktivitasPage() {
   }), [filters, rows]);
 
   const exportLogs = () => {
-    const csv = [["Timestamp", "User", "Role", "Module", "Status", "Description"], ...filtered.map((row) => [row.created_at, row.user?.name || row.user?.username || "", row.user?.role || "", row.entity_type || "", "", row.detail || row.event])]
+    const csv = [["Timestamp", "User", "Role", "Module", "Status", "Description"], ...filtered.map((row) => [row.created_at, row.user?.name || row.user?.username || "", row.user?.role || "", row.entity_type || "", "", formatActivityDescription(row)])]
       .map((line) => line.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(",")).join("\r\n");
     const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
     const link = document.createElement("a"); link.href = url; link.download = "laporan-aktivitas.csv"; link.click(); URL.revokeObjectURL(url);
@@ -104,11 +195,11 @@ export default function LaporanAktivitasPage() {
       <div className={styles.activityTableTitle}><span className={styles.activityTitleIcon}><AdminIcon name="history-linear" size={20} /></span><h2>Tabel Riwayat Aktivitas</h2></div>
       {filtered.length === 0 ? <EmptyState title="Tidak ada aktivitas yang cocok" description="Ubah filter untuk melihat aktivitas lainnya." /> : <div className={`${s.tableWrap} ${styles.activityTableWrap}`}><table className={`${s.dataTable} ${styles.activityTable}`}>
         <thead><tr><th><span className={styles.timestampHeading}>Timestamp (WIB)<AdminIcon name="alt-arrow-down-linear" size={12} /></span></th><th>Pengguna &amp; Identitas</th><th>Peran</th><th>Deskripsi Aktivitas</th><th>Status</th></tr></thead>
-        <tbody>{filtered.map((row) => { const name = row.user?.name || row.user?.username || "—"; const apiRole = row.user?.role || ""; const displayRole = apiRole === "admin" ? "Super Admin" : apiRole === "parent" ? "Orang Tua" : apiRole === "teacher" ? "Guru" : apiRole === "student" ? "Siswa" : "—"; return <tr key={row.id}>
+        <tbody>{filtered.map((row) => { const name = row.user?.name || row.user?.username || "—"; const apiRole = row.user?.role || ""; const displayRole = apiRole === "admin" ? "Super Admin" : apiRole === "parent" ? "Orang Tua" : apiRole === "teacher" ? "Guru" : apiRole === "student" ? "Siswa" : "—"; const description = formatActivityDescription(row); return <tr key={row.id}>
           <td><span className={styles.activityTimestamp}><AdminIcon name="clock-circle-linear" size={13} /> {new Date(row.created_at).toLocaleString("id-ID", { timeZone: "Asia/Jakarta" })}</span></td>
           <td><div className={styles.activityIdentity}><span className={styles.activityAvatar} data-role={displayRole}>{initials(name)}</span><span className={styles.activityIdentityText}><span className={styles.activityName}>{name}</span><span className={s.tableSub}>{textOrDash(row.user?.username)}</span></span></div></td>
           <td><StatusBadge className={styles.roleBadge} tone={displayRole === "Super Admin" ? "primary" : displayRole === "Guru" ? "info" : displayRole === "Siswa" ? "success" : "warning"}>{displayRole}</StatusBadge></td>
-          <td><span className={styles.activityDescription}>{textOrDash(row.detail || row.event)}</span></td>
+          <td><span className={styles.activityDescription} title={description}>{description}</span></td>
           <td><span className={styles.activityStatus}>—</span></td>
         </tr>; })}</tbody>
       </table></div>}
