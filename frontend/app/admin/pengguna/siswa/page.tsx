@@ -242,7 +242,7 @@ export default function SiswaPage() {
         {statistics.map((item) => <ManagementStatCard key={item.label} item={item} variant="student" />)}
       </div>
       {/* Bagian tampilan: pencarian dan penyaringan direktori siswa. */}
-      <ManagementToolbar keyword={keyword} onKeywordChange={setKeyword} searchPlaceholder="Cari nama / NISN..." category={category} onCategoryChange={setCategory} categoryOptions={["Semua Kategori", "Aktif", "Terkunci", "Belum Aktivasi"]} variant="student" showExampleBadge={false} />
+      <ManagementToolbar keyword={keyword} onKeywordChange={setKeyword} searchPlaceholder="Cari nama / NISN..." category={category} onCategoryChange={setCategory} categoryOptions={["Semua Kategori", "Aktif", "Terkunci", "Belum Aktivasi"]} variant="student" />
       {/* Bagian tampilan: tabel peserta didik beserta aksi detail, edit, dan reset kredensial. */}
       <ManagementTable variant="student" tableClassName={`${s.dataTable} ${s.studentDataTable}`} footer={<Pagination className={s.studentPagination} variant="directory" current={page} total={Math.max(1, Math.ceil(filtered.length / 7))} onChange={setPage} label={`Menampilkan ${filtered.length ? (page - 1) * 7 + 1 : 0}-${Math.min(page * 7, filtered.length)} dari ${filtered.length} siswa`} emphasizeLabelNumbers />}>
           <thead><tr><th>NISN</th><th>Nama Siswa</th><th>Rombel / Kelas</th><th>Jenis Kelamin</th><th>Status Akun LMS</th><th>Aktivitas Terakhir</th><th>Aksi</th></tr></thead>

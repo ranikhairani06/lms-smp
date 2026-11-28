@@ -39,7 +39,7 @@ Empat mapel dan delapan rombel contoh memiliki rute masing-masing. Rute yang tid
 
 ## Batas integrasi
 
-Login, logout, identitas akun, dan perubahan kata sandi memakai API yang sudah ada. Data pembelajaran masih fixture di `_components/data.ts`; badge `Data contoh` menandai status tersebut.
+Login, logout, identitas akun, dan perubahan kata sandi memakai API yang sudah ada. Data pembelajaran masih fixture di `_components/data.ts`.
 
 Draf materi, asesmen, nilai rubrik, buku nilai, dan status baca notifikasi disimpan ke localStorage per ID pengguna. Publikasi hanya mengubah pratinjau lokal; tidak mengirim nilai atau pesan ke siswa/orang tua. Lampiran menyimpan nama berkas, bukan mengunggah isi berkas. Agenda tambahan dan draf capaian pembelajaran bersifat sementara.
 

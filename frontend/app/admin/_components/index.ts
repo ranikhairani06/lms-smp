@@ -5,7 +5,6 @@ export {
   AdminStatRow,
   AdminTableIconButton,
   Button,
-  ExampleBadge,
   Field,
   ImportDataButton,
   InfoBanner,
