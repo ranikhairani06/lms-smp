@@ -325,16 +325,6 @@ export default function TahunAjaranPage() {
       <div className={s.metricCard}><small>Periode Mendatang</small><strong>{nextSemester ? `${nextSemester.academic_year?.name ?? apiYears.find((year) => year.id === nextSemester.academic_year_id)?.name ?? "—"} ${nextSemester.name}` : "—"}</strong><p><span style={{ color: "var(--color-warning-dark)" }}>{nextSemester?.start_date ? `Dimulai ${displayDate(nextSemester.start_date)}` : "—"}</span></p></div>
     </div>
 
-    <div className={s.panel} style={{ marginBottom: "var(--space-lg)" }}>
-      <div className={s.panelTitle}><h2>Siklus Akademik Terjadwal</h2><span>{activeSemester ? activeSemester.name : "—"}</span></div>
-      <div className={s.progressSegments}><span /><span /><span /></div>
-      <div className={s.heroTags} style={{ marginTop: "var(--space-sm)" }}>
-        <span style={{ color: "var(--color-text-secondary)", background: "transparent", border: 0 }}>● {activeSemester ? `Aktif: ${activeSemester.name}` : "Belum ada semester aktif"}</span>
-        <span style={{ color: "var(--color-text-secondary)", background: "transparent", border: 0 }}>● {activeSemester?.end_date ? `Berakhir ${displayDate(activeSemester.end_date)}` : "Tanggal akhir belum ditentukan"}</span>
-        <span style={{ color: "var(--color-text-secondary)", background: "transparent", border: 0 }}>● {nextSemester ? `Berikutnya: ${nextSemester.name}` : "Belum ada semester mendatang"}</span>
-      </div>
-    </div>
-
     <div className={s.panel}>
       <div className={s.toolbar}>
         <div className={s.tabs}>{["Semua Status", "Aktif", "Mendatang", "Selesai"].map((item) => <button key={item} aria-pressed={tab === item} onClick={() => setTab(item)}>{item}</button>)}</div>
