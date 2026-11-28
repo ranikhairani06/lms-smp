@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import AdminIcon from "@/app/admin/_components/AdminIcons";
 import useAdminDirectoryFilter from "@/app/admin/_components/useAdminDirectoryFilter";
 import {
@@ -15,20 +15,19 @@ import {
   ManagementToolbar,
   type ManagementStat,
 } from "@/app/admin/pengguna/_components/ManagementComponents";
-import { AdminTableIconButton, Button, InfoBanner, ManagementHeaderActions, TableEmpty, adminStyles as s } from "@/app/admin/_components/AdminUI";
+import { AdminTableIconButton, Button, InfoBanner, TableEmpty, adminStyles as s } from "@/app/admin/_components/AdminUI";
 import { ErrorState, LoadingState } from "@/components/lms/state";
 import { useAdminMutation, useAdminResource } from "@/app/admin/_components/useAdminApi";
 
-type ParentDirectoryItem = { name: string; relation: string; child: string; additionalChildren: number; phone: string; status: string; access: string };
+type ParentDirectoryItem = { id: number; name: string; relation: string; child: string; additionalChildren: number; phone: string; status: string; access: string };
 
 type ApiStudent = { id: number; nisn: string; user?: { name?: string }; class_room?: { name?: string } | null };
 type ApiParent = { id: number; phone?: string | null; address?: string | null; user?: { name?: string; email?: string | null; is_active?: boolean }; student?: ApiStudent | null };
 
-const getParentSearchText = (parent: ParentDirectoryItem) => `${parent.name} ${parent.child} ${parent.phone}`;
+const getParentSearchText = (parent: ParentDirectoryItem) => `${parent.child} ${parent.phone}`;
 const matchesParentCategory = (parent: ParentDirectoryItem, category: string) => category === "Semua Kategori" || parent.relation === "—" || parent.relation === category;
 
 export default function OrangTuaPage() {
-  const csvInputRef = useRef<HTMLInputElement>(null);
   const parentResource = useAdminResource<ApiParent[]>("parents");
   const studentResource = useAdminResource<ApiStudent[]>("students");
   const [apiError, setApiError] = useState("");
@@ -39,7 +38,6 @@ export default function OrangTuaPage() {
     const child = item.student;
     return {
       id: item.id,
-      studentId: child?.id,
       name: item.user?.name ?? "—",
       relation: "—",
       child: child ? `${child.user?.name ?? "—"} • ${child.class_room?.name?.replace(/^Kelas\s+/i, "") ?? "—"}` : "—",
@@ -92,7 +90,6 @@ export default function OrangTuaPage() {
   });
   const statistics: ManagementStat[] = [
     { label: "Total Akun Orang Tua / Wali", value: String(parentRows.length), icon: "users-group-rounded-linear", tone: "primary" },
-    { label: "Penautan Peserta Didik", value: parentRows.length ? `${Math.round(parentRows.filter((item) => item.studentId).length / parentRows.length * 100)}%` : "—", icon: "link-linear", tone: "warning" },
     { label: "Akun Aktif Bulan Ini", value: "—", icon: "check-circle-linear", tone: "success" },
   ];
   const pageRows = filtered.slice((page - 1) * 7, page * 7);
@@ -100,16 +97,13 @@ export default function OrangTuaPage() {
 
   return (
     <div className={s.parentManagementPage}>
-      <PageHeading breadcrumbs={["LMS", "Manajemen Pengguna", "Manajemen Orang Tua (Wali)"]} title="Manajemen Orang Tua (Wali Murid)" description="Pengelolaan data akun wali murid terverifikasi, penautan akun siswa, dan nomor kontak darurat."
-        actions={<ManagementHeaderActions onImport={() => csvInputRef.current?.click()} onAdd={() => { setEditingParent(null); setForm({ name: "", relation: "Ayah Kandung", phone: "", email: "", address: "", student: "" }); setApiSuccess(""); setSubmitAttempted(false); setModal(true); }} addLabel="Tambah Orang Tua/Wali" />} />
-      {/* Bagian tampilan: pemilih CSV serta hasil impor akun orang tua/wali. */}
-      <input ref={csvInputRef} type="file" accept=".csv,text/csv" hidden onChange={(event) => { const input = event.currentTarget; input.value = ""; setApiError("Impor data orang tua/wali belum didukung oleh layanan."); }} aria-label="Pilih file CSV orang tua atau wali" />
+      <PageHeading breadcrumbs={["LMS", "Manajemen Pengguna", "Manajemen Orang Tua (Wali)"]} title="Manajemen Orang Tua (Wali Murid)" description="Pengelolaan data akun wali murid terverifikasi, penautan akun siswa, dan nomor kontak darurat." />
       {apiError && <InfoBanner tone="danger">{apiError}</InfoBanner>}
       {apiSuccess && <InfoBanner tone="success">{apiSuccess}</InfoBanner>}
       {(createParent.error || updateParent.error) && !apiError && <InfoBanner tone="danger">{createParent.error ?? updateParent.error}</InfoBanner>}
       {(parentResource.loading || studentResource.loading) && <LoadingState title="Memuat data orang tua/wali..." />}
       {(parentResource.error || studentResource.error) && <ErrorState title={parentResource.error ?? studentResource.error ?? "Data belum dapat dimuat."} action={<Button variant="outline" onClick={() => void Promise.all([refreshParents(), studentResource.reload()])}>Coba Lagi</Button>} />}
-      {/* Bagian tampilan: ringkasan akun orang tua dan status penautan peserta didik. */}
+      {/* Bagian tampilan: ringkasan akun orang tua dan aktivitas akun. */}
       <div className={`${s.statGridThree} ${s.adminStatRow}`}>
         {statistics.map((item) => <ManagementStatCard key={item.label} item={item} />)}
       </div>
@@ -117,23 +111,22 @@ export default function OrangTuaPage() {
       <ManagementToolbar
         keyword={keyword}
         onKeywordChange={setKeyword}
-        searchPlaceholder="Cari nama orang tua/wali, nomor HP, atau siswa..."
+        searchPlaceholder="Cari nomor HP atau nama siswa..."
         category={category}
         onCategoryChange={setCategory}
         categoryOptions={["Semua Kategori", "Ayah Kandung", "Ibu Kandung", "Wali Murid"]}
       />
       {/* Bagian tampilan: direktori akun wali dan daftar siswa yang tertaut. */}
-      <ManagementTable className={s.parentTableWrap} tableClassName={`${s.dataTable} ${s.directoryTable} ${s.parentTable}`} footer={<Pagination variant="directory" current={page} total={Math.max(1, Math.ceil(filtered.length / 7))} onChange={setPage} label={`Menampilkan ${filtered.length ? (page - 1) * 7 + 1 : 0}-${Math.min(page * 7, filtered.length)} dari ${filtered.length} orang tua/wali`} />}>
-          <thead><tr><th>Nama Orang Tua / Wali</th><th>Siswa Terhubung &amp; Kelas</th><th>Nomor HP</th><th>Status Akun</th><th>Terakhir Akses</th><th>Aksi</th></tr></thead>
-          <tbody>{pageRows.map((parent) => <tr key={parent.name}>
-            <td><span className={s.tableStrong}>{parent.name}</span><span className={s.tableSub}>{parent.relation}</span></td>
+      <ManagementTable className={s.parentTableWrap} tableClassName={`${s.dataTable} ${s.directoryTable} ${s.parentTable}`} footer={<Pagination className={s.parentPagination} variant="directory" current={page} total={Math.max(1, Math.ceil(filtered.length / 7))} onChange={setPage} label={`Menampilkan ${filtered.length ? (page - 1) * 7 + 1 : 0}-${Math.min(page * 7, filtered.length)} dari ${filtered.length} orang tua/wali`} />}>
+          <thead><tr><th>Siswa Terhubung &amp; Kelas</th><th>Nomor HP</th><th>Status Akun</th><th>Terakhir Akses</th><th>Aksi</th></tr></thead>
+          <tbody>{pageRows.map((parent) => <tr key={parent.id}>
             <td><div className={s.parentChildren}><StatusBadge tone="primary" className={s.directoryBadge}><AdminIcon name="graduation-cap-linear" size={12} /> {parent.child}</StatusBadge>{parent.additionalChildren > 0 && <span className={s.parentAdditionalChildren}>+{parent.additionalChildren} anak <AdminIcon name="info-circle-linear" size={12} /></span>}</div></td><td>{parent.phone}</td><td><StatusBadge tone={parent.status === "Aktif" ? "success" : "warning"} className={`${s.directoryBadge} ${s.directoryStatusBadge}`}>{parent.status}</StatusBadge></td><td>{parent.access}</td>
-            <td><ManagementActionButtons><AdminTableIconButton icon="eye-linear" title="Detail" ariaLabel="Detail" onClick={() => alert(`${parent.name}\n${parent.child}${parent.additionalChildren > 0 ? `\n+${parent.additionalChildren} anak` : ""}`)} /><AdminTableIconButton icon="pen-linear" title="Edit" ariaLabel="Edit" onClick={() => { const selected = parentResource.data?.find((item) => item.id === parent.id); if (!selected) return; setEditingParent(selected); setForm({ name: parent.name, relation: "Ayah Kandung", phone: selected.phone ?? "", email: selected.user?.email ?? "", address: selected.address ?? "", student: parent.child }); setApiSuccess(""); setTouched({}); setSubmitAttempted(false); setModal(true); }} /><AdminTableIconButton icon="history-linear" title="Riwayat" ariaLabel="Riwayat" onClick={() => alert("Riwayat akses akun wali")} /><AdminTableIconButton icon="trash-bin-trash-linear" title="Hapus" ariaLabel={`Hapus ${parent.name}`} disabled={removeParent.loading} onClick={() => setDeleteParent({ id: parent.id, user: { name: parent.name } })} /></ManagementActionButtons></td>
-          </tr>)}{filtered.length === 0 && <TableEmpty colSpan={6} />}</tbody>
+            <td><ManagementActionButtons><AdminTableIconButton icon="pen-linear" title="Edit" ariaLabel={`Edit ${parent.name}`} onClick={() => { const selected = parentResource.data?.find((item) => item.id === parent.id); if (!selected) return; setEditingParent(selected); setForm({ name: parent.name, relation: "Ayah Kandung", phone: selected.phone ?? "", email: selected.user?.email ?? "", address: selected.address ?? "", student: parent.child }); setApiSuccess(""); setTouched({}); setSubmitAttempted(false); setModal(true); }} /><AdminTableIconButton icon="trash-bin-trash-linear" title="Hapus" ariaLabel={`Hapus ${parent.name}`} disabled={removeParent.loading} onClick={() => setDeleteParent({ id: parent.id, user: { name: parent.name } })} /></ManagementActionButtons></td>
+          </tr>)}{filtered.length === 0 && <TableEmpty colSpan={5} />}</tbody>
       </ManagementTable>
 
       {/* Bagian tampilan: modal registrasi wali, relasi keluarga, dan multi-child linking. */}
-      {modal && <Modal title="Tambah Orang Tua / Wali" subtitle="Registrasi akun wali murid dan tautkan dengan data peserta didik aktif." onClose={() => setModal(false)} footer={<>{displayedErrorCount > 0 && <div style={{ display: "flex", alignItems: "center", gap: "var(--space-sm)", maxWidth: "220px", color: "var(--color-error)", fontSize: "var(--text-l12-size)", lineHeight: "var(--text-l12-line)" }}><AdminIcon name="danger-triangle-linear" size={16} />Pastikan {displayedErrorCount} kolom bermasalah telah diperbaiki</div>}<div style={{ display: "flex", alignItems: "center", gap: "var(--space-sm)", marginLeft: "auto" }}><Button variant="outline" onClick={() => setModal(false)}>Batal</Button><Button type="submit" form="parent-form" icon="diskette-linear" disabled={displayedErrorCount > 0}>Simpan Akun Orang Tua</Button></div></>}>
+      {modal && <Modal title={editingParent ? "Edit Orang Tua / Wali" : "Tambah Orang Tua / Wali"} subtitle={editingParent ? "Perbarui informasi akun wali murid dan siswa tertaut." : "Registrasi akun wali murid dan tautkan dengan data peserta didik aktif."} onClose={() => setModal(false)} footer={<>{displayedErrorCount > 0 && <div style={{ display: "flex", alignItems: "center", gap: "var(--space-sm)", maxWidth: "220px", color: "var(--color-error)", fontSize: "var(--text-l12-size)", lineHeight: "var(--text-l12-line)" }}><AdminIcon name="danger-triangle-linear" size={16} />Pastikan {displayedErrorCount} kolom bermasalah telah diperbaiki</div>}<div style={{ display: "flex", alignItems: "center", gap: "var(--space-sm)", marginLeft: "auto" }}><Button variant="outline" onClick={() => setModal(false)}>Batal</Button><Button type="submit" form="parent-form" icon="diskette-linear" disabled={displayedErrorCount > 0}>{editingParent ? "Simpan Perubahan" : "Simpan Akun Orang Tua"}</Button></div></>}>
         <form id="parent-form" onSubmit={handleSubmit} noValidate>
         <div className={s.formGrid}>
           <div className={s.formFull}><Field label="Nama Lengkap Orang Tua / Wali" value={form.name} onChange={(value) => setForm({ ...form, name: value })} onBlur={() => setTouched((current) => ({ ...current, name: true }))} error={createParent.fieldErrors.name?.[0] ?? updateParent.fieldErrors.name?.[0] ?? (shouldShowError("name") ? fieldErrors.name : undefined)} required placeholder="Nama lengkap beserta gelar (jika ada)" /></div>
