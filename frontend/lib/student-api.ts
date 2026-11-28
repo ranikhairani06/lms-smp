@@ -62,6 +62,9 @@ export type StudentAssessmentSummary = {
   end_at: string | null;
   maximum_attempt: number;
   passing_score: number | null;
+  show_explanation_after_submission?: boolean;
+  shuffle_questions?: boolean;
+  shuffle_options?: boolean;
 };
 
 export type StudentQuestionOption = {
@@ -78,6 +81,7 @@ export type StudentQuestion = {
   prompt: string;
   points: number;
   position: number;
+  explanation?: string | null;
   options: StudentQuestionOption[];
 };
 
@@ -192,7 +196,10 @@ function isAssessmentSummary(value: unknown): value is StudentAssessmentSummary 
     (value.anti_copy_paste === undefined || typeof value.anti_copy_paste === "boolean") &&
     (value.duration_minutes === null || isNumber(value.duration_minutes)) && isNullableString(value.start_at) &&
     isNullableString(value.end_at) && isNumber(value.maximum_attempt) &&
-    (value.passing_score === null || isNumber(value.passing_score));
+    (value.passing_score === null || isNumber(value.passing_score)) &&
+    (value.show_explanation_after_submission === undefined || typeof value.show_explanation_after_submission === "boolean") &&
+    (value.shuffle_questions === undefined || typeof value.shuffle_questions === "boolean") &&
+    (value.shuffle_options === undefined || typeof value.shuffle_options === "boolean");
 }
 
 function isSection(value: unknown): value is StudentSection {
@@ -234,6 +241,7 @@ function isQuestionOption(value: unknown): value is StudentQuestionOption {
 function isQuestion(value: unknown): value is StudentQuestion {
   return isRecord(value) && isNumber(value.id) && isNumber(value.assessment_id) && isString(value.type) &&
     isString(value.prompt) && isNumber(value.points) && isNumber(value.position) &&
+    (value.explanation === undefined || isNullableString(value.explanation)) &&
     Array.isArray(value.options) && value.options.every(isQuestionOption);
 }
 

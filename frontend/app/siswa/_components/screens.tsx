@@ -5,6 +5,7 @@ import { useCallback, useMemo, useState } from "react";
 import { Solar } from "./icon";
 import {
   Attachment,
+  AssessmentInstructions,
   Badge,
   ButtonLink,
   Card,
@@ -1079,9 +1080,7 @@ export function SubjectDetail() {
                     {upcomingAssessment?.title ?? "Belum ada asesmen yang tersedia."}
                   </h3>
 
-                  <p>
-                    {upcomingAssessment?.description ?? "Deskripsi asesmen belum tersedia dari API."}
-                  </p>
+                  {upcomingAssessment?.description ? <AssessmentInstructions content={upcomingAssessment.description} /> : <p>Deskripsi asesmen belum tersedia dari API.</p>}
                 </div>
 
                 <div className="es-upcoming-task-deadline">
@@ -1380,7 +1379,7 @@ export function SubjectDetail() {
 
                     <h2>{upcomingAssessment?.title ?? "Asesmen tidak tersedia dari API"}</h2>
 
-                    <p className="es-priority-task-description">{upcomingAssessment?.description ?? "Deskripsi asesmen tidak tersedia dari API."}</p>
+                    {upcomingAssessment?.description ? <AssessmentInstructions className="es-priority-task-description" content={upcomingAssessment.description} /> : <p className="es-priority-task-description">Deskripsi asesmen tidak tersedia dari API.</p>}
                   </div>
 
                   <div className="es-priority-task-footer">
@@ -1871,10 +1870,7 @@ export function Assignment() {
             {assessment.title}
           </h1>
 
-          <p>
-            <Solar name="calendar" />
-            {assessment.description ?? "Deskripsi tugas tidak tersedia dari API."}
-          </p>
+          <div className="es-ad-description-copy"><Solar name="calendar" />{assessment.description ? <AssessmentInstructions content={assessment.description} /> : <p>Deskripsi tugas tidak tersedia dari API.</p>}</div>
         </div>
 
         <ButtonLink

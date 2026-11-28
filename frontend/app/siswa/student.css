@@ -4828,6 +4828,7 @@
   font-size: 12px;
   line-height: 18px;
 }
+.student-app .es-priority-task-description .assessment-instructions { display: grid; gap: var(--space-xs); }
 
 .student-app .es-priority-task-footer {
   display: flex;
@@ -5283,6 +5284,9 @@
   font-size: 14px;
   line-height: 22px;
 }
+.student-app .es-qi-hero .assessment-instructions { margin-top: var(--space-sm); color: var(--color-primary-tint); font-size: var(--text-p16-size); line-height: var(--text-p16-line); }
+.student-app .es-qr-explanation { margin-top: var(--space-md); padding: var(--space-md); color: var(--color-primary-dark); background: var(--color-primary-tint); border-radius: var(--radius-s); }
+.student-app .es-qr-explanation p { margin: var(--space-xs) 0 0; color: var(--color-text-secondary); }
 
 .student-app .es-qi-schedule {
   display: flex;
@@ -7227,6 +7231,11 @@
   line-height: 20px;
   text-align: justify;
 }
+
+/* Formatted teacher instructions in assessment and task descriptions. */
+.student-app .es-ad-description-copy { display: flex; align-items: flex-start; gap: var(--space-sm); margin: 0; color: var(--color-text-secondary); font-size: var(--text-p12-size); line-height: var(--text-p16-line); text-align: justify; }
+.student-app .es-ad-description-copy > svg { flex: 0 0 auto; margin-top: var(--space-xs); }
+.student-app .es-ad-description-copy .assessment-instructions { flex: 1; }
 
 /* Berkas */
 .student-app .es-ad-teacher-file,

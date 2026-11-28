@@ -2873,7 +2873,9 @@
 .tg-assessment-editor { overflow: hidden; border: var(--border-width-xs) solid var(--color-border); border-radius: var(--radius-s); }
 .tg-assessment-editor textarea { min-height: var(--space-2xl); padding: var(--space-xs); border: 0; border-radius: 0; font-size: var(--text-p12-size); line-height: var(--text-p12-line); white-space: pre-wrap; }
 .tg-assessment-toolbar { display: flex; align-items: center; gap: var(--space-sm); min-height: var(--space-xl); padding: 0 var(--space-sm); color: var(--color-text-secondary); background: var(--color-primary-tint); border-bottom: var(--border-width-xs) solid var(--color-border); }
-.tg-assessment-toolbar span { display: inline-grid; place-items: center; width: var(--space-md); height: var(--space-md); }
+.tg-assessment-toolbar button { display: inline-grid; place-items: center; width: var(--space-lg); height: var(--space-lg); padding: 0; color: inherit; background: transparent; border: 0; border-radius: var(--radius-xs); cursor: pointer; }
+.tg-assessment-toolbar button:hover,
+.tg-assessment-toolbar button:focus-visible { color: var(--color-primary); background: var(--color-surface); outline: none; }
 .tg-assessment-toolbar svg { width: var(--space-md); height: var(--space-md); }
 .tg-assessment-toolbar i { width: var(--border-width-xs); height: var(--space-md); background: var(--color-border); }
 .tg-assessment-builder-columns { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); align-items: start; gap: var(--space-md); }
@@ -3033,8 +3035,9 @@
 .tg-assessment-duration strong { color: var(--color-text-primary); font-size: var(--text-l16-size); line-height: var(--text-l16-line); }
 .tg-assessment-duration small { color: var(--color-text-secondary); font-size: var(--text-p12-size); line-height: var(--text-p12-line); font-weight: var(--font-weight-regular); }
 .tg-assessment-token-options { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-xs); padding: var(--space-xs); background: var(--color-primary-tint); border-radius: var(--radius-s); }
-.tg-assessment-token-options span { display: grid; place-items: center; min-height: var(--space-xl); padding: var(--space-xs); color: var(--color-text-secondary); border-radius: var(--radius-s); font-size: var(--text-l12-size); line-height: var(--text-l12-line); text-align: center; }
-.tg-assessment-token-options .is-selected { color: var(--color-surface); background: var(--color-primary); font-weight: var(--font-weight-semibold); }
+.tg-assessment-token-options button { display: grid; place-items: center; min-height: var(--space-xl); padding: var(--space-xs); color: var(--color-text-secondary); background: transparent; border: 0; border-radius: var(--radius-s); font: inherit; font-size: var(--text-l12-size); line-height: var(--text-l12-line); text-align: center; cursor: pointer; }
+.tg-assessment-token-options button.is-selected { color: var(--color-surface); background: var(--color-primary); font-weight: var(--font-weight-semibold); }
+.tg-assessment-token-options button:focus-visible { outline: var(--border-width-m) solid var(--color-primary); outline-offset: var(--border-width-xs); }
 .tg-assessment-token-note { color: var(--color-text-secondary); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
 .tg-assessment-feedback-setting { display: flex; align-items: center; justify-content: space-between; gap: var(--space-md); padding: var(--space-md); background: var(--color-primary-tint); border-radius: var(--radius-s); }
 .tg-assessment-feedback-setting > span:first-child,
@@ -3043,6 +3046,13 @@
 .tg-assessment-static-toggle strong { color: var(--color-text-primary); font-size: var(--text-l12-size); line-height: var(--text-l12-line); font-weight: var(--font-weight-semibold); }
 .tg-assessment-feedback-setting small,
 .tg-assessment-static-toggle small { color: var(--color-text-secondary); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
+.tg-assessment-switch-control { position: relative; flex: 0 0 calc(var(--space-2xl) - var(--space-xs)); width: calc(var(--space-2xl) - var(--space-xs)); height: var(--space-lg); margin: 0; appearance: none; background: var(--color-border); border: 0; border-radius: var(--radius-pill); cursor: pointer; transition: background-color 160ms ease; }
+.tg-assessment-switch-control::after { position: absolute; top: var(--border-width-xs); left: var(--border-width-xs); width: calc(var(--space-md) + var(--space-xs)); height: calc(var(--space-md) + var(--space-xs)); content: ""; background: var(--color-surface); border-radius: var(--radius-circle); transition: transform 160ms ease; }
+.tg-assessment-switch-control:checked { background: var(--color-primary); }
+.tg-assessment-switch-control:checked::after { transform: translateX(var(--space-md)); }
+.tg-assessment-switch-control:focus-visible { outline: var(--border-width-m) solid var(--color-primary); outline-offset: var(--border-width-xs); }
+.tg-assessment-static-toggle { cursor: pointer; }
+.tg-assessment-feedback-setting input { flex: 0 0 auto; }
 .tg-assessment-randomization > .tg-card-heading { margin-bottom: var(--space-sm); }
 .tg-assessment-static-toggle { display: flex; align-items: center; justify-content: space-between; gap: var(--space-md); padding: var(--space-sm) 0; }
 .tg-assessment-static-toggle + .tg-assessment-static-toggle { border-top: var(--border-width-xs) solid var(--color-border); }

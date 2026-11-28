@@ -1,10 +1,10 @@
 "use client";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { MouseEvent } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { Solar } from "./icon";
-import { Badge, ButtonLink, Card, Heading, Stats } from "./ui";
+import { AssessmentInstructions, Badge, ButtonLink, Card, Heading, Stats } from "./ui";
 import {
   saveQuizAttempt,
   useQuizAttempt,
@@ -13,6 +13,17 @@ import {
 import { StudentEmpty, StudentError, StudentLoading } from "./api-state";
 import { useStudentResource } from "@/lib/useStudentResource";
 import { getStudentAssessment, logStudentExamActivity, saveStudentAssessmentDraft, submitStudentAssessment } from "@/lib/student-api";
+
+function shuffleWithSeed<T>(items: T[], seed: number): T[] {
+  const shuffled = [...items];
+  let state = seed >>> 0 || 1;
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    state = (state * 1664525 + 1013904223) >>> 0;
+    const target = state % (index + 1);
+    [shuffled[index], shuffled[target]] = [shuffled[target], shuffled[index]];
+  }
+  return shuffled;
+}
 
 export function QuizIntro() {
   const params = useParams();
@@ -66,7 +77,7 @@ export function QuizIntro() {
         <div className="es-qi-hero-copy">
           <h1>{title}</h1>
 
-          <p>{assessment.description ?? "Deskripsi asesmen tidak tersedia dari API."}</p>
+          {assessment.description ? <AssessmentInstructions content={assessment.description} /> : <p>Deskripsi asesmen tidak tersedia dari API.</p>}
         </div>
 
         <div className="es-qi-schedule">
@@ -383,6 +394,7 @@ export function QuizWork() {
   const [storageError, setStorageError] = useState(false);
   const [savedAt, setSavedAt] = useState("");
   const [submitError, setSubmitError] = useState("");
+  const [shuffleSeed, setShuffleSeed] = useState<number | null>(null);
   const submitting = useRef(false);
   const loggedSession = useRef<number | null>(null);
   const lastSavedDraft = useRef<Record<number, string | number>>({});
@@ -390,7 +402,14 @@ export function QuizWork() {
   const draftTimer = useRef<number | null>(null);
   const assessmentResponse = resource.status === "ready" ? resource.data : null;
   const assessment = assessmentResponse?.assessment ?? null;
-  const questions = assessment?.questions ?? [];
+  const questions = useMemo(() => {
+    const source = assessment?.questions ?? [];
+    if (!assessment || shuffleSeed === null) return source;
+    const ordered = assessment.shuffle_questions ? shuffleWithSeed(source, shuffleSeed) : source;
+    return ordered.map(question => assessment.shuffle_options
+      ? { ...question, options: shuffleWithSeed(question.options, shuffleSeed ^ Math.imul(question.id, 2654435761)) }
+      : question);
+  }, [assessment, shuffleSeed]);
   const durationSeconds = assessmentResponse?.remaining_seconds ?? (assessment?.duration_minutes ? assessment.duration_minutes * 60 : null);
 
   useEffect(() => {
@@ -430,8 +449,10 @@ export function QuizWork() {
     if (!assessmentResponse) return;
     try {
       const raw = sessionStorage.getItem(storageKey);
+      let savedSeed = 0;
       if (raw) {
         const saved = JSON.parse(raw) as Attempt;
+        savedSeed = saved.shuffleSeed || 0;
         if (saved && !saved.submitted) {
           setAnswers(saved.answers || {});
           setRemaining(durationSeconds ?? 0);
@@ -441,6 +462,12 @@ export function QuizWork() {
       } else {
         setRemaining(durationSeconds ?? 0);
       }
+      if (!savedSeed) savedSeed = Number(sessionStorage.getItem(`${storageKey}:shuffle-seed`)) || 0;
+      if (!savedSeed) {
+        savedSeed = window.crypto.getRandomValues(new Uint32Array(1))[0] || 1;
+        sessionStorage.setItem(`${storageKey}:shuffle-seed`, String(savedSeed));
+      }
+      setShuffleSeed(savedSeed);
     } catch {
       setStorageError(true);
       setRemaining(durationSeconds ?? 0);
@@ -503,9 +530,13 @@ export function QuizWork() {
         serverScore: result.score,
         serverStatus: result.status,
         passingScore: assessment.passing_score,
+        shuffleSeed: shuffleSeed ?? undefined,
+        questionOrderIds: questions.map(question => question.id),
+        optionOrderIds: Object.fromEntries(questions.map(question => [String(question.id), question.options.map(option => option.id)])),
       };
       saveQuizAttempt(subjectSlug, quizId, attempt);
       sessionStorage.removeItem(storageKey);
+      sessionStorage.removeItem(`${storageKey}:shuffle-seed`);
       if (assessmentResponse.exam_session) {
         void logStudentExamActivity(assessmentResponse.exam_session.id, "submitted");
       }
@@ -514,7 +545,7 @@ export function QuizWork() {
       setSubmitError("Jawaban belum dapat dikirim. Silakan coba lagi.");
       submitting.current = false;
     }
-  }, [assessment, assessmentResponse, answers, b, durationSeconds, questions, quizId, remaining, router, storageKey, subjectSlug]);
+  }, [assessment, assessmentResponse, answers, b, durationSeconds, questions, quizId, remaining, router, shuffleSeed, storageKey, subjectSlug]);
 
   useEffect(() => {
     if (loaded && durationSeconds !== null && remaining === 0) void submit(true);
@@ -525,17 +556,18 @@ export function QuizWork() {
     try {
       const raw = sessionStorage.getItem(storageKey);
       const saved = raw ? (JSON.parse(raw) as Attempt) : null;
-      sessionStorage.setItem(storageKey, JSON.stringify({ answers, submitted: false }));
+      sessionStorage.setItem(storageKey, JSON.stringify({ answers, submitted: false, shuffleSeed }));
       setSavedAt(new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Jakarta", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }).format(new Date()));
       setStorageError(false);
       const sessionId = assessmentResponse?.exam_session?.id;
     } catch {
       setStorageError(true);
     }
-  }, [answers, assessmentResponse, loaded, storageKey]);
+  }, [answers, assessmentResponse, loaded, shuffleSeed, storageKey]);
 
   if (resource.status === "loading") return <StudentLoading title="Memuat soal asesmen..." />;
   if (resource.status === "error") return <StudentError resource={resource} />;
+  if (!loaded) return <StudentLoading title="Menyiapkan soal asesmen..." />;
   if (resource.status === "empty" || questions.length === 0) return <StudentEmpty title="Soal asesmen belum tersedia." />;
   if (!assessmentResponse?.can_attempt) return <StudentError resource={{ status: "error", statusCode: 403, message: "Asesmen ini belum dapat dikerjakan pada tingkat kelas Anda." }} />;
 
@@ -886,7 +918,10 @@ export function QuizResult() {
   const passingScore = attempt?.passingScore ?? (resource.status === "ready" ? resource.data.assessment.passing_score : null);
   const passed = score !== null && passingScore !== null && score >= passingScore;
   const durationText = attempt ? `${Math.floor(attempt.duration / 60)}m ${attempt.duration % 60}s` : "—";
-  const filteredQuestions = questions.map((question, index) => ({ question, index }));
+  const orderedQuestions = attempt?.questionOrderIds?.length
+    ? attempt.questionOrderIds.map(id => questions.find(question => question.id === id)).filter((question): question is (typeof questions)[number] => Boolean(question))
+    : questions;
+  const filteredQuestions = orderedQuestions.map((question, index) => ({ question, index }));
   const pageSize = 2;
   const totalPages = Math.max(1, Math.ceil(filteredQuestions.length / pageSize));
   const currentPage = Math.min(page, totalPages);
@@ -1078,7 +1113,9 @@ export function QuizResult() {
               </div>
               <p className="es-qr-question">{question.prompt}</p>
               <div className="es-qr-options">
-                {question.options.map((option, optionIndex) => {
+                {(attempt?.optionOrderIds?.[String(question.id)]
+                  ? attempt.optionOrderIds[String(question.id)].map(id => question.options.find(option => option.id === id)).filter((option): option is (typeof question.options)[number] => Boolean(option))
+                  : question.options).map((option, optionIndex) => {
                   const isSelected =
                     attempt !== null &&
                     answers[index] === optionIndex;
@@ -1107,6 +1144,7 @@ export function QuizResult() {
                   );
                 })}
               </div>
+              {resource.data.assessment.show_explanation_after_submission && question.explanation && <div className="es-qr-explanation"><strong>Pembahasan</strong><p>{question.explanation}</p></div>}
             </Card>
           );
         })}

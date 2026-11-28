@@ -1012,3 +1012,10 @@ body {
 }
 .icon-s { width: var(--space-md); height: var(--space-md); }
 .icon-l { width: var(--space-xl); height: var(--space-xl); }
+
+/* Teks instruksi asesmen dengan format aman untuk semua role. */
+.assessment-instructions { display: grid; gap: var(--space-xs); }
+.assessment-instructions p { margin: 0; }
+.assessment-instructions ul,
+.assessment-instructions ol { margin: 0; padding-left: var(--space-lg); }
+.assessment-instructions a { color: var(--color-primary); text-decoration: underline; }

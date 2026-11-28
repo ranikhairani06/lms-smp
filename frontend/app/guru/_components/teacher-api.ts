@@ -8,7 +8,7 @@ export type TeacherSection = {
   assessments?: TeacherAssessment[];
 };
 export type TeacherMaterial = { id: number; title: string; type: string; target_grade: number; body?: string | null; file_path?: string | null; created_at?: string };
-export type TeacherQuestion = { id: number; type: string; prompt: string; points: number; correct_answer?: string | boolean | null; options?: { id?: number; text: string; is_correct?: boolean }[] };
+export type TeacherQuestion = { id: number; type: string; prompt: string; points: number; correct_answer?: string | boolean | null; explanation?: string | null; options?: { id?: number; text: string; is_correct?: boolean }[] };
 export type TeacherAssessment = {
   id: number;
   title: string;
@@ -20,6 +20,12 @@ export type TeacherAssessment = {
   passing_score?: number | null;
   start_at?: string | null;
   description?: string | null;
+  section_id?: number;
+  material_id?: number | null;
+  maximum_attempt?: number;
+  show_explanation_after_submission?: boolean;
+  shuffle_questions?: boolean;
+  shuffle_options?: boolean;
   questions?: TeacherQuestion[];
   course?: { id?: number; name?: string };
 };
