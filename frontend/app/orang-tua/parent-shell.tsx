@@ -88,7 +88,7 @@ export default function ParentShell({ children, user }: { children: ReactNode; u
             </div>
           </div>,
         }}
-        footer={<>LMS SMP Terpadu â€¢ Sistem Administrasi &amp; Pembelajaran Terpadu</>}
+        footer={<>LMS SMP Terpadu · Sistem Administrasi &amp; Pembelajaran Terpadu</>}
         mobileNavigation={navigation}
         mobileNavigationLabel="Navigasi orang tua mobile"
         mobileNavigationBreakpoint="tablet"

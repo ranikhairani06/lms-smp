@@ -89,7 +89,7 @@ export default function TeacherShell({ user, children }: { user: AuthUser; child
           </Link>
         </div>,
       }}
-      footer={<>LMS SMP Terpadu â€¢ Sistem Administrasi &amp; Pembelajaran Terpadu</>}
+      footer={<>LMS SMP Terpadu · Sistem Administrasi &amp; Pembelajaran Terpadu</>}
       mobileNavigation={mobileNavigation}
       showMobileLogout={false}
       collapsed={collapsed}
