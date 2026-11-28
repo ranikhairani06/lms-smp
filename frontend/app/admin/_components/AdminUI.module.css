@@ -765,7 +765,7 @@
 
 /* Tabel guru: pertahankan lebar baca yang nyaman dan scroll horizontal di wadahnya. */
 .teacherTableWrap { min-width: 0; overflow-x: auto; padding: var(--space-sm); }
-.teacherTable { width: max(100%, 1320px); min-width: max(100%, 1320px); table-layout: fixed; }
+.teacherTable { width: 100%; min-width: 1180px; table-layout: fixed; }
 .teacherTable th,
 .teacherTable td { padding: var(--space-md) var(--space-md); }
 .teacherTable th { padding: var(--space-md) var(--space-md); }
@@ -776,19 +776,20 @@
   letter-spacing: normal;
 }
 .teacherTable td { padding-top: var(--space-md); padding-bottom: var(--space-md); overflow-wrap: anywhere; }
-.teacherTable th:nth-child(1) { width: 20%; }
-.teacherTable th:nth-child(2) { width: 12%; }
-.teacherTable th:nth-child(3) { width: 12%; }
-.teacherTable th:nth-child(4) { width: 10%; }
-.teacherTable th:nth-child(5) { width: 12%; }
-.teacherTable th:nth-child(6) { width: 14%; }
-.teacherTable th:nth-child(7) { width: 7%; }
-.teacherTable th:nth-child(8) { width: 13%; }
+.teacherTable th:nth-child(1) { width: 18%; }
+.teacherTable th:nth-child(2) { width: 16%; }
+.teacherTable th:nth-child(3) { width: 15%; }
+.teacherTable th:nth-child(4) { width: 14%; }
+.teacherTable th:nth-child(5) { width: 16%; }
+.teacherTable th:nth-child(6) { width: 8%; }
+.teacherTable th:nth-child(7) { width: 13%; }
 .teacherTable td:last-child { white-space: nowrap; overflow-wrap: normal; }
 .teacherTable tbody tr:nth-child(even) { background: var(--color-primary-tint); }
 .teacherTable .teacherName {
   display: block;
-  overflow: visible;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-size: var(--text-p12-size);
   line-height: var(--text-p12-line);
   font-weight: var(--font-weight-semibold);
@@ -874,7 +875,7 @@
 .teacherManagementPage .teacherTable th { background: var(--color-background); }
 
 /* Direktori guru: tandai data statis dan sediakan scrollbar horizontal yang terlihat. */
-.teacherManagementPage .adminStatRow { position: relative; }
+.teacherManagementPage .adminStatRow { position: relative; grid-template-columns: min(100%, 460px); }
 .teacherManagementPage .adminStatRow::before,
 .teacherManagementPage .teacherTableWrap::before {
   padding: var(--space-xs) var(--space-sm);
@@ -894,6 +895,8 @@
 .teacherManagementPage .teacherTableWrap {
   width: 100%;
   max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   overflow-x: scroll;
   overscroll-behavior-x: contain;
   scrollbar-width: thin;
@@ -1655,6 +1658,18 @@
 .studentPagination .pageControls button {
   width: var(--space-xl);
   height: var(--space-xl);
+  border-radius: var(--radius-s);
+  background: var(--color-primary-tint);
+}
+.studentPagination .pageControls {
+  gap: var(--space-xs);
+  padding: var(--space-xs);
+  border-radius: var(--radius-m);
+  background: var(--color-background);
+}
+.studentPagination .pageControls button.pageCurrent {
+  color: var(--color-surface);
+  background: var(--color-primary);
 }
 
 /* Kartu Update Data membungkus judul dan banner sinkronisasi mandiri. */

@@ -20,6 +20,10 @@ function countLabel(data: AdminDashboardData | undefined, key: "teachers" | "stu
   return data ? data[key].toLocaleString("id-ID") : "—";
 }
 
+function totalUsersLabel(data: AdminDashboardData | undefined) {
+  return typeof data?.users === "number" ? `${data.users.toLocaleString("id-ID")} Users` : "—";
+}
+
 function classNameWithoutPrefix(name: string) {
   return name.replace(/^kelas\s+/i, "");
 }
@@ -51,7 +55,7 @@ export default function AdminDashboardPage() {
 
       {/* Statistik yang didukung API dashboard. */}
       <div className={`${s.statGridFour} ${s.dashboardStats}`}>
-        <StatCard label="Total Users" value="—" icon="users-group-rounded-linear" tone="primary" hideEmptyDetail />
+        <StatCard label="Total Users" value={totalUsersLabel(dashboard)} icon="users-group-rounded-linear" tone="primary" hideEmptyDetail />
         <StatCard label="Total Guru" value={`${countLabel(dashboard, "teachers")} Guru`} icon="user-id-linear" tone="success" hideEmptyDetail />
         <StatCard label="Total Siswa" value={`${countLabel(dashboard, "students")} Siswa`} detail={activeClassCount === undefined ? undefined : `${activeClassCount.toLocaleString("id-ID")} rombel tersedia`} icon="square-academic-cap-linear" tone="warning" hideEmptyDetail />
         <StatCard label="Total Wali Murid" value={`${countLabel(dashboard, "parents")} Wali`} icon="users-group-rounded-linear" tone="info" hideEmptyDetail />
