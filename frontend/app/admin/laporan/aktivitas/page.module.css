@@ -28,7 +28,7 @@
 }
 .filterGrid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(calc(var(--space-xl) * 4 + var(--space-sm)), 1fr)) auto;
+  grid-template-columns: repeat(3, minmax(calc(var(--space-xl) * 4 + var(--space-sm)), 1fr)) auto;
   align-items: end;
   gap: var(--space-sm);
 }

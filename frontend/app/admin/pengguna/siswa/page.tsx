@@ -32,7 +32,6 @@ import { useAdminMutation, useAdminResource } from "@/app/admin/_components/useA
 
 
 
-type Guardian = { name: string; relationship: string };
 type Student = {
   id?: number;
   nisn: string;
@@ -44,14 +43,11 @@ type Student = {
   is_logged_in?: boolean;
   last_login_at?: string | null;
   last_activity_at?: string | null;
-  nik?: string;
-  birthplace?: string;
   birthdate?: string;
-  guardian?: Guardian;
 };
 const emptyStudent: Student = { nisn: "", name: "\u2014", rombel: "\u2014", gender: "\u2014", status: "", activity: "\u2014" };
 type RombelData = { id?: number; code: string; wali: string; filled: number; capacity: number | null; grade_level?: number };
-type FormFieldKey = "name" | "nisn" | "nik" | "birthplace" | "birthdate" | "gender" | "rombel";
+type FormFieldKey = "name" | "nisn" | "birthdate" | "gender" | "rombel";
 type ApiStudentSummary = {
   total_students?: number;
   active_login_students?: number;
@@ -149,7 +145,7 @@ export default function SiswaPage() {
   const [selected, setSelected] = useState<Student>(emptyStudent);
   const [deleteSelected, setDeleteSelected] = useState<Student | null>(null);
   const [page, setPage] = useState(1);
-  const [form, setForm] = useState({ name: "", nisn: "", nik: "", birthplace: "", birthdate: "", gender: "Laki-laki", rombel: "" });
+  const [form, setForm] = useState({ name: "", nisn: "", birthdate: "", gender: "Laki-laki", rombel: "" });
   const [touched, setTouched] = useState<Partial<Record<FormFieldKey, boolean>>>({});
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const [verified, setVerified] = useState(false);
@@ -213,8 +209,6 @@ export default function SiswaPage() {
   const fieldErrors: Record<FormFieldKey, string> = {
     name: form.name.trim() ? "" : "Nama lengkap wajib diisi.",
     nisn: !form.nisn ? "NISN wajib diisi." : form.nisn.length !== 10 ? "NISN harus terdiri dari 10 digit angka." : duplicateStudent ? `NISN ${form.nisn} sudah terdaftar atas nama ${duplicateStudent.name}. Masukkan NISN yang valid.` : "",
-    nik: form.nik && form.nik.length !== 16 ? "NIK harus terdiri dari 16 digit angka." : "",
-    birthplace: "",
     birthdate: form.birthdate.trim() ? "" : "Tanggal lahir wajib diisi untuk generate kata sandi default siswa.",
     gender: form.gender ? "" : "Pilih jenis kelamin.",
     rombel: !selectedRombel ? "Pilih rombongan belajar." : rombelIsFull ? "Rombongan belajar ini sudah penuh." : "",
@@ -236,12 +230,12 @@ export default function SiswaPage() {
     if (student) {
       setSelected(student);
       const studentRombel = rombelData.find((rombel) => rombel.code === student.rombel);
-      setForm({ name: student.name, nisn: student.nisn, nik: student.nik ?? "", birthplace: student.birthplace ?? "", birthdate: student.birthdate ? new Date(student.birthdate).toLocaleDateString("en-GB") : "", gender: student.gender, rombel: studentRombel ? formatRombel(studentRombel) : "" });
+      setForm({ name: student.name, nisn: student.nisn, birthdate: student.birthdate ? new Date(student.birthdate).toLocaleDateString("en-GB") : "", gender: student.gender, rombel: studentRombel ? formatRombel(studentRombel) : "" });
     } else {
       setSelected(emptyStudent);
       const preferredRombel = rombelData.find((rombel) => rombel.code === "8B" && rombel.capacity !== null && rombel.filled < rombel.capacity)
         ?? rombelData.find((rombel) => rombel.capacity !== null && rombel.filled < rombel.capacity);
-      setForm({ name: "", nisn: "", nik: "", birthplace: "", birthdate: "", gender: "Laki-laki", rombel: preferredRombel ? formatRombel(preferredRombel) : "" });
+      setForm({ name: "", nisn: "", birthdate: "", gender: "Laki-laki", rombel: preferredRombel ? formatRombel(preferredRombel) : "" });
     }
     setTouched({});
     setSubmitAttempted(false);
@@ -268,7 +262,7 @@ export default function SiswaPage() {
 
   const updateFormField = (field: FormFieldKey, value: string) => setForm((current) => ({ ...current, [field]: value }));
 
-  const renderTextField = (field: Exclude<FormFieldKey, "gender" | "rombel">, label: string, placeholder: string, required = false, fullWidth = false, trailingIcon?: string, labelHint?: string) => {
+  const renderTextField = (field: "name" | "nisn" | "birthdate", label: string, placeholder: string, required = false, fullWidth = false, trailingIcon?: string) => {
     const error = fieldErrors[field] || serverFieldError(field);
     const showError = Boolean(error && (shouldShowError(field) || Boolean(serverFieldError(field))));
     const isValid = Boolean(form[field].trim() && !error);
@@ -277,16 +271,15 @@ export default function SiswaPage() {
         key={field}
         label={label}
         value={form[field]}
-        onChange={(value) => updateFormField(field, field === "nisn" ? value.replace(/\D/g, "").slice(0, 10) : field === "nik" ? value.replace(/\D/g, "").slice(0, 16) : value)}
+        onChange={(value) => updateFormField(field, field === "nisn" ? value.replace(/\D/g, "").slice(0, 10) : value)}
         onBlur={() => setTouched((current) => ({ ...current, [field]: true }))}
         placeholder={placeholder}
         required={required}
-        inputMode={field === "nisn" || field === "nik" ? "numeric" : undefined}
-        maxLength={field === "nisn" ? 10 : field === "nik" ? 16 : undefined}
+        inputMode={field === "nisn" ? "numeric" : undefined}
+        maxLength={field === "nisn" ? 10 : undefined}
         error={showError ? error : undefined}
         valid={isValid}
         trailingIcon={trailingIcon}
-        labelHint={labelHint}
         className={fullWidth ? s.formFull : ""}
       />
     );
@@ -383,8 +376,6 @@ export default function SiswaPage() {
           <div className={`${s.formGrid} ${s.studentFormGrid}`}>
             {renderTextField("name", "Nama Lengkap", "Nama lengkap peserta didik", true, true)}
             {renderTextField("nisn", "NISN (Nomor Induk Siswa Nasional)", "Masukkan 10 digit NISN", true, true)}
-            {renderTextField("nik", "NIK (Nomor Induk Kependudukan)", "Masukkan 16 digit NIK", false, true, undefined, "(16 digit)")}
-            {renderTextField("birthplace", "Tempat Lahir", "Kota kelahiran", true)}
             {renderTextField("birthdate", "Tanggal Lahir", "DD/MM/YYYY", true, false, "calendar-linear")}
             <div className={`${s.formField} ${s.studentGenderField} ${genderErrorShown ? s.formFieldInvalid : ""}`} role="radiogroup" aria-label="Jenis Kelamin" aria-invalid={genderErrorShown}>
               <span>Jenis Kelamin <b>*</b>{genderErrorShown && <AdminIcon name="danger-triangle-linear" size={14} />}</span>
@@ -416,19 +407,6 @@ export default function SiswaPage() {
               {rombelErrorShown && <small className={s.fieldError} role="alert">{fieldErrors.rombel}</small>}
             </label>
           </div>
-          <div className={`${s.formSectionTitle} ${s.studentParentHeader}`}>
-            Orang Tua / Wali Tertaut
-            <button type="button" className={s.textLink}>+ Buat akun orang tua baru</button>
-          </div>
-          {modal === "edit" && selected.guardian ? (
-            <div className={s.linkedStudent}>
-              <span className={s.initialAvatar}><AdminIcon name="users-group-rounded-linear" size={19} /></span>
-              <div><strong>{selected.guardian.name}</strong><small>{selected.guardian.relationship}</small></div>
-              <StatusBadge tone="success">Akun Terhubung</StatusBadge>
-            </div>
-          ) : (
-            <div className={s.studentGuardianEmpty}><AdminIcon name="users-group-rounded-linear" size={18} />Belum ada data orang tua/wali tertaut.</div>
-          )}
         </form>
       </Modal>}
 
@@ -437,7 +415,7 @@ export default function SiswaPage() {
         <InfoBanner tone="warning">Kata sandi akan dikembalikan ke tanggal lahir siswa. Siswa diminta membuat kata sandi baru saat login berikutnya.</InfoBanner>
         <p className={s.pageDescription}>Nomor Induk (NISN): <strong>{selected.nisn}</strong></p>
         <label className={s.choicePill}><input type="checkbox" checked={verified} onChange={(e) => setVerified(e.target.checked)} /> Saya sudah memverifikasi identitas pengguna</label>
-        <p className={s.pageDescription}>Verifikasi identitas wali murid / siswa fisik telah dilakukan oleh admin.</p>
+        <p className={s.pageDescription}>Verifikasi identitas siswa telah dilakukan oleh admin.</p>
       </Modal>}
       {deleteSelected && <Modal title="Hapus data siswa?" subtitle={deleteSelected.name} onClose={() => { if (!deleteStudent.loading) setDeleteSelected(null); }} footer={<><Button variant="outline" disabled={deleteStudent.loading} onClick={() => setDeleteSelected(null)}>Batal</Button><Button variant="danger" disabled={deleteStudent.loading} onClick={() => { void deleteStudent.run(); }}>{deleteStudent.loading ? "Menghapus..." : "Ya, Hapus"}</Button></>}>
         <p className={s.pageDescription}>Data siswa “{deleteSelected.name}” akan dihapus.</p>

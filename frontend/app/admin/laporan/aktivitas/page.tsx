@@ -145,10 +145,9 @@ export default function LaporanAktivitasPage() {
   const [error, setError] = useState<string | null>(null);
   const [range, setRange] = useState("7 Hari Terakhir");
   const [role, setRole] = useState("Semua Peran");
-  const [module, setModule] = useState("Semua Modul");
   const [status, setStatus] = useState("Semua Status");
   const [page, setPage] = useState(1);
-  const [filters, setFilters] = useState({ range: "7 Hari Terakhir", role: "Semua Peran", module: "Semua Modul", status: "Semua Status" });
+  const [filters, setFilters] = useState({ range: "7 Hari Terakhir", role: "Semua Peran", status: "Semua Status" });
 
   const load = useCallback(async (targetPage: number) => {
     setLoading(true); setError(null);
@@ -169,10 +168,9 @@ export default function LaporanAktivitasPage() {
   const filtered = useMemo(() => rows.filter((row) => {
     const rowRole = row.user?.role === "admin" ? "Super Admin" : row.user?.role === "parent" ? "Orang Tua" : row.user?.role === "teacher" ? "Guru" : row.user?.role === "student" ? "Siswa" : textOrDash(row.user?.role);
     const matchesRole = filters.role === "Semua Peran" || rowRole === filters.role;
-    const matchesModule = filters.module === "Semua Modul" || row.entity_type === filters.module;
     // Kontrak audit log tidak menyimpan status sukses/gagal.
     const matchesStatus = filters.status === "Semua Status";
-    return matchesRole && matchesModule && matchesStatus;
+    return matchesRole && matchesStatus;
   }), [filters, rows]);
 
   const exportLogs = () => {
@@ -187,9 +185,8 @@ export default function LaporanAktivitasPage() {
     <Panel className={styles.filterPanel}><div className={styles.filterGrid}>
       <label className={styles.filterItem}><span className={styles.filterLabel}><AdminIcon name="calendar-linear" size={12} /> Rentang Tanggal</span><span className={styles.selectWrap}><select className={styles.filterSelect} value={range} onChange={(event) => setRange(event.target.value)}><option>7 Hari Terakhir</option><option>30 Hari Terakhir</option><option>Bulan Ini</option><option>Semua Waktu</option></select><AdminIcon name="alt-arrow-down-linear" size={16} /></span></label>
       <label className={styles.filterItem}><span className={styles.filterLabel}><AdminIcon name="users-group-rounded-linear" size={12} /> Peran Pengguna</span><span className={styles.selectWrap}><select className={styles.filterSelect} value={role} onChange={(event) => setRole(event.target.value)}><option>Semua Peran</option>{[["admin", "Super Admin"], ["teacher", "Guru"], ["parent", "Orang Tua"], ["student", "Siswa"]].map(([apiRole, label]) => rows.some((row) => row.user?.role === apiRole) && <option key={apiRole}>{label}</option>)}</select><AdminIcon name="alt-arrow-down-linear" size={16} /></span></label>
-      <label className={styles.filterItem}><span className={styles.filterLabel}><AdminIcon name="widget-2-linear" size={12} /> Modul Sistem</span><span className={styles.selectWrap}><select className={styles.filterSelect} value={module} onChange={(event) => setModule(event.target.value)}><option>Semua Modul</option>{[...new Set(rows.map((row) => row.entity_type).filter((value): value is string => Boolean(value)))].map((value) => <option key={value}>{value}</option>)}</select><AdminIcon name="alt-arrow-down-linear" size={16} /></span></label>
       <label className={styles.filterItem}><span className={styles.filterLabel}><AdminIcon name="check-circle-linear" size={12} /> Status</span><span className={styles.selectWrap}><select className={styles.filterSelect} value={status} onChange={(event) => setStatus(event.target.value)}><option>Semua Status</option><option>Berhasil</option><option>Gagal</option></select><AdminIcon name="alt-arrow-down-linear" size={16} /></span></label>
-      <div className={styles.filterActions}><Button className={styles.applyFilterButton} icon="slider-horizontal-linear" onClick={() => { setFilters({ range, role, module, status }); setPage(1); }}>Terapkan Filter</Button><Button className={styles.resetButton} variant="ghost" icon="refresh-linear" onClick={() => { setRange("7 Hari Terakhir"); setRole("Semua Peran"); setModule("Semua Modul"); setStatus("Semua Status"); setFilters({ range: "7 Hari Terakhir", role: "Semua Peran", module: "Semua Modul", status: "Semua Status" }); setPage(1); }}>Reset</Button></div>
+      <div className={styles.filterActions}><Button className={styles.applyFilterButton} icon="slider-horizontal-linear" onClick={() => { setFilters({ range, role, status }); setPage(1); }}>Terapkan Filter</Button><Button className={styles.resetButton} variant="ghost" icon="refresh-linear" onClick={() => { setRange("7 Hari Terakhir"); setRole("Semua Peran"); setStatus("Semua Status"); setFilters({ range: "7 Hari Terakhir", role: "Semua Peran", status: "Semua Status" }); setPage(1); }}>Reset</Button></div>
     </div></Panel>
     {loading ? <LoadingState title="Memuat laporan aktivitas..." /> : error ? <ErrorState title={error} action={<Button variant="outline" onClick={() => void load(page)}>Coba Lagi</Button>} /> : !rows.length ? <EmptyState title="Belum ada aktivitas" description="Belum ada data aktivitas yang tersedia." /> : <Panel className={styles.activityTablePanel}>
       <div className={styles.activityTableTitle}><span className={styles.activityTitleIcon}><AdminIcon name="history-linear" size={20} /></span><h2>Tabel Riwayat Aktivitas</h2></div>
