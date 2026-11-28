@@ -384,7 +384,7 @@ export default function TahunAjaranPage() {
           <span>Semester <b>*</b></span>
           <select value={form.semesterNumber} onChange={(event) => {
             const value = event.target.value;
-            setForm({ ...form, semesterNumber: value, name: `Semester ${semesterLabel(Number(value))}` });
+            setForm({ ...form, semesterNumber: value });
           }}>
             <option value="1">Semester Ganjil</option>
             <option value="2">Semester Genap</option>
