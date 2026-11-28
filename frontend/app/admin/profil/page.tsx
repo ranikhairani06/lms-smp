@@ -10,26 +10,19 @@ import styles from "./page.module.css";
 
 export default function ProfilAdminPage() {
   const router = useRouter();
-  const [personal, setPersonal] = useState({ nip: "", name: "", email: "", phone: "" });
+  const [name, setName] = useState("");
   const [password, setPassword] = useState({ current: "", next: "", confirm: "" });
   const [passwordErrors, setPasswordErrors] = useState<Record<string, string[]>>({});
   const [passwordPending, setPasswordPending] = useState(false);
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNext, setShowNext] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [saved, setSaved] = useState(false);
   useEffect(() => {
     let active = true;
-    void apiRequest<{ user: Pick<AuthUser, "name" | "email" | "username"> }>("me")
+    void apiRequest<{ user: Pick<AuthUser, "name"> }>("me")
       .then(({ user }) => {
         if (!active) return;
-        const username = user.username ?? "";
-        setPersonal({
-          name: user.name ?? "",
-          email: user.email ?? "",
-          nip: /^(?:\d{16}|\d{18})$/.test(username) ? username : "",
-          phone: "",
-        });
+        setName(user.name ?? "");
       })
       .catch((error: unknown) => {
         if (!active) return;
@@ -83,39 +76,18 @@ export default function ProfilAdminPage() {
 
       {/* Bagian tampilan: identitas administrator, status peran, dan aksi foto. */}
       <section className={styles.profileHero}>
-        <div className={styles.profileAvatar} aria-label={`Inisial ${personal.name}`}>
-          {initials(personal.name)}
+        <div className={styles.profileAvatar} aria-label={`Inisial ${name}`}>
+          {initials(name)}
           <span><AdminIcon name="check-bold" size={14} /></span>
         </div>
         <div className={styles.profileIdentity}>
-          <strong>{personal.name}</strong>
+          <strong>{name}</strong>
           <StatusBadge tone="info" className={styles.profileRole}><AdminIcon name="shield-check-bold" size={13} />Peran: Super Administrator</StatusBadge>
-          <p><AdminIcon name="card-2-linear" size={14} />NIP/NIK: <b>{personal.nip}</b></p>
           <p><AdminIcon name="clock-circle-linear" size={14} />Terakhir masuk: Hari ini, 07:42 WIB</p>
         </div>
-        <Button size="medium" variant="softPrimary" icon="cloud-upload-linear" onClick={() => alert("Pilih foto profil baru.")}>Ubah Foto Profil</Button>
       </section>
 
       <div className={styles.profileCards}>
-        {/* Bagian tampilan: data identitas dan aksi simpan profil. */}
-        <Panel className={styles.profileCard}>
-          <header className={styles.cardHeading}>
-            <h2>Informasi Pribadi</h2>
-            <p>Data identitas resmi administrator sekolah</p>
-          </header>
-          <div className={styles.personalFields}>
-            <Field className={styles.profileField} label="NIP / NIK Resmi" value={personal.nip} onChange={(value) => setPersonal({ ...personal, nip: value })} required leadingIcon="card-2-linear" />
-            <Field className={styles.profileField} label="Nama Lengkap Beserta Gelar" value={personal.name} onChange={(value) => setPersonal({ ...personal, name: value })} required leadingIcon="user-circle-linear" />
-            <Field className={styles.profileField} label="Alamat Email" value={personal.email} onChange={(value) => setPersonal({ ...personal, email: value })} required type="email" leadingIcon="letter-linear" />
-            <Field className={styles.profileField} label="Nomor Telepon / WhatsApp" value={personal.phone} onChange={(value) => setPersonal({ ...personal, phone: value })} required leadingIcon="phone-linear" />
-          </div>
-          <footer className={styles.personalActions}>
-            <Button size="medium" variant="ghost" onClick={() => setSaved(false)}>Batalkan</Button>
-            <Button size="medium" variant="primarySolid" icon="diskette-linear" onClick={() => setSaved(true)}>Simpan Perubahan Data Diri</Button>
-          </footer>
-          {saved && <p className={styles.savedMessage}><AdminIcon name="check-circle-linear" size={14} />Perubahan data diri berhasil disimpan (pratinjau lokal).</p>}
-        </Panel>
-
         {/* Bagian tampilan: kolom sandi, indikator kekuatan, dan kriteria sandi. */}
         <Panel className={`${styles.profileCard} ${styles.passwordCard}`}>
           <header className={styles.cardHeading}>

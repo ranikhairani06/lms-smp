@@ -7,7 +7,7 @@
 .profileHero {
   min-height: calc(var(--space-2xl) * 3 + var(--space-xs));
   display: grid;
-  grid-template-columns: calc(var(--space-2xl) * 2) minmax(0, 1fr) auto;
+  grid-template-columns: calc(var(--space-2xl) * 2) minmax(0, 1fr);
   align-items: center;
   gap: var(--space-lg);
   margin-bottom: var(--space-md);
@@ -47,10 +47,9 @@
 .profileIdentity > strong { color: var(--color-text-primary); font-size: var(--text-h4-size); line-height: var(--text-h4-line); font-weight: var(--font-weight-bold); }
 .profileRole { gap: var(--space-xs); padding: var(--space-xs) var(--space-sm); white-space: nowrap; }
 .profileIdentity p { display: flex; align-items: center; gap: var(--space-xs); margin: 0; color: var(--color-text-secondary); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
-.profileIdentity p b { color: var(--color-text-primary); font-weight: var(--font-weight-semibold); }
 
-/* Bagian tampilan: dua panel profil dengan tinggi dan padding seimbang. */
-.profileCards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; gap: var(--space-md); }
+/* Bagian tampilan: panel pembaruan kata sandi. */
+.profileCards { display: grid; grid-template-columns: minmax(0, 1fr); align-items: stretch; gap: var(--space-md); }
 .profileCard {
   min-width: 0;
   min-height: calc(var(--space-2xl) * 12);
@@ -64,7 +63,6 @@
 .cardHeading p { margin: var(--space-xs) 0 0; color: var(--color-text-secondary); font-size: var(--text-p16-size); line-height: var(--text-p16-line); }
 
 /* Bagian tampilan: field berikon, latar lembut, serta fokus yang jelas. */
-.personalFields,
 .passwordFields { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-md); }
 .profileField { gap: var(--space-xs); color: var(--color-text-primary); font-size: var(--text-l12-size); line-height: var(--text-l12-line); font-weight: var(--font-weight-semibold); }
 .profileField > span:first-child b { color: var(--color-error); }
@@ -86,10 +84,6 @@
 .passwordToggle { width: var(--space-lg); height: var(--space-lg); display: grid; flex: 0 0 auto; place-items: center; padding: 0; color: var(--color-text-secondary); background: transparent; border: 0; border-radius: var(--radius-xs); cursor: pointer; }
 .passwordToggle:hover { color: var(--color-primary); background: var(--color-background); }
 
-/* Bagian tampilan: tombol simpan, batal, dan submit sandi. */
-.personalActions { display: flex; flex: 0 0 auto; justify-content: flex-end; align-items: center; gap: var(--space-sm); margin-top: auto; padding-top: var(--space-md); border-top: var(--border-width-xs) solid var(--color-border); }
-.personalActions > :global(button) { flex: 0 0 auto; }
-.savedMessage,
 .passwordMatch { display: flex; align-items: center; gap: var(--space-xs); margin: var(--space-sm) 0 0; color: var(--color-success-dark); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
 .passwordMismatch { margin: var(--space-sm) 0 0; color: var(--color-error-dark); font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
 .passwordSubmit { width: 100%; margin-top: auto; }
@@ -110,17 +104,14 @@
 @media (max-width: 1100px) {
   .profileCards { grid-template-columns: minmax(0, 1fr); }
   .profileCard { min-height: 0; }
-  .personalActions { margin-top: var(--space-lg); }
   .passwordSubmit { margin-top: var(--space-lg); }
 }
 
 @media (max-width: 768px) {
   .profileHero { grid-template-columns: calc(var(--space-2xl) * 2) minmax(0, 1fr); gap: var(--space-md); }
-  .profileHero > :global(button) { grid-column: 1 / -1; justify-self: stretch; }
   .profileAvatar { width: calc(var(--space-2xl) * 2); height: calc(var(--space-2xl) * 2); }
   .profileIdentity > strong { font-size: var(--text-h5-size); line-height: var(--text-h5-line); }
   .profileRole { white-space: normal; }
   .cardHeading p { font-size: var(--text-p12-size); line-height: var(--text-p12-line); }
-  .personalActions { flex-wrap: wrap; }
   .passwordCriteria { flex-wrap: wrap; justify-content: flex-start; }
 }
