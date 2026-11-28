@@ -1,140 +1,419 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AdminIcon from "@/app/admin/_components/AdminIcons";
 import { AdminTableIconButton, Button, Field, InfoBanner, Modal, PageHeading, SearchField, StatusBadge, adminStyles as s } from "@/app/admin/_components/AdminUI";
 import { EmptyState, ErrorState, LoadingState } from "@/components/lms/state";
 import { ApiError, apiRequest } from "@/lib/api";
-import { useAdminMutation, useAdminResource } from "@/app/admin/_components/useAdminApi";
+import { useAdminResource } from "@/app/admin/_components/useAdminApi";
 
-type AcademicYear = { id: number; name: string; start_year: number; is_active: boolean };
-type Semester = { id: number; academic_year_id: number; semester_number: number; name: string; start_date?: string | null; end_date?: string | null; is_active: boolean; academicYear?: { id: number; name: string; start_year: number } };
-type YearRow = { id: number; year: string; status: string; note: string; range: string; rombel: string; students: string; semester?: Semester };
+type AcademicYear = {
+  id: number;
+  name: string;
+  start_year: number;
+  is_active: boolean;
+  is_deleted?: boolean;
+  class_rooms_count?: number;
+  students_count?: number;
+};
+
+type Semester = {
+  id: number;
+  academic_year_id: number;
+  semester_number: number;
+  name: string;
+  start_date?: string | null;
+  end_date?: string | null;
+  is_active: boolean;
+  is_deleted?: boolean;
+  academic_year?: AcademicYear;
+};
+
+type YearRow = {
+  year: string;
+  status: string;
+  note: string;
+  range: string;
+  rombel: string;
+  students: string;
+  semester: Semester;
+};
+
+type SemesterForm = {
+  academicYearId: string;
+  semesterNumber: string;
+  name: string;
+  startDate: string;
+  endDate: string;
+  isActive: boolean;
+};
+
+const emptySemesterForm: SemesterForm = {
+  academicYearId: "",
+  semesterNumber: "1",
+  name: "Semester Ganjil",
+  startDate: "",
+  endDate: "",
+  isActive: false,
+};
 
 const dateValue = (value?: string | null) => value ? value.slice(0, 10) : "";
-const periodStatus = (semester: Semester) => {
+
+function todayValue() {
+  const today = new Date();
+  return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+}
+
+function periodStatus(semester: Semester) {
   if (semester.is_active) return "Aktif";
-  const now = new Date().toISOString().slice(0, 10);
-  if (semester.start_date && semester.start_date.slice(0, 10) > now) return "Mendatang";
-  if (semester.end_date && semester.end_date.slice(0, 10) < now) return "Selesai";
+  const today = todayValue();
+  if (semester.start_date && dateValue(semester.start_date) > today) return "Mendatang";
+  if (semester.end_date && dateValue(semester.end_date) < today) return "Selesai";
   return "—";
-};
+}
+
+function displayDate(value?: string | null) {
+  const date = dateValue(value);
+  return date ? new Date(`${date}T00:00:00`).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : "—";
+}
+
+function displayCount(value?: number) {
+  return typeof value === "number" ? value.toLocaleString("id-ID") : "—";
+}
+
+function semesterLabel(number: number) {
+  return number === 1 ? "Ganjil" : "Genap";
+}
+
+function academicYearForSemester(years: AcademicYear[], semester: Semester) {
+  const listedYear = years.find((year) => year.id === semester.academic_year_id);
+  const nestedYear = semester.academic_year;
+  if (!listedYear) return nestedYear;
+  return {
+    ...nestedYear,
+    ...listedYear,
+    class_rooms_count: listedYear.class_rooms_count ?? nestedYear?.class_rooms_count,
+    students_count: listedYear.students_count ?? nestedYear?.students_count,
+  };
+}
+
+function errorMessage(cause: unknown) {
+  return cause instanceof Error ? cause.message : "Permintaan belum dapat diproses. Silakan coba lagi.";
+}
 
 export default function TahunAjaranPage() {
   const router = useRouter();
   const yearResource = useAdminResource<AcademicYear[]>("academic-years");
   const semesterResource = useAdminResource<Semester[]>("semesters");
-  const apiYears = yearResource.data ?? [];
-  const apiSemesters = semesterResource.data ?? [];
-  const rows: YearRow[] = apiSemesters.map((semester) => {
-    const academicYear = apiYears.find((item) => item.id === semester.academic_year_id) || semester.academicYear;
-    const yearName = academicYear?.name || "—";
-    const status = periodStatus(semester);
-    return { id: semester.academic_year_id, year: `${yearName} – ${semester.name}`, status, note: semester.is_active ? "Periode Aktif" : semester.name, range: `${semester.start_date ? new Date(`${dateValue(semester.start_date)}T00:00:00`).toLocaleDateString("id-ID") : "—"} – ${semester.end_date ? new Date(`${dateValue(semester.end_date)}T00:00:00`).toLocaleDateString("id-ID") : "—"}`, rombel: "—", students: "—", semester };
-  });
+  const apiYears = (yearResource.data ?? []).filter((year) => !year.is_deleted);
+  const apiSemesters = (semesterResource.data ?? []).filter((semester) => !semester.is_deleted);
   const [notice, setNotice] = useState("");
   const [keyword, setKeyword] = useState("");
   const [tab, setTab] = useState("Semua Status");
-  const [modal, setModal] = useState<"add" | "activate" | "edit" | null>(null);
+  const [modal, setModal] = useState<"add-year" | "add-semester" | "edit-semester" | "activate" | null>(null);
   const [selected, setSelected] = useState<YearRow | null>(null);
   const [deleteSelected, setDeleteSelected] = useState<YearRow | null>(null);
-  const [form, setForm] = useState({ academic: "", gStart: "", gEnd: "", eStart: "", eEnd: "" });
+  const [form, setForm] = useState<SemesterForm>(emptySemesterForm);
+  const [newYearName, setNewYearName] = useState("");
   const [pending, setPending] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
-  const createdYearId = useRef<number | null>(null);
-  const createdSemesterNumbers = useRef(new Set<number>());
 
-  const refresh = async () => { await Promise.all([yearResource.reload(), semesterResource.reload()]); };
-  const createYear = useAdminMutation<AcademicYear>("POST", "academic-years", undefined, refresh);
-  const activateYear = useAdminMutation("POST", `academic-years/${selected?.id ?? 0}/activate`, undefined, refresh);
-  const deleteYear = useAdminMutation("DELETE", `academic-years/${deleteSelected?.id ?? 0}`, async () => { setNotice("Tahun ajaran berhasil dihapus."); setDeleteSelected(null); await refresh(); }, refresh);
-  const filtered = useMemo(() => rows.filter((item) => (tab === "Semua Status" || item.status === tab) && item.year.toLowerCase().includes(keyword.toLowerCase())), [rows, tab, keyword]);
-  const activeSemester = apiSemesters.find((item) => item.is_active);
-  const activeYear = apiYears.find((item) => item.id === activeSemester?.academic_year_id) || apiYears.find((item) => item.is_active);
-  const nextSemester = apiSemesters.filter((item) => !item.is_active && item.start_date && item.start_date.slice(0, 10) > new Date().toISOString().slice(0, 10)).sort((a, b) => String(a.start_date).localeCompare(String(b.start_date)))[0];
-  const activeSemesterCount = apiSemesters.length;
+  const rows: YearRow[] = apiSemesters.map((semester) => {
+    const academicYear = academicYearForSemester(apiYears, semester);
+    const yearName = academicYear?.name ?? "—";
+    const status = periodStatus(semester);
+    const period = `${displayDate(semester.start_date)} – ${displayDate(semester.end_date)}`;
+    return {
+      year: `${yearName} – ${semester.name}`,
+      status,
+      note: `Semester ${semester.semester_number} · ${semesterLabel(semester.semester_number)}`,
+      range: period,
+      rombel: `${displayCount(academicYear?.class_rooms_count)} Rombel`,
+      students: `${displayCount(academicYear?.students_count)} Siswa`,
+      semester,
+    };
+  });
+
+  const refresh = async () => {
+    await Promise.all([yearResource.reload(), semesterResource.reload()]);
+  };
+
+  const filtered = useMemo(() => rows.filter((item) =>
+    (tab === "Semua Status" || item.status === tab) && item.year.toLowerCase().includes(keyword.toLowerCase())
+  ), [rows, tab, keyword]);
+
+  const activeSemester = apiSemesters.find((semester) => semester.is_active);
+  const activeYear = (activeSemester && academicYearForSemester(apiYears, activeSemester))
+    ?? apiYears.find((year) => year.is_active);
+  const nextSemester = apiSemesters
+    .filter((semester) => !semester.is_active && semester.start_date && dateValue(semester.start_date) > todayValue())
+    .sort((left, right) => dateValue(left.start_date).localeCompare(dateValue(right.start_date)))[0];
   const loading = yearResource.loading || semesterResource.loading;
   const loadError = yearResource.error || semesterResource.error;
 
-  const submitYear = async (mode: "add" | "edit") => {
-    setNotice(""); setFieldErrors({});
-    if (mode === "edit") {
-      const semester = selected?.semester;
-      if (!semester) { setNotice("Semester tidak tersedia untuk diperbarui."); return; }
-      setPending(true);
-      try {
-        await apiRequest(`admin/semesters/${semester.id}`, { method: "PUT", body: JSON.stringify({ academic_year_id: semester.academic_year_id, semester_number: semester.semester_number, name: semester.name, start_date: form.gStart || null, end_date: form.gEnd || null }) });
-        setNotice("Konfigurasi semester berhasil diperbarui."); setModal(null); await refresh();
-      } catch (cause) {
-        if (cause instanceof ApiError) { setFieldErrors(cause.fieldErrors); if (cause.status === 401) router.replace("/login?role=admin&reason=session-expired"); if (cause.status === 404) await refresh(); }
-        setNotice(cause instanceof Error ? cause.message : "Perubahan belum dapat disimpan.");
-      } finally { setPending(false); }
+  const openAddYear = () => {
+    setNotice("");
+    setFieldErrors({});
+    setNewYearName("");
+    setModal("add-year");
+  };
+
+  const openAddSemester = () => {
+    setNotice("");
+    setFieldErrors({});
+    setSelected(null);
+    setForm({ ...emptySemesterForm, academicYearId: String(activeYear?.id ?? apiYears[0]?.id ?? "") });
+    setModal("add-semester");
+  };
+
+  const openEditSemester = (row: YearRow) => {
+    setNotice("");
+    setFieldErrors({});
+    setSelected(row);
+    setForm({
+      academicYearId: String(row.semester.academic_year_id),
+      semesterNumber: String(row.semester.semester_number),
+      name: row.semester.name,
+      startDate: dateValue(row.semester.start_date),
+      endDate: dateValue(row.semester.end_date),
+      isActive: row.semester.is_active,
+    });
+    setModal("edit-semester");
+  };
+
+  const handleRequestError = async (cause: unknown) => {
+    if (cause instanceof ApiError) {
+      setFieldErrors(cause.fieldErrors);
+      if (cause.status === 401) router.replace("/login?role=admin&reason=session-expired");
+      if (cause.status === 404) await refresh();
+    }
+    setNotice(errorMessage(cause));
+  };
+
+  const submitAcademicYear = async () => {
+    setNotice("");
+    setFieldErrors({});
+    const match = newYearName.trim().match(/^(\d{4})\/(\d{4})$/);
+    if (!match) {
+      setFieldErrors({ name: ["Masukkan tahun ajaran dengan format YYYY/YYYY."] });
       return;
     }
-    const match = form.academic.match(/^(\d{4})\s*\/\s*(\d{4})$/);
-    if (!match) { setNotice("Masukkan tahun ajaran dengan format YYYY/YYYY."); return; }
-    if (!form.gStart || !form.gEnd || !form.eStart || !form.eEnd) { setNotice("Lengkapi tanggal mulai dan selesai untuk kedua semester."); return; }
+
     setPending(true);
     try {
-      let yearId = createdYearId.current;
-      if (!yearId) {
-        const created = await createYear.run({ name: `${match[1]}/${match[2]}`, start_year: Number(match[1]) });
-        if (!created?.id) { setFieldErrors(createYear.fieldErrors); setNotice(createYear.error || "Tahun ajaran gagal disimpan."); return; }
-        yearId = created.id; createdYearId.current = yearId;
-      }
-      const configurations = [
-        { semester_number: 1, name: "Ganjil", start_date: form.gStart, end_date: form.gEnd },
-        { semester_number: 2, name: "Genap", start_date: form.eStart, end_date: form.eEnd },
-      ];
-      for (const config of configurations) {
-        if (createdSemesterNumbers.current.has(config.semester_number)) continue;
-        await apiRequest("admin/semesters", { method: "POST", body: JSON.stringify({ academic_year_id: yearId, ...config }) });
-        createdSemesterNumbers.current.add(config.semester_number);
-      }
-      setNotice("Tahun ajaran dan semester berhasil ditambahkan."); setModal(null); createdYearId.current = null; createdSemesterNumbers.current.clear(); await refresh();
+      await apiRequest("admin/academic-years", {
+        method: "POST",
+        body: JSON.stringify({ name: `${match[1]}/${match[2]}`, start_year: Number(match[1]) }),
+      });
+      setNotice("Tahun ajaran berhasil ditambahkan.");
+      setModal(null);
+      await refresh();
     } catch (cause) {
-      if (cause instanceof ApiError) { setFieldErrors(cause.fieldErrors); if (cause.status === 401) router.replace("/login?role=admin&reason=session-expired"); if (cause.status === 404) await refresh(); }
-      setNotice(cause instanceof Error ? cause.message : "Data kalender gagal disimpan.");
-    } finally { setPending(false); }
+      await handleRequestError(cause);
+    } finally {
+      setPending(false);
+    }
+  };
+
+  const submitSemester = async () => {
+    setNotice("");
+    setFieldErrors({});
+    const errors: Record<string, string[]> = {};
+    const semesterNumber = Number(form.semesterNumber);
+    if (!apiYears.some((year) => year.id === Number(form.academicYearId))) errors.academic_year_id = ["Pilih tahun ajaran yang tersedia."];
+    if (semesterNumber !== 1 && semesterNumber !== 2) errors.semester_number = ["Pilih Semester Ganjil atau Genap."];
+    if (!form.name.trim()) errors.name = ["Nama semester wajib diisi."];
+    else if (form.name.trim().length > 100) errors.name = ["Nama semester maksimal 100 karakter."];
+    if (form.startDate && form.endDate && form.endDate < form.startDate) errors.end_date = ["Tanggal selesai harus sama dengan atau setelah tanggal mulai."];
+    if (Object.keys(errors).length) {
+      setFieldErrors(errors);
+      return;
+    }
+
+    const payload: Record<string, string | number | boolean> = {
+      academic_year_id: Number(form.academicYearId),
+      semester_number: semesterNumber,
+      name: form.name.trim(),
+      ...(form.startDate ? { start_date: form.startDate } : {}),
+      ...(form.endDate ? { end_date: form.endDate } : {}),
+      ...(modal === "add-semester" ? { is_active: form.isActive } : {}),
+    };
+
+    setPending(true);
+    try {
+      if (modal === "edit-semester" && selected) {
+        await apiRequest(`admin/semesters/${selected.semester.id}`, { method: "PUT", body: JSON.stringify(payload) });
+        setNotice("Semester berhasil diperbarui.");
+      } else {
+        await apiRequest("admin/semesters", { method: "POST", body: JSON.stringify(payload) });
+        setNotice(form.isActive ? "Semester berhasil ditambahkan dan diaktifkan." : "Semester berhasil ditambahkan.");
+      }
+      setModal(null);
+      await refresh();
+    } catch (cause) {
+      await handleRequestError(cause);
+    } finally {
+      setPending(false);
+    }
   };
 
   const activateSelected = async () => {
-    if (!selected?.semester) { setNotice("Semester yang dipilih tidak tersedia."); return; }
+    if (!selected) return;
+    setNotice("");
     setPending(true);
     try {
-      const activatedYear = await activateYear.run();
-      if (!activatedYear) return;
       await apiRequest(`admin/semesters/${selected.semester.id}/activate`, { method: "POST" });
-      setNotice("Tahun ajaran dan semester berhasil diaktifkan."); setModal(null); await refresh();
+      setNotice("Semester aktif berhasil diperbarui.");
+      setModal(null);
+      await refresh();
     } catch (cause) {
-      if (cause instanceof ApiError && cause.status === 401) router.replace("/login?role=admin&reason=session-expired");
-      if (cause instanceof ApiError && cause.status === 404) await refresh();
-      setNotice(cause instanceof Error ? cause.message : "Semester gagal diaktifkan.");
-    } finally { setPending(false); }
+      await handleRequestError(cause);
+    } finally {
+      setPending(false);
+    }
+  };
+
+  const deleteSemester = async () => {
+    if (!deleteSelected) return;
+    setNotice("");
+    setPending(true);
+    try {
+      await apiRequest(`admin/semesters/${deleteSelected.semester.id}`, { method: "DELETE" });
+      setNotice("Semester berhasil dihapus.");
+      setDeleteSelected(null);
+      await refresh();
+    } catch (cause) {
+      await handleRequestError(cause);
+    } finally {
+      setPending(false);
+    }
+  };
+
+  const openActivate = (row: YearRow) => {
+    setNotice("");
+    setSelected(row);
+    setModal("activate");
   };
 
   return <>
-    <PageHeading breadcrumbs={["LMS", "Master Data", "Tahun Ajaran"]} title="Master Data Tahun Ajaran & Semester" description="Konfigurasi tahun akademik, semester aktif, dan transisi rombongan belajar." actions={<Button icon="calendar-add-linear" onClick={() => { createdYearId.current = null; createdSemesterNumbers.current.clear(); setForm({ academic: "", gStart: "", gEnd: "", eStart: "", eEnd: "" }); setModal("add"); }}>Tambah Tahun Ajaran</Button>} />
+    <PageHeading
+      breadcrumbs={["LMS", "Master Data", "Tahun Ajaran & Semester"]}
+      title="Master Data Tahun Ajaran & Semester"
+      description="Konfigurasi tahun akademik, semester aktif, dan transisi rombongan belajar."
+      actions={<div className={s.tableActions}><Button variant="outline" icon="calendar-add-linear" onClick={openAddYear}>Tambah Tahun Ajaran</Button><Button icon="calendar-add-linear" onClick={openAddSemester}>Tambah Semester</Button></div>}
+    />
     {notice && <InfoBanner tone={notice.includes("berhasil") ? "success" : "danger"}>{notice}</InfoBanner>}
     {loading && <LoadingState title="Memuat tahun ajaran dan semester..." />}
     {loadError && <ErrorState title={loadError} action={<Button variant="outline" onClick={() => void refresh()}>Coba Lagi</Button>} />}
+
     <section className={s.yearHero}>
-      <div><div className={s.heroTags}><span>TAHUN AJARAN BERJALAN</span><span>STATUS: {activeYear ? "AKTIF" : "—"}</span><span>ID: {activeYear?.id ?? "—"}</span></div><h2>{activeYear?.name ?? "—"}{activeSemester ? ` – Semester ${activeSemester.name}` : ""}</h2><div className={s.heroTags}><span><AdminIcon name="calendar-linear" size={12} /> {activeSemester ? `${activeSemester.start_date ? dateValue(activeSemester.start_date) : "—"} – ${activeSemester.end_date ? dateValue(activeSemester.end_date) : "—"}` : "—"}</span><span><AdminIcon name="users-group-rounded-linear" size={12} /> —</span></div></div>
-      <div className={s.heroActions}><Button variant="outline" icon="pen-linear" onClick={() => { if (activeYear && activeSemester) { const row = rows.find((item) => item.semester?.id === activeSemester.id); if (row) { setSelected(row); setForm({ academic: activeYear.name, gStart: dateValue(activeSemester.start_date), gEnd: dateValue(activeSemester.end_date), eStart: "", eEnd: "" }); setModal("edit"); } } }}>Ubah Konfigurasi</Button><Button variant="outline" icon="refresh-circle-linear" onClick={() => setNotice("Proses kenaikan kelas belum tersedia di layanan.")}>Proses Kenaikan Kelas</Button></div>
+      <div>
+        <div className={s.heroTags}><span>TAHUN AJARAN BERJALAN</span><span>STATUS: {activeYear ? "AKTIF" : "—"}</span><span>ID: {activeYear?.id ?? "—"}</span></div>
+        <h2>{activeYear?.name ?? "—"}{activeSemester ? ` – ${activeSemester.name}` : ""}</h2>
+        <div className={s.heroTags}>
+          <span><AdminIcon name="calendar-linear" size={12} /> {activeSemester ? `${displayDate(activeSemester.start_date)} – ${displayDate(activeSemester.end_date)}` : "—"}</span>
+          <span><AdminIcon name="users-group-rounded-linear" size={12} /> {displayCount(activeYear?.class_rooms_count)} Rombel · {displayCount(activeYear?.students_count)} Siswa</span>
+        </div>
+      </div>
+      <div className={s.heroActions}>
+        <Button variant="outline" icon="pen-linear" disabled={!activeSemester} onClick={() => {
+          const row = rows.find((item) => item.semester.id === activeSemester?.id);
+          if (row) openEditSemester(row);
+        }}>Ubah Konfigurasi</Button>
+        <Button variant="outline" icon="refresh-circle-linear" onClick={() => setNotice("Proses kenaikan kelas belum tersedia di layanan.")}>Proses Kenaikan Kelas</Button>
+      </div>
     </section>
-    <div className={s.twoCards}><div className={s.metricCard}><small>Total Tahun Akademik</small><strong>{apiYears.length} Periode</strong><p>{activeSemesterCount} Semester Tercatat</p></div><div className={s.metricCard}><small>Periode Mendatang</small><strong>{nextSemester ? `${nextSemester.academicYear?.name || apiYears.find((item) => item.id === nextSemester.academic_year_id)?.name || "—"} ${nextSemester.name}` : "—"}</strong><p><span style={{ color: "var(--color-warning-dark)" }}>{nextSemester?.start_date ? `◷ Dimulai ${dateValue(nextSemester.start_date)}` : "—"}</span></p></div></div>
-    <div className={s.panel} style={{ marginBottom: "var(--space-lg)" }}><div className={s.panelTitle}><h2>Siklus Akademik Terjadwal</h2><span>—</span></div><div className={s.progressSegments}><span /><span /><span /></div><div className={s.heroTags} style={{ marginTop: "var(--space-sm)" }}><span style={{ color: "var(--color-text-secondary)", background: "transparent", border: 0 }}>● Pembelajaran Aktif</span><span style={{ color: "var(--color-text-secondary)", background: "transparent", border: 0 }}>● Asesmen Akhir &amp; Rapor</span><span style={{ color: "var(--color-text-secondary)", background: "transparent", border: 0 }}>● {nextSemester ? `Transisi ${nextSemester.name} ${nextSemester.academicYear?.name || ""}` : "—"}</span></div></div>
-    <div className={s.panel}><div className={s.toolbar}><div className={s.tabs}>{["Semua Status", "Aktif", "Mendatang", "Selesai"].map((item) => <button key={item} aria-pressed={tab === item} onClick={() => setTab(item)}>{item}</button>)}</div><div className={s.toolbarSpacer} /><SearchField value={keyword} onChange={setKeyword} placeholder="Saring tahun ajaran..." /></div>
-      <div className={s.tableWrap}><table className={s.dataTable}><thead><tr><th>Tahun Ajaran &amp; Semester</th><th>Rentang Waktu Kalender</th><th>Rombel &amp; Siswa</th><th>Status Operasional</th><th>Aksi Manajemen</th></tr></thead>
-        <tbody>{filtered.map((item) => <tr key={item.semester?.id ?? item.id}><td><span className={s.tableStrong}>{item.year}</span><span className={s.tableSub}>{item.note}</span></td><td>{item.range}</td><td><strong>{item.rombel}</strong><span className={s.tableSub}>{item.students}</span></td><td><StatusBadge tone={item.status === "Aktif" ? "success" : item.status === "Mendatang" ? "info" : "neutral"}>{item.status}</StatusBadge></td><td><div className={s.tableActions}>{item.status !== "Aktif" && <Button variant="ghost" onClick={() => { setSelected(item); setForm({ academic: item.year.split(" – ")[0], gStart: dateValue(item.semester?.start_date), gEnd: dateValue(item.semester?.end_date), eStart: "", eEnd: "" }); setModal("edit"); }}>Edit</Button>}{item.status !== "Aktif" && <Button onClick={() => { setSelected(item); setModal("activate"); }}>Jadikan Aktif</Button>}{item.status === "Aktif" && <span className={s.tableSub}>Sedang berjalan</span>}{item.semester && apiSemesters.findIndex((semester) => semester.academic_year_id === item.id) === apiSemesters.findIndex((semester) => semester.id === item.semester?.id) && <AdminTableIconButton icon="trash-bin-trash-linear" title="Hapus" ariaLabel={`Hapus tahun ajaran ${item.year}`} disabled={deleteYear.loading} onClick={() => setDeleteSelected(item)} />}</div></td></tr>)}{!loading && filtered.length === 0 && <tr><td colSpan={5} className={s.emptyCell}>{rows.length ? "Tidak ada periode yang cocok." : <EmptyState title="Belum ada semester" description="Semester yang tersedia dari backend akan muncul di sini." />}</td></tr>}</tbody>
-      </table></div><div className={s.pagination}><span>Menampilkan {filtered.length} dari {rows.length} Semester</span><div className={s.pageControls}><button disabled>‹</button><button className={s.pageCurrent}>1</button></div></div>
+
+    <div className={s.twoCards}>
+      <div className={s.metricCard}><small>Total Tahun Akademik</small><strong>{apiYears.length.toLocaleString("id-ID")} Periode</strong><p>{apiSemesters.length.toLocaleString("id-ID")} Semester Tercatat</p></div>
+      <div className={s.metricCard}><small>Periode Mendatang</small><strong>{nextSemester ? `${nextSemester.academic_year?.name ?? apiYears.find((year) => year.id === nextSemester.academic_year_id)?.name ?? "—"} ${nextSemester.name}` : "—"}</strong><p><span style={{ color: "var(--color-warning-dark)" }}>{nextSemester?.start_date ? `Dimulai ${displayDate(nextSemester.start_date)}` : "—"}</span></p></div>
     </div>
-    {modal === "add" && <Modal title="Tambah Tahun Ajaran Baru" subtitle="Konfigurasi satu tahun akademik lengkap dengan semester Ganjil dan Genap sekaligus." onClose={() => { if (!pending) setModal(null); }} footer={<><Button variant="outline" disabled={pending} onClick={() => setModal(null)}>Batal</Button><Button icon="check-linear" disabled={pending} onClick={() => void submitYear("add")}>{pending ? "Menyimpan..." : "Simpan Tahun Ajaran"}</Button></>}>
-      <InfoBanner>Kedua semester dibuat sekaligus. Status semester mengikuti konfigurasi yang tersimpan.</InfoBanner><Field label="Tahun Akademik" value={form.academic} onChange={(value) => setForm({ ...form, academic: value })} error={fieldErrors.name?.[0] ?? fieldErrors.start_year?.[0]} required /><div className={s.formSectionTitle}>Konfigurasi Semester Ganjil (Gasal) <StatusBadge tone="primary">Semester 1</StatusBadge></div><div className={s.formGrid}><Field label="Tanggal Mulai" value={form.gStart} onChange={(value) => setForm({ ...form, gStart: value })} error={fieldErrors.start_date?.[0]} required /><Field label="Tanggal Selesai" value={form.gEnd} onChange={(value) => setForm({ ...form, gEnd: value })} error={fieldErrors.end_date?.[0]} required /></div><div className={s.formSectionTitle}>Konfigurasi Semester Genap <StatusBadge tone="warning">Semester 2</StatusBadge></div><div className={s.formGrid}><Field label="Tanggal Mulai" value={form.eStart} onChange={(value) => setForm({ ...form, eStart: value })} required /><Field label="Tanggal Selesai" value={form.eEnd} onChange={(value) => setForm({ ...form, eEnd: value })} required /></div><div className={s.formSectionTitle}>Aturan &amp; Validasi Kalender</div><InfoBanner tone="success">Semester Genap dimulai setelah Semester Ganjil selesai.</InfoBanner><InfoBanner tone="success">Tahun ajaran belum pernah terdaftar sebelumnya.</InfoBanner><InfoBanner>Durasi efektif Ganjil: — • Genap: —</InfoBanner>
+
+    <div className={s.panel} style={{ marginBottom: "var(--space-lg)" }}>
+      <div className={s.panelTitle}><h2>Siklus Akademik Terjadwal</h2><span>{activeSemester ? activeSemester.name : "—"}</span></div>
+      <div className={s.progressSegments}><span /><span /><span /></div>
+      <div className={s.heroTags} style={{ marginTop: "var(--space-sm)" }}>
+        <span style={{ color: "var(--color-text-secondary)", background: "transparent", border: 0 }}>● {activeSemester ? `Aktif: ${activeSemester.name}` : "Belum ada semester aktif"}</span>
+        <span style={{ color: "var(--color-text-secondary)", background: "transparent", border: 0 }}>● {activeSemester?.end_date ? `Berakhir ${displayDate(activeSemester.end_date)}` : "Tanggal akhir belum ditentukan"}</span>
+        <span style={{ color: "var(--color-text-secondary)", background: "transparent", border: 0 }}>● {nextSemester ? `Berikutnya: ${nextSemester.name}` : "Belum ada semester mendatang"}</span>
+      </div>
+    </div>
+
+    <div className={s.panel}>
+      <div className={s.toolbar}>
+        <div className={s.tabs}>{["Semua Status", "Aktif", "Mendatang", "Selesai"].map((item) => <button key={item} aria-pressed={tab === item} onClick={() => setTab(item)}>{item}</button>)}</div>
+        <div className={s.toolbarSpacer} />
+        <SearchField value={keyword} onChange={setKeyword} placeholder="Saring tahun ajaran atau semester..." />
+      </div>
+      <div className={s.tableWrap}>
+        <table className={s.dataTable}>
+          <thead><tr><th>Tahun Ajaran &amp; Semester</th><th>Rentang Waktu Kalender</th><th>Rombel &amp; Siswa</th><th>Status Operasional</th><th>Aksi Manajemen</th></tr></thead>
+          <tbody>
+            {filtered.map((item) => <tr key={item.semester.id}>
+              <td><span className={s.tableStrong}>{item.year}</span><span className={s.tableSub}>{item.note}</span></td>
+              <td>{item.range}</td>
+              <td><strong>{item.rombel}</strong><span className={s.tableSub}>{item.students}</span></td>
+              <td><StatusBadge tone={item.status === "Aktif" ? "success" : item.status === "Mendatang" ? "info" : "neutral"}>{item.status}</StatusBadge></td>
+              <td><div className={s.tableActions}>
+                <Button variant="ghost" onClick={() => openEditSemester(item)}>Edit</Button>
+                {item.status !== "Aktif" && <Button onClick={() => openActivate(item)}>Jadikan Aktif</Button>}
+                <AdminTableIconButton icon="trash-bin-trash-linear" title="Hapus semester" ariaLabel={`Hapus ${item.year}`} disabled={pending} onClick={() => { setNotice(""); setDeleteSelected(item); }} />
+              </div></td>
+            </tr>)}
+            {!loading && filtered.length === 0 && <tr><td colSpan={5} className={s.emptyCell}>{rows.length ? "Tidak ada periode yang cocok." : <EmptyState title="Belum ada semester" description="Semester yang tersedia dari backend akan muncul di sini." />}</td></tr>}
+          </tbody>
+        </table>
+      </div>
+      <div className={s.pagination}><span>Menampilkan {filtered.length.toLocaleString("id-ID")} dari {rows.length.toLocaleString("id-ID")} Semester</span></div>
+    </div>
+
+    {modal === "add-year" && <Modal title="Tambah Tahun Ajaran" subtitle="Tambahkan tahun ajaran agar dapat dipilih saat membuat semester." onClose={() => { if (!pending) setModal(null); }} footer={<><Button variant="outline" disabled={pending} onClick={() => setModal(null)}>Batal</Button><Button icon="check-linear" disabled={pending} onClick={() => void submitAcademicYear()}>{pending ? "Menyimpan..." : "Simpan Tahun Ajaran"}</Button></>}>
+      <Field label="Tahun Ajaran" value={newYearName} onChange={setNewYearName} placeholder="2026/2027" error={fieldErrors.name?.[0] ?? fieldErrors.start_year?.[0]} required maxLength={9} />
+      {notice && <InfoBanner tone="danger">{notice}</InfoBanner>}
     </Modal>}
-    {modal === "activate" && <Modal title={`Jadikan ${selected?.year ?? "periode"} sebagai periode aktif?`} onClose={() => { if (!activateYear.loading && !pending) setModal(null); }} footer={<><Button variant="outline" disabled={pending} onClick={() => setModal(null)}>Batal</Button><Button disabled={activateYear.loading || pending} onClick={() => { void activateSelected(); }}>Jadikan Aktif</Button></>}><InfoBanner tone="warning">Periode aktif akan diperbarui sesuai konfigurasi backend.</InfoBanner><div className={s.formSectionTitle}>Dampak perubahan</div><p className={s.pageDescription}>Perubahan periode akan disinkronkan dengan rombongan belajar dan laporan hasil belajar.</p>{activateYear.error && <InfoBanner tone="danger">{activateYear.error}</InfoBanner>}</Modal>}
-    {modal === "edit" && <Modal title="Ubah Konfigurasi Tahun Ajaran" subtitle={selected?.year} onClose={() => { if (!pending) setModal(null); }} footer={<><Button variant="outline" disabled={pending} onClick={() => setModal(null)}>Batal</Button><Button disabled={pending} onClick={() => void submitYear("edit")}>{pending ? "Menyimpan..." : "Simpan Perubahan"}</Button></>}><div className={s.formGrid}><Field label="Tanggal Mulai" value={form.gStart} onChange={(value) => setForm({ ...form, gStart: value })} error={fieldErrors.start_date?.[0]} required /><Field label="Tanggal Selesai" value={form.gEnd} onChange={(value) => setForm({ ...form, gEnd: value })} error={fieldErrors.end_date?.[0]} required /><div className={s.formFull}><Field label="Jumlah Rombel" value="—" onChange={() => undefined} /></div></div>{notice && <InfoBanner tone="danger">{notice}</InfoBanner>}</Modal>}
-    {deleteSelected && <Modal title="Hapus tahun ajaran?" subtitle={deleteSelected.year} onClose={() => { if (!deleteYear.loading) setDeleteSelected(null); }} footer={<><Button variant="outline" disabled={deleteYear.loading} onClick={() => setDeleteSelected(null)}>Batal</Button><Button variant="danger" disabled={deleteYear.loading} onClick={() => { void deleteYear.run(); }}>{deleteYear.loading ? "Menghapus..." : "Ya, Hapus"}</Button></>}><p className={s.pageDescription}>Tahun ajaran <strong>{deleteSelected.year}</strong> akan dihapus.</p>{deleteYear.error && <InfoBanner tone="danger">{deleteYear.error}</InfoBanner>}</Modal>}
+
+    {(modal === "add-semester" || modal === "edit-semester") && <Modal title={modal === "add-semester" ? "Tambah Semester Baru" : "Edit Semester"} subtitle="Pilih tahun ajaran, semester, dan rentang tanggal kalender." onClose={() => { if (!pending) setModal(null); }} footer={<><Button variant="outline" disabled={pending} onClick={() => setModal(null)}>Batal</Button><Button icon="check-linear" disabled={pending || !apiYears.length} onClick={() => void submitSemester()}>{pending ? "Menyimpan..." : modal === "add-semester" ? "Simpan Semester" : "Simpan Perubahan"}</Button></>}>
+      {notice && <InfoBanner tone="danger">{notice}</InfoBanner>}
+      {!apiYears.length && <InfoBanner tone="warning">Belum ada tahun ajaran. Tambahkan tahun ajaran terlebih dahulu.</InfoBanner>}
+      <div className={s.formGrid}>
+        <label className={`${s.formField} ${fieldErrors.academic_year_id ? s.formFieldInvalid : ""}`}>
+          <span>Tahun Ajaran <b>*</b></span>
+          <select value={form.academicYearId} onChange={(event) => setForm({ ...form, academicYearId: event.target.value })}>
+            <option value="">Pilih tahun ajaran</option>
+            {apiYears.map((year) => <option key={year.id} value={year.id}>{year.name}</option>)}
+          </select>
+          {fieldErrors.academic_year_id?.[0] && <small className={s.fieldError}>{fieldErrors.academic_year_id[0]}</small>}
+        </label>
+        <label className={`${s.formField} ${fieldErrors.semester_number ? s.formFieldInvalid : ""}`}>
+          <span>Semester <b>*</b></span>
+          <select value={form.semesterNumber} onChange={(event) => {
+            const value = event.target.value;
+            setForm({ ...form, semesterNumber: value, name: `Semester ${semesterLabel(Number(value))}` });
+          }}>
+            <option value="1">Semester 1 — Ganjil</option>
+            <option value="2">Semester 2 — Genap</option>
+          </select>
+          {fieldErrors.semester_number?.[0] && <small className={s.fieldError}>{fieldErrors.semester_number[0]}</small>}
+        </label>
+        <div className={s.formFull}>
+          <Field label="Nama Semester" value={form.name} onChange={(value) => setForm({ ...form, name: value })} error={fieldErrors.name?.[0]} required maxLength={100} placeholder="Semester Ganjil" />
+        </div>
+        <Field label="Tanggal Mulai" type="date" value={form.startDate} onChange={(value) => setForm({ ...form, startDate: value })} error={fieldErrors.start_date?.[0]} />
+        <Field label="Tanggal Selesai" type="date" value={form.endDate} onChange={(value) => setForm({ ...form, endDate: value })} error={fieldErrors.end_date?.[0]} />
+        {modal === "add-semester" && <label className={`${s.choicePill} ${s.formFull}`}><input type="checkbox" checked={form.isActive} onChange={(event) => setForm({ ...form, isActive: event.target.checked })} />Aktifkan semester ini setelah disimpan</label>}
+      </div>
+    </Modal>}
+
+    {modal === "activate" && selected && <Modal title={`Jadikan ${selected.year} sebagai periode aktif?`} onClose={() => { if (!pending) setModal(null); }} footer={<><Button variant="outline" disabled={pending} onClick={() => setModal(null)}>Batal</Button><Button disabled={pending} onClick={() => void activateSelected()}>{pending ? "Mengaktifkan..." : "Jadikan Aktif"}</Button></>}>
+      <InfoBanner tone="warning">Semester aktif sebelumnya akan dinonaktifkan oleh layanan.</InfoBanner>
+      {notice && <InfoBanner tone="danger">{notice}</InfoBanner>}
+      <p className={s.pageDescription}>{selected.range} · {selected.semester.name}</p>
+    </Modal>}
+
+    {deleteSelected && <Modal title="Hapus semester?" subtitle={deleteSelected.year} onClose={() => { if (!pending) setDeleteSelected(null); }} footer={<><Button variant="outline" disabled={pending} onClick={() => setDeleteSelected(null)}>Batal</Button><Button variant="danger" disabled={pending} onClick={() => void deleteSemester()}>{pending ? "Menghapus..." : "Ya, Hapus Semester"}</Button></>}>
+      {notice && <InfoBanner tone="danger">{notice}</InfoBanner>}
+      <p className={s.pageDescription}>Semester ini akan dihapus dari daftar tahun ajaran.</p>
+    </Modal>}
   </>;
 }
