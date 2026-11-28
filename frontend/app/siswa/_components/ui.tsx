@@ -29,6 +29,59 @@ export function Card({
     </section>
   );
 }
+
+function inlineInstructionContent(text: string, keyPrefix: string): ReactNode[] {
+  const pattern = /(\*\*[^*]+\*\*|__[^_]+__|~~[^~]+~~|\*[^*]+\*|\[[^\]]+\]\((?:https?:\/\/|mailto:)[^)]+\))/g;
+  const output: ReactNode[] = [];
+  let cursor = 0;
+  let index = 0;
+  for (const match of text.matchAll(pattern)) {
+    const value = match[0];
+    const start = match.index ?? 0;
+    if (start > cursor) output.push(text.slice(cursor, start));
+    const key = `${keyPrefix}-${index++}`;
+    if (value.startsWith("**")) output.push(<strong key={key}>{value.slice(2, -2)}</strong>);
+    else if (value.startsWith("__")) output.push(<u key={key}>{value.slice(2, -2)}</u>);
+    else if (value.startsWith("~~")) output.push(<s key={key}>{value.slice(2, -2)}</s>);
+    else if (value.startsWith("*")) output.push(<em key={key}>{value.slice(1, -1)}</em>);
+    else {
+      const link = value.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+      if (link) output.push(<a key={key} href={link[2]} target="_blank" rel="noreferrer">{link[1]}</a>);
+      else output.push(value);
+    }
+    cursor = start + value.length;
+  }
+  if (cursor < text.length) output.push(text.slice(cursor));
+  return output;
+}
+
+export function AssessmentInstructions({ content, className }: { content: string; className?: string }) {
+  const lines = content.split(/\r?\n/);
+  const blocks: ReactNode[] = [];
+  let index = 0;
+  while (index < lines.length) {
+    if (!lines[index].trim()) { index += 1; continue; }
+    const unordered = /^\s*[-*]\s+/.test(lines[index]);
+    const ordered = /^\s*\d+\.\s+/.test(lines[index]);
+    if (unordered || ordered) {
+      const items: ReactNode[] = [];
+      while (index < lines.length && (unordered ? /^\s*[-*]\s+/.test(lines[index]) : /^\s*\d+\.\s+/.test(lines[index]))) {
+        items.push(<li key={index}>{inlineInstructionContent(lines[index].replace(unordered ? /^\s*[-*]\s+/ : /^\s*\d+\.\s+/, ""), `list-${index}`)}</li>);
+        index += 1;
+      }
+      blocks.push(unordered ? <ul key={`block-${index}`}>{items}</ul> : <ol key={`block-${index}`}>{items}</ol>);
+      continue;
+    }
+    const paragraph: string[] = [];
+    while (index < lines.length && lines[index].trim() && !/^\s*[-*]\s+/.test(lines[index]) && !/^\s*\d+\.\s+/.test(lines[index])) {
+      paragraph.push(lines[index]);
+      index += 1;
+    }
+    blocks.push(<p key={`block-${index}`}>{inlineInstructionContent(paragraph.join(" "), `paragraph-${index}`)}</p>);
+  }
+  return <div className={["assessment-instructions", className].filter(Boolean).join(" ")}>{blocks}</div>;
+}
+
 export function Badge({
   children,
   tone = "primary",

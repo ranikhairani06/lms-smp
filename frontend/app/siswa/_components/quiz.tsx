@@ -4,14 +4,13 @@ import type { MouseEvent } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { Solar } from "./icon";
-import { Badge, ButtonLink, Card, Heading, Stats } from "./ui";
+import { AssessmentInstructions, Badge, ButtonLink, Card, Heading, Stats } from "./ui";
 import {
   saveQuizAttempt,
   useQuizAttempt,
   type QuizAttempt as Attempt,
 } from "./quiz-store";
 import { StudentEmpty, StudentError, StudentLoading } from "./api-state";
-import { AssessmentInstructions } from "@/components/lms/AssessmentInstructions";
 import { useStudentResource } from "@/lib/useStudentResource";
 import { getStudentAssessment, logStudentExamActivity, saveStudentAssessmentDraft, submitStudentAssessment } from "@/lib/student-api";
 

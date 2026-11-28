@@ -5,6 +5,7 @@ import { useCallback, useMemo, useState } from "react";
 import { Solar } from "./icon";
 import {
   Attachment,
+  AssessmentInstructions,
   Badge,
   ButtonLink,
   Card,
@@ -13,7 +14,6 @@ import {
   Stats,
 } from "./ui";
 import { StudentEmpty, StudentError, StudentLoading } from "./api-state";
-import { AssessmentInstructions } from "@/components/lms/AssessmentInstructions";
 import { ApiError } from "@/lib/api";
 import { useStudentResource } from "@/lib/useStudentResource";
 import { isAllowedUploadExtension, MAX_UPLOAD_FILE_SIZE_BYTES, MAX_UPLOAD_FILE_SIZE_LABEL, uploadAccept, uploadExtensionsLabel } from "@/lib/uploadLimits";
