@@ -912,14 +912,14 @@
 
 /* Toolbar, tabel, relasi siswa, dan pagination khusus direktori orang tua. */
 .parentManagementPage { display: contents; }
+.parentManagementPage .adminStatRow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .parentManagementPage .parentTable { min-width: 100%; table-layout: fixed; }
 .parentManagementPage .parentTable th { background: var(--color-primary-tint); }
-.parentManagementPage .parentTable th:nth-child(1) { width: 30%; }
+.parentManagementPage .parentTable th:nth-child(1) { width: 40%; }
 .parentManagementPage .parentTable th:nth-child(2) { width: 18%; }
-.parentManagementPage .parentTable th:nth-child(3) { width: 12%; }
+.parentManagementPage .parentTable th:nth-child(3) { width: 16%; }
 .parentManagementPage .parentTable th:nth-child(4) { width: 12%; }
 .parentManagementPage .parentTable th:nth-child(5) { width: 14%; }
-.parentManagementPage .parentTable th:nth-child(6) { width: 14%; }
 .parentManagementPage .parentTable td { padding-top: var(--space-lg); padding-bottom: var(--space-lg); }
 .parentManagementPage .parentTable .directoryStatusBadge { border-color: transparent; }
 .parentManagementPage .parentChildren { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-xs); }
@@ -944,7 +944,7 @@
 .parentManagementPage .badge_success { color: var(--color-success-dark); background: var(--color-success-tint); }
 .parentManagementPage .parentTable th { background: var(--color-background); }
 .parentManagementPage .parentTable td { padding-top: var(--space-md); padding-bottom: var(--space-md); }
-.parentManagementPage .parentTableWrap { position: relative; overflow-x: auto; scrollbar-color: var(--color-border) var(--color-background); }
+.parentManagementPage .parentTableWrap { position: relative; width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box; overflow-x: auto; scrollbar-color: var(--color-border) var(--color-background); }
 .parentManagementPage .parentTableWrap::before,
 .parentManagementPage .adminStatRow::before {
   padding: var(--space-xs) var(--space-sm);
@@ -959,7 +959,8 @@
 .parentManagementPage .parentTableWrap::before { display: block; width: fit-content; margin: 0 0 var(--space-xs) auto; }
 .parentManagementPage .adminStatRow { position: relative; }
 .parentManagementPage .adminStatRow::before { position: absolute; top: calc(0px - var(--text-l12-line) - var(--space-sm)); right: 0; }
-.parentManagementPage .parentTable { width: 100%; min-width: 1060px; }
+.parentManagementPage .parentTable { width: 100%; min-width: 900px; }
+.parentManagementPage .parentChildren .directoryBadge { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
 .parentManagementPage .parentTable .directoryBadge { color: var(--color-primary-dark); background: var(--color-primary-tint); }
 .parentManagementPage .parentTable .directoryStatusBadge.badge_success { color: var(--color-success-dark); background: var(--color-success-tint); }
 .parentManagementPage .searchField { background: var(--color-surface); }
@@ -1668,6 +1669,30 @@
   background: var(--color-background);
 }
 .studentPagination .pageControls button.pageCurrent {
+  color: var(--color-surface);
+  background: var(--color-primary);
+}
+.parentPagination.paginationDirectory {
+  background: var(--color-background);
+  border-top: var(--border-width-xs) solid var(--color-border);
+}
+.parentPagination > span strong {
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-bold);
+}
+.parentPagination .pageControls button {
+  width: var(--space-xl);
+  height: var(--space-xl);
+  border-radius: var(--radius-s);
+  background: var(--color-primary-tint);
+}
+.parentPagination .pageControls {
+  gap: var(--space-xs);
+  padding: var(--space-xs);
+  border-radius: var(--radius-m);
+  background: var(--color-background);
+}
+.parentPagination .pageControls button.pageCurrent {
   color: var(--color-surface);
   background: var(--color-primary);
 }
