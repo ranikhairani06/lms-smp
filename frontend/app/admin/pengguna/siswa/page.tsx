@@ -33,17 +33,81 @@ import { useAdminMutation, useAdminResource } from "@/app/admin/_components/useA
 
 
 type Guardian = { name: string; relationship: string };
-type Student = { id?: number; nisn: string; name: string; rombel: string; gender: string; status: string; activity: string; nik?: string; birthplace?: string; birthdate?: string; guardian?: Guardian };
+type Student = {
+  id?: number;
+  nisn: string;
+  name: string;
+  rombel: string;
+  gender: string;
+  status: string;
+  activity: string;
+  is_logged_in?: boolean;
+  last_login_at?: string | null;
+  last_activity_at?: string | null;
+  nik?: string;
+  birthplace?: string;
+  birthdate?: string;
+  guardian?: Guardian;
+};
 const emptyStudent: Student = { nisn: "", name: "\u2014", rombel: "\u2014", gender: "\u2014", status: "", activity: "\u2014" };
 type RombelData = { id?: number; code: string; wali: string; filled: number; capacity: number | null; grade_level?: number };
 type FormFieldKey = "name" | "nisn" | "nik" | "birthplace" | "birthdate" | "gender" | "rombel";
-type ApiStudent = { id: number; nisn: string; birth_date: string; cohort_year: number; class_room_id: number | null; user?: { name?: string; is_active?: boolean; must_change_password?: boolean }; class_room?: { id: number; name: string } | null };
+type ApiStudentSummary = {
+  total_students?: number;
+  active_login_students?: number;
+  must_change_password_students?: number;
+};
+type ApiStudent = {
+  id: number;
+  user_id?: number;
+  nisn: string;
+  birth_date: string;
+  cohort_year: number;
+  class_room_id: number | null;
+  is_deleted?: boolean;
+  is_logged_in?: boolean;
+  last_login_at?: string | null;
+  last_activity_at?: string | null;
+  user?: {
+    id?: number;
+    name?: string;
+    username?: string;
+    role?: string;
+    is_active?: boolean;
+    must_change_password?: boolean;
+  };
+  class_room?: { id: number; name: string; grade_level?: number } | null;
+};
+type ApiStudentsResponse = {
+  data: ApiStudent[];
+  summary?: ApiStudentSummary;
+};
 type ApiClass = { id: number; name: string; grade_level: number; students_count: number; is_active: boolean };
 const getStudentSearchText = (student: Student) => `${student.name} ${student.nisn}`;
 const matchesStudentCategory = (student: Student, category: string) => {
   if (category === "Semua Kategori") return true;
+  if (category === "Aktif Login") return student.is_logged_in === true;
   if (category === "Terkunci") return student.status === "Nonaktif" || student.status === "Terkunci";
   return student.status === category;
+};
+
+const formatLastActivity = (value?: string | null) => {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+  const datePart = new Intl.DateTimeFormat("id-ID", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "Asia/Jakarta",
+  }).format(date);
+  const timePart = new Intl.DateTimeFormat("id-ID", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZone: "Asia/Jakarta",
+  }).format(date).replace(".", ":");
+  return `${datePart}, ${timePart}`;
 };
 
 const formatRombel = (rombel: Pick<RombelData, "code" | "wali">) => `Kelas ${rombel.code} — Wali: ${rombel.wali}`;
@@ -51,21 +115,26 @@ const formatRombel = (rombel: Pick<RombelData, "code" | "wali">) => `Kelas ${rom
 export default function SiswaPage() {
   const router = useRouter();
   const csvInputRef = useRef<HTMLInputElement>(null);
-  const studentResource = useAdminResource<ApiStudent[]>("students");
+  const studentResource = useAdminResource<ApiStudent[], ApiStudentsResponse>("students");
   const classResource = useAdminResource<ApiClass[]>("classes");
   const [studentsError, setStudentsError] = useState("");
   const [studentsSuccess, setStudentsSuccess] = useState("");
   const [importBusy, setImportBusy] = useState(false);
   const [importError, setImportError] = useState("");
   const [importSuccess, setImportSuccess] = useState("");
-  const students: Student[] = (studentResource.data ?? []).map((item) => ({
+  const rawStudents = studentResource.data ?? [];
+  const studentSummary = studentResource.raw?.summary;
+  const students: Student[] = rawStudents.map((item) => ({
     id: item.id,
     nisn: item.nisn,
     name: item.user?.name ?? "—",
     rombel: item.class_room?.name?.replace(/^Kelas\s+/i, "") ?? "—",
     gender: "—",
     status: item.user?.is_active === false ? "Nonaktif" : item.user?.must_change_password ? "Belum Ganti Password" : "Aktif",
-    activity: "—",
+    activity: formatLastActivity(item.last_activity_at ?? item.last_login_at),
+    is_logged_in: item.is_logged_in,
+    last_login_at: item.last_login_at ?? null,
+    last_activity_at: item.last_activity_at ?? null,
     birthdate: item.birth_date,
   }));
   const rombelData: RombelData[] = (classResource.data ?? []).map((item) => ({
@@ -223,10 +292,14 @@ export default function SiswaPage() {
     );
   };
 
+  const totalStudents = studentSummary?.total_students ?? rawStudents.length;
+  const activeLoginStudents = studentSummary?.active_login_students ?? rawStudents.filter((item) => item.is_logged_in).length;
+  const mustChangePasswordStudents = studentSummary?.must_change_password_students ?? rawStudents.filter((item) => item.user?.must_change_password).length;
+
   const statistics: ManagementStat[] = [
-    { label: "Total Siswa Terdaftar", value: String(students.length), icon: "users-group-rounded-linear", tone: "primary" },
-    { label: "Siswa Aktif Login", value: "—", icon: "user-check-linear", tone: "success" },
-    { label: "Belum Ganti Password", value: String((studentResource.data ?? []).filter((item) => item.user?.must_change_password).length), icon: "lock-keyhole-linear", tone: "warning" },
+    { label: "Total Siswa Terdaftar", value: String(totalStudents), icon: "users-group-rounded-linear", tone: "primary" },
+    { label: "Siswa Aktif Login", value: String(activeLoginStudents), icon: "user-check-linear", tone: "success" },
+    { label: "Belum Ganti Password", value: String(mustChangePasswordStudents), icon: "lock-keyhole-linear", tone: "warning" },
   ];
 
   return (
@@ -253,7 +326,7 @@ export default function SiswaPage() {
         {statistics.map((item) => <ManagementStatCard key={item.label} item={item} variant="student" />)}
       </div>
       {/* Bagian tampilan: pencarian dan penyaringan direktori siswa. */}
-      <ManagementToolbar keyword={keyword} onKeywordChange={changeKeyword} searchPlaceholder="Cari nama / NISN..." category={category} onCategoryChange={changeCategory} categoryOptions={["Semua Kategori", "Aktif", "Terkunci", "Belum Ganti Password"]} variant="student" />
+      <ManagementToolbar keyword={keyword} onKeywordChange={changeKeyword} searchPlaceholder="Cari nama / NISN..." category={category} onCategoryChange={changeCategory} categoryOptions={["Semua Kategori", "Aktif Login", "Aktif", "Terkunci", "Belum Ganti Password"]} variant="student" />
       {/* Bagian tampilan: tabel peserta didik beserta aksi edit, reset kredensial, dan hapus. */}
       <ManagementTable variant="student" tableClassName={`${s.dataTable} ${s.studentDataTable}`} footer={<Pagination className={s.studentPagination} variant="directory" current={page} total={Math.max(1, Math.ceil(filtered.length / 7))} onChange={setPage} label={`Menampilkan ${filtered.length ? (page - 1) * 7 + 1 : 0}-${Math.min(page * 7, filtered.length)} dari ${filtered.length} siswa`} emphasizeLabelNumbers />}>
           <thead><tr><th>NISN</th><th>Nama Siswa</th><th>Rombel / Kelas</th><th>Jenis Kelamin</th><th>Status Akun LMS</th><th>Aktivitas Terakhir</th><th>Aksi</th></tr></thead>
@@ -261,7 +334,19 @@ export default function SiswaPage() {
             {pageRows.map((student) => (
               <tr key={student.nisn}>
                 <td>{student.nisn}</td><td><span className={s.tableStrong}>{student.name}</span></td><td><span className={s.levelTag}>{student.rombel}</span></td><td>{student.gender}</td>
-        <td><StatusBadge className={s.studentStatusPill} tone={student.status.startsWith("Aktif") ? "info" : student.status.startsWith("Terkunci") ? "danger" : "neutral"}>{student.status}</StatusBadge></td><td>{student.activity}</td>
+        <td><StatusBadge className={s.studentStatusPill} tone={student.status.startsWith("Aktif") ? "info" : student.status.startsWith("Terkunci") ? "danger" : "neutral"}>{student.status}</StatusBadge></td>
+        <td>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+            {student.is_logged_in && (
+              <span
+                title="Sedang login"
+                aria-label="Sedang login"
+                style={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: "#16a34a", flexShrink: 0 }}
+              />
+            )}
+            <span>{student.activity}</span>
+          </span>
+        </td>
                 <td><ManagementActionButtons className={student.status.startsWith("Terkunci") ? s.studentLockedActions : s.studentRowActions}>
                   {student.status.startsWith("Terkunci") && <Button className={s.studentUnlockButton} onClick={() => openModal("reset", student)}>Buka Kunci</Button>}
                   <span className={s.studentIconActions}>

@@ -4,8 +4,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ApiError, apiRequest } from "@/lib/api";
 
-type ResourceState<T> = {
+type ResourceState<T, R = unknown> = {
   data: T | null;
+  raw: R | null;
   loading: boolean;
   error: string | null;
   empty: boolean;
@@ -19,9 +20,10 @@ function redirectExpired(router: ReturnType<typeof useRouter>, error: unknown) {
 }
 
 // Hook GET Admin: membedakan loading, gagal, dan respons koleksi kosong.
-export function useAdminResource<T>(path: string): ResourceState<T> {
+export function useAdminResource<T, R = unknown>(path: string): ResourceState<T, R> {
   const router = useRouter();
   const [data, setData] = useState<T | null>(null);
+  const [raw, setRaw] = useState<R | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [empty, setEmpty] = useState(false);
@@ -37,6 +39,7 @@ export function useAdminResource<T>(path: string): ResourceState<T> {
       const payload = response && typeof response === "object" && "data" in response
         ? (response as { data: T }).data
         : response as T;
+      setRaw(response as R);
       setData(payload);
       setEmpty(Array.isArray(payload) && payload.length === 0);
     } catch (cause) {
@@ -60,7 +63,7 @@ export function useAdminResource<T>(path: string): ResourceState<T> {
     };
   }, [reload]);
 
-  return { data, loading, error, empty, reload };
+  return { data, raw, loading, error, empty, reload };
 }
 
 type MutationMethod = "POST" | "PUT" | "DELETE";
