@@ -11,6 +11,23 @@ import styles from "./page.module.css";
 type AuditLog = { id: number; user?: { id: number; name?: string | null; username?: string | null; role?: string | null } | null; event: string; entity_type?: string | null; entity_id?: number | null; detail?: string | null; created_at: string };
 type AuditPage = { data: AuditLog[]; current_page: number; last_page: number; total: number; per_page: number };
 
+function normalizeAuditPage(value: unknown): AuditPage {
+  const response = value && typeof value === "object" ? value as Record<string, unknown> : {};
+  const nested = response.data && !Array.isArray(response.data) && typeof response.data === "object"
+    ? response.data as Record<string, unknown>
+    : response;
+  const meta = nested.meta && typeof nested.meta === "object" ? nested.meta as Record<string, unknown> : {};
+  const data = Array.isArray(nested.data) ? nested.data as AuditLog[] : Array.isArray(response.data) ? response.data as AuditLog[] : [];
+  const numberOr = (candidate: unknown, fallback: number) => typeof candidate === "number" && Number.isFinite(candidate) ? candidate : fallback;
+  return {
+    data,
+    current_page: numberOr(nested.current_page ?? meta.current_page, 1),
+    last_page: Math.max(1, numberOr(nested.last_page ?? meta.last_page, 1)),
+    total: numberOr(nested.total ?? meta.total, data.length),
+    per_page: numberOr(nested.per_page ?? meta.per_page, 20),
+  };
+}
+
 const dateRange = (range: string) => {
   const now = new Date();
   const to = now.toISOString().slice(0, 10);
@@ -42,7 +59,7 @@ export default function LaporanAktivitasPage() {
     const dates = dateRange(filters.range);
     if (dates.from) params.set("date_from", dates.from);
     if (dates.to) params.set("date_to", dates.to);
-    try { setResult(await apiRequest<AuditPage>(`admin/audit-logs?${params.toString()}`)); }
+    try { setResult(normalizeAuditPage(await apiRequest<unknown>(`admin/audit-logs?${params.toString()}`))); }
     catch (cause) {
       if (cause instanceof ApiError && cause.status === 401) router.replace("/login?role=admin&reason=session-expired");
       setError(cause instanceof Error ? cause.message : "Data aktivitas belum dapat dimuat.");
