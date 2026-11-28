@@ -118,12 +118,6 @@ export function AddButton({ onClick, label, icon }: { onClick: () => void; label
   return <Button className={styles.addButton} icon={icon} onClick={onClick}>{label}</Button>;
 }
 
-// Bagian tampilan: badge yang menandai tabel berisi data contoh.
-export function ExampleBadge() {
-  return <span className={styles.exampleBadge}>Data contoh</span>;
-}
-
-
 export function StatCard({
   label,
   value,

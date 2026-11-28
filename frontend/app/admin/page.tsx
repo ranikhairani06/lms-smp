@@ -91,7 +91,7 @@ export default function AdminDashboardPage() {
 
         <div>
           <Panel>
-            <div className={s.panelTitle}><div><h2>Data yang Perlu Ditindaklanjuti</h2><p>Penyimpangan data &amp; validasi administratif</p></div><span className={s.exampleBadge}>Data contoh</span></div>
+            <div className={s.panelTitle}><div><h2>Data yang Perlu Ditindaklanjuti</h2><p>Penyimpangan data &amp; validasi administratif</p></div></div>
             <div className={`${s.attentionItem} ${s.attentionWarning}`}>
               <span className={s.attentionIcon}><AdminIcon name="danger-triangle-linear" size={19} color="var(--color-warning-dark)" /></span>
               <div className={s.attentionText}>

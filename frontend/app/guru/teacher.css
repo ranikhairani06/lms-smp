@@ -338,13 +338,6 @@
   font-weight: var(--font-weight-semibold);
 }
  
-.tg-preview-label {
-  margin-left: auto;
-  color: var(--lms-text-secondary);
-  border: var(--border-width-xs) solid var(--lms-border);
-  border-radius: var(--radius-pill);
-  padding: var(--space-xs) var(--space-sm);
-}
  
  
 /* ==========================================================================
@@ -2377,7 +2370,6 @@
   .tg-document { padding: var(--space-md); }
   .tg-table-foot { flex-wrap: wrap; }
   .tg-profile-avatar { width: 80px; height: 80px; }
-  .tg-breadcrumb .tg-preview-label { font-size: var(--text-l12-size); }
 }
 
 /* Halaman daftar mata pelajaran guru: ringkasan, filter, dan kartu mapel Figma. */

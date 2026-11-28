@@ -107,7 +107,6 @@ export default function TeacherShell({ user, children }: { user: AuthUser; child
           {index > 0 && <Solar name="alt-arrow-right" />}
           <Link href={crumb.href} aria-current={index === crumbs.length - 1 ? "page" : undefined}>{crumb.label}</Link>
         </span>)}
-        <span className="tg-preview-label">Data contoh</span>
       </nav>
       <div className="tg-page" id="teacher-content">{children}</div>
       <button className="tg-mobile-logout tg-logout" onClick={() => setLogout(true)}><Solar name="logout-2" />Keluar dari akun</button>
