@@ -43,7 +43,6 @@ type YearRow = {
 type SemesterForm = {
   academicYearId: string;
   semesterNumber: string;
-  name: string;
   startDate: string;
   endDate: string;
   isActive: boolean;
@@ -52,7 +51,6 @@ type SemesterForm = {
 const emptySemesterForm: SemesterForm = {
   academicYearId: "",
   semesterNumber: "1",
-  name: "Semester Ganjil",
   startDate: "",
   endDate: "",
   isActive: false,
@@ -174,7 +172,6 @@ export default function TahunAjaranPage() {
     setForm({
       academicYearId: String(row.semester.academic_year_id),
       semesterNumber: String(row.semester.semester_number),
-      name: row.semester.name,
       startDate: dateValue(row.semester.start_date),
       endDate: dateValue(row.semester.end_date),
       isActive: row.semester.is_active,
@@ -223,8 +220,6 @@ export default function TahunAjaranPage() {
     const semesterNumber = Number(form.semesterNumber);
     if (!apiYears.some((year) => year.id === Number(form.academicYearId))) errors.academic_year_id = ["Pilih tahun ajaran yang tersedia."];
     if (semesterNumber !== 1 && semesterNumber !== 2) errors.semester_number = ["Pilih Semester Ganjil atau Genap."];
-    if (!form.name.trim()) errors.name = ["Nama semester wajib diisi."];
-    else if (form.name.trim().length > 100) errors.name = ["Nama semester maksimal 100 karakter."];
     if (form.startDate && form.endDate && form.endDate < form.startDate) errors.end_date = ["Tanggal selesai harus sama dengan atau setelah tanggal mulai."];
     if (Object.keys(errors).length) {
       setFieldErrors(errors);
@@ -234,7 +229,7 @@ export default function TahunAjaranPage() {
     const payload: Record<string, string | number | boolean> = {
       academic_year_id: Number(form.academicYearId),
       semester_number: semesterNumber,
-      name: form.name.trim(),
+      name: `Semester ${semesterLabel(semesterNumber)}`,
       ...(form.startDate ? { start_date: form.startDate } : {}),
       ...(form.endDate ? { end_date: form.endDate } : {}),
       ...(modal === "add-semester" ? { is_active: form.isActive } : {}),
@@ -373,7 +368,7 @@ export default function TahunAjaranPage() {
       {notice && <InfoBanner tone="danger">{notice}</InfoBanner>}
     </Modal>}
 
-    {(modal === "add-semester" || modal === "edit-semester") && <Modal title={modal === "add-semester" ? "Tambah Semester Baru" : "Edit Semester"} subtitle="Pilih tahun ajaran, semester, dan rentang tanggal kalender." onClose={() => { if (!pending) setModal(null); }} footer={<><Button variant="outline" disabled={pending} onClick={() => setModal(null)}>Batal</Button><Button icon="check-linear" disabled={pending || !apiYears.length} onClick={() => void submitSemester()}>{pending ? "Menyimpan..." : modal === "add-semester" ? "Simpan Semester" : "Simpan Perubahan"}</Button></>}>
+    {(modal === "add-semester" || modal === "edit-semester") && <Modal title={modal === "add-semester" ? "Tambah Semester Baru" : "Edit Semester"} subtitle="Pilih tahun ajaran, semester, dan rentang tanggal kalender." onClose={() => { if (!pending) setModal(null); }} footer={<div style={{ display: "flex", justifyContent: "flex-end", gap: "var(--space-sm)", width: "100%" }}><Button variant="outline" disabled={pending} onClick={() => setModal(null)}>Batal</Button><Button icon="check-linear" disabled={pending} onClick={() => void submitSemester()}>{pending ? "Menyimpan..." : modal === "add-semester" ? "Simpan Semester" : "Simpan Perubahan"}</Button></div>}>
       {notice && <InfoBanner tone="danger">{notice}</InfoBanner>}
       {!apiYears.length && <InfoBanner tone="warning">Belum ada tahun ajaran. Tambahkan tahun ajaran terlebih dahulu.</InfoBanner>}
       <div className={s.formGrid}>
@@ -389,16 +384,13 @@ export default function TahunAjaranPage() {
           <span>Semester <b>*</b></span>
           <select value={form.semesterNumber} onChange={(event) => {
             const value = event.target.value;
-            setForm({ ...form, semesterNumber: value, name: `Semester ${semesterLabel(Number(value))}` });
+            setForm({ ...form, semesterNumber: value });
           }}>
-            <option value="1">Semester 1 — Ganjil</option>
-            <option value="2">Semester 2 — Genap</option>
+            <option value="1">Semester Ganjil</option>
+            <option value="2">Semester Genap</option>
           </select>
           {fieldErrors.semester_number?.[0] && <small className={s.fieldError}>{fieldErrors.semester_number[0]}</small>}
         </label>
-        <div className={s.formFull}>
-          <Field label="Nama Semester" value={form.name} onChange={(value) => setForm({ ...form, name: value })} error={fieldErrors.name?.[0]} required maxLength={100} placeholder="Semester Ganjil" />
-        </div>
         <Field label="Tanggal Mulai" type="date" value={form.startDate} onChange={(value) => setForm({ ...form, startDate: value })} error={fieldErrors.start_date?.[0]} />
         <Field label="Tanggal Selesai" type="date" value={form.endDate} onChange={(value) => setForm({ ...form, endDate: value })} error={fieldErrors.end_date?.[0]} />
         {modal === "add-semester" && <label className={`${s.choicePill} ${s.formFull}`}><input type="checkbox" checked={form.isActive} onChange={(event) => setForm({ ...form, isActive: event.target.checked })} />Aktifkan semester ini setelah disimpan</label>}
