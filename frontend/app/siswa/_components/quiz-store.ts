@@ -10,6 +10,9 @@ export type QuizAttempt = {
   serverScore?: number | null;
   serverStatus?: string;
   passingScore?: number | null;
+  shuffleSeed?: number;
+  questionOrderIds?: number[];
+  optionOrderIds?: Record<string, number[]>;
 };
 
 const UPDATE_EVENT = "eduspace:quiz-updated";

@@ -14,6 +14,7 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
   const id = useId();
   return <div className="tg-field"><label htmlFor={id}>{label}</label>{Children.map(children, child => isValidElement(child) && ["input", "textarea", "select"].includes(String(child.type)) ? cloneElement(child as ReactElement<{ id: string }>, { id }) : child)}</div>;
 }
+function isAssessmentDeadlinePast(value: string) { return new Date(value).getTime() <= Date.now(); }
 // TODO-DATA: lokasi ruang kelas meniru sampel Figma karena model rombel belum membawa nama ruang.
 function Targets({ subject, selected, change, description = "Alokasikan materi ke kelas binaan", className = "", summaryLabel, shuffle = false, showSelectAll = true, compactLabels = false }: { subject: Subject; selected: string[]; change: (value: string[]) => void; description?: string; className?: string; summaryLabel?: string; shuffle?: boolean; showSelectAll?: boolean; compactLabels?: boolean }) { const studentCount = subject.classes.length ? selected.reduce((sum, group) => sum + (subject.classes.indexOf(group) === 0 ? 34 : 32), 0) : null; return <Card className={className} title="Target Rombongan Belajar" description={description} action={showSelectAll ? <Button type="button" tone="ghost" onClick={() => change(selected.length === subject.classes.length ? [] : subject.classes)}>Pilih Semua</Button> : undefined}><div className="tg-stack">{subject.classes.map((group, index) => <label className="tg-check-row" key={group}><input type="checkbox" checked={selected.includes(group)} onChange={event => change(event.target.checked ? [...selected, group] : selected.filter(value => value !== group))} /><span><strong>Kelas {group}{compactLabels ? "" : " (Reguler)"}</strong><small style={{ display: "block" }}>{compactLabels ? (index === 2 ? "Ruang Multimedia" : `Ruang Lab Komputer ${index + 1}`) : `Lab Komputer ${index + 1}`}</small></span><Badge>{index === 0 ? 34 : 32} Siswa</Badge></label>)}{summaryLabel ? <div className="tg-assessment-target-total"><span><Solar name="users-group-rounded" />{summaryLabel}</span><strong>{studentCount ?? "—"} Siswa</strong></div> : <Notice>{selected.length} rombongan belajar terpilih</Notice>}{shuffle && <div className="tg-assessment-toggle-row tg-assessment-shuffle"><span><strong>Acak nomor urut soal per siswa</strong></span><span className="tg-assessment-switch" aria-hidden="true" /></div>}</div></Card>; }
 export function MaterialEditor({ subject, editId }: { subject: Subject; editId?: string }) {
@@ -73,11 +74,18 @@ export function AssessmentEditor({ subject, editId, kind = "kuis" }: { subject: 
   const submitError = error || fieldErrorMessage(createAssessment.fieldErrors) || createAssessment.error || "";
   const pendingAssessmentId = useRef<number | null>(null); const sentQuestions = useRef<Set<number>>(new Set()); const creationComplete = useRef(false); const creationInFlight = useRef(false);
   const apiAssessment = sections.flatMap(item => item.assessments || []).find(item => String(item.id) === editId);
+  const assessmentSection = sections.find(section => section.id === apiAssessment?.section_id || section.assessments?.some(item => String(item.id) === editId));
+  const availableMaterials = sections.flatMap(section => (section.materials || []).map(material => ({ id: String(material.id), material, sectionId: section.id })));
+  const defaultMaterialId = apiAssessment?.material_id
+    ? String(apiAssessment.material_id)
+    : assessmentSection?.materials?.[0]
+      ? String(assessmentSection.materials[0].id)
+      : availableMaterials[0]?.id || "";
   const formKind = editId ? apiAssessment?.assessment_type === "practice" ? "kuis" : "tugas" : kind;
   const editing = Boolean(editId);
   const toLocalDateTime = (value?: string | null) => value ? new Date(new Date(value).getTime() - new Date(value).getTimezoneOffset() * 60000).toISOString().slice(0, 16) : "";
-  const apiQuestions: Question[] = (apiAssessment?.questions || []).map(question => ({ id: question.id, type: question.type === "multiple_choice" ? "Pilihan Ganda" : question.type === "true_false" ? "Benar / Salah" : question.type === "file_upload" ? "Unggah Portofolio" : "Uraian", text: question.prompt, weight: question.points, options: (question.options || []).map(option => option.text), answer: String((question.options || []).findIndex(option => option.text === question.correct_answer)) }));
-  const initial: SavedAssessment = { id: currentId, subject: subject.id, title: apiAssessment?.title || "", type: formKind === "tugas" ? "Tugas" : "Kuis", kind: formKind, instructions: apiAssessment?.description || "", targets: [], start: toLocalDateTime(apiAssessment?.start_at), end: toLocalDateTime(apiAssessment?.end_at), questions: apiQuestions, status: apiAssessment?.is_published ? "Diterbitkan" : "Draf" };
+  const apiQuestions: Question[] = (apiAssessment?.questions || []).map(question => ({ id: question.id, type: question.type === "multiple_choice" ? "Pilihan Ganda" : question.type === "true_false" ? "Benar / Salah" : question.type === "file_upload" ? "Unggah Portofolio" : "Uraian", text: question.prompt, weight: question.points, options: (question.options || []).map(option => option.text), answer: String((question.options || []).findIndex(option => option.text === question.correct_answer)), explanation: question.explanation || "" }));
+  const initial: SavedAssessment = { id: currentId, subject: subject.id, title: apiAssessment?.title || "", type: formKind === "tugas" ? "Tugas" : "Kuis", kind: formKind, instructions: apiAssessment?.description || "", targets: [], start: toLocalDateTime(apiAssessment?.start_at), end: toLocalDateTime(apiAssessment?.end_at), questions: apiQuestions, status: apiAssessment?.is_published ? "Diterbitkan" : "Draf", materialId: defaultMaterialId, durationMinutes: apiAssessment?.duration_minutes ?? 60, maximumAttempt: apiAssessment?.maximum_attempt ?? 1, showExplanationAfterSubmission: apiAssessment?.show_explanation_after_submission ?? false, shuffleQuestions: apiAssessment?.shuffle_questions ?? false, shuffleOptions: apiAssessment?.shuffle_options ?? false };
   const form = modified || initial;
   const targetSubject = { ...subject, classes: [] };
   const [startDate, startTime = "08:00"] = form.start.split("T");
@@ -87,8 +95,51 @@ export function AssessmentEditor({ subject, editId, kind = "kuis" }: { subject: 
   const [dropTargetQuestionId, setDropTargetQuestionId] = useState<number | null>(null);
   const [previousQuestionOrderIds, setPreviousQuestionOrderIds] = useState<number[] | null>(null);
   const [reorderMessage, setReorderMessage] = useState<string | null>(null);
+  const instructionsRef = useRef<HTMLTextAreaElement | null>(null);
   const change = (values: Partial<SavedAssessment>) => { setModified({ ...form, ...values }); setMessage(""); };
   const updateQuestion = (id: number, values: Partial<Question>) => change({ questions: form.questions.map(question => question.id === id ? { ...question, ...values } : question) });
+  function applyInstructionFormat(format: "bold" | "italic" | "underline" | "unordered" | "ordered" | "link" | "strike") {
+    const input = instructionsRef.current;
+    if (!input) return;
+    const value = form.instructions;
+    let start = input.selectionStart;
+    let end = input.selectionEnd;
+    let replacement = value;
+    if (format === "unordered" || format === "ordered") {
+      const blockStart = value.lastIndexOf("\n", Math.max(0, start - 1)) + 1;
+      const nextBreak = value.indexOf("\n", end);
+      const blockEnd = nextBreak < 0 ? value.length : nextBreak;
+      const block = value.slice(blockStart, blockEnd);
+      const prefix = format === "unordered" ? "- " : "1. ";
+      const lines = block.split("\n");
+      const hasPrefix = lines.every(line => format === "unordered" ? /^\s*-\s/.test(line) : /^\s*\d+\.\s/.test(line));
+      const formatted = lines.map((line, index) => hasPrefix ? line.replace(format === "unordered" ? /^\s*-\s/ : /^\s*\d+\.\s/, "") : `${format === "ordered" ? `${index + 1}. ` : prefix}${line}`).join("\n");
+      replacement = `${value.slice(0, blockStart)}${formatted}${value.slice(blockEnd)}`;
+      start = blockStart;
+      end = blockStart + formatted.length;
+    } else {
+      const selected = value.slice(start, end);
+      let before = "";
+      let after = "";
+      let content = selected;
+      if (format === "link") {
+        const url = window.prompt("Masukkan alamat tautan (https:// atau mailto:)");
+        if (!url) return;
+        if (!/^(https?:\/\/|mailto:)/i.test(url)) { setError("Tautan harus diawali https:// atau mailto:"); return; }
+        before = "["; after = `](${url})`; content ||= url;
+      } else {
+        before = format === "bold" ? "**" : format === "italic" ? "*" : format === "underline" ? "__" : "~~";
+        after = before;
+        content ||= format === "bold" ? "teks tebal" : format === "italic" ? "teks miring" : format === "underline" ? "teks bergaris bawah" : "teks dicoret";
+      }
+      const inserted = `${before}${content}${after}`;
+      replacement = `${value.slice(0, start)}${inserted}${value.slice(end)}`;
+      start += before.length;
+      end = start + content.length;
+    }
+    change({ instructions: replacement });
+    requestAnimationFrame(() => { input.focus(); input.setSelectionRange(start, end); });
+  }
   function moveQuestion(draggedId: number, targetId: number | null) {
     const fromIndex = form.questions.findIndex(question => question.id === draggedId);
     if (fromIndex < 0 || draggedId === targetId) return;
@@ -122,14 +173,18 @@ export function AssessmentEditor({ subject, editId, kind = "kuis" }: { subject: 
     if (!form.title.trim()) { setError("Judul asesmen wajib diisi."); return; }
     if (form.questions.some(question => !question.text.trim() || question.weight <= 0 || (["Pilihan Ganda", "Benar / Salah"].includes(question.type) && (question.options.some(option => !option.trim()) || question.answer === "")))) { setError("Lengkapi pertanyaan dan pilihan jawaban sebelum menyimpan."); return; }
     if (publish && (total !== 100 || !form.questions.length || !form.instructions.trim())) { setError("Lengkapi instruksi dan soal, serta pastikan total bobot tepat 100 poin."); return; }
+    if (publish && formKind === "kuis" && form.showExplanationAfterSubmission && form.questions.some(question => !question.explanation?.trim())) { setError("Isi pembahasan untuk setiap soal atau nonaktifkan tampilan pembahasan setelah siswa selesai."); return; }
     if (publish && (!form.start || !form.end || form.end <= form.start)) { setError("Batas akhir harus setelah tanggal mulai pengerjaan."); return; }
+    if (formKind === "kuis" && (!Number.isInteger(form.durationMinutes) || (form.durationMinutes || 0) < 5 || (form.durationMinutes || 0) > 240)) { setError("Durasi kuis harus antara 5 sampai 240 menit."); return; }
+    if (formKind === "kuis" && (!Number.isInteger(form.maximumAttempt) || (form.maximumAttempt || 0) < 1 || (form.maximumAttempt || 0) > 3)) { setError("Jatah token ujian harus antara 1 sampai 3 kali."); return; }
     const assessmentType = assessmentTypeForUiLabel(form.type);
     if (!assessmentType) { setError("Jenis asesmen ini belum memiliki padanan pada API."); return; }
-    if (sections.length > 1) { setError("Asesmen tidak dapat disimpan karena course memiliki lebih dari satu bagian."); return; }
+    const selectedMaterial = availableMaterials.find(item => item.id === (form.materialId || defaultMaterialId));
+    if (formKind === "kuis" && !selectedMaterial) { setError("Pilih materi dari daftar materi mata pelajaran sebelum menyimpan kuis."); return; }
     if (!courseState.course) { setError(courseState.error || "Course belum tersedia untuk menyimpan asesmen."); return; }
     const targetGrade = gradeFromSubject(subject);
     if (!targetGrade) { setError("Tingkat kelas asesmen tidak dapat ditentukan dari mata pelajaran ini."); return; }
-    if (!form.end || new Date(form.end).getTime() <= Date.now()) { setError("Batas akhir asesmen harus berada setelah waktu sekarang."); return; }
+    if (!form.end || isAssessmentDeadlinePast(form.end)) { setError("Batas akhir asesmen harus berada setelah waktu sekarang."); return; }
     if (creationComplete.current) { setMessage("Asesmen dan seluruh soal berhasil disimpan."); return; }
     if (creationInFlight.current) return;
     creationInFlight.current = true;
@@ -137,17 +192,23 @@ export function AssessmentEditor({ subject, editId, kind = "kuis" }: { subject: 
       try {
       let assessmentId = pendingAssessmentId.current;
       if (!assessmentId) {
-        const sectionId = await ensureTeacherCourseSection(courseState.course!.id, courseState.course!.name, sections);
+        const sectionId = selectedMaterial?.sectionId ?? await ensureTeacherCourseSection(courseState.course!.id, courseState.course!.name, sections);
         const assessmentResult = await createAssessment.run({
           title: form.title.trim(),
           assessment_type: assessmentType,
           target_grade: targetGrade,
+          ...(formKind === "kuis" && selectedMaterial ? { material_id: Number(selectedMaterial.id) } : {}),
           is_published: publish,
-          duration_minutes: 60,
+          duration_minutes: formKind === "kuis" ? form.durationMinutes ?? 60 : 60,
           end_at: new Date(form.end).toISOString(),
           start_at: form.start ? new Date(form.start).toISOString() : undefined,
           description: form.instructions,
-          maximum_attempt: 1,
+          maximum_attempt: formKind === "kuis" ? form.maximumAttempt ?? 1 : 1,
+          ...(formKind === "kuis" ? {
+            show_explanation_after_submission: form.showExplanationAfterSubmission ?? false,
+            shuffle_questions: form.shuffleQuestions ?? false,
+            shuffle_options: form.shuffleOptions ?? false,
+          } : {}),
         }, `sections/${sectionId}/assessments`) as { data?: { id?: number } } | undefined;
         if (!assessmentResult?.data?.id) { setError(""); return; }
         assessmentId = assessmentResult.data.id;
@@ -169,7 +230,7 @@ export function AssessmentEditor({ subject, editId, kind = "kuis" }: { subject: 
         try {
           result = await apiRequest<{ data?: unknown }>(`teacher/assessments/${assessmentId}/questions`, {
             method: "POST",
-            body: JSON.stringify({ type, prompt: question.text, points: question.weight, ...(correctAnswer === undefined ? {} : { correct_answer: correctAnswer }), ...(options ? { options } : {}) }),
+            body: JSON.stringify({ type, prompt: question.text, points: question.weight, ...(correctAnswer === undefined ? {} : { correct_answer: correctAnswer }), ...(form.showExplanationAfterSubmission && question.explanation?.trim() ? { explanation: question.explanation.trim() } : {}), ...(options ? { options } : {}) }),
           });
         } catch (cause) {
           if (cause instanceof ApiError && cause.status === 401) router.replace("/login?role=teacher&reason=session-expired");
@@ -200,29 +261,27 @@ export function AssessmentEditor({ subject, editId, kind = "kuis" }: { subject: 
         <Field label={formKind === "tugas" ? "Judul Asesmen / Tugas *" : "Judul Asesmen *"}><input required maxLength={120} value={form.title} onChange={event => change({ title: event.target.value })} /></Field>
         <div className="tg-form-grid tg-assessment-basic-grid">
           {formKind === "tugas" ? <><Field label="Tipe Asesmen *"><select value={form.type} onChange={event => change({ type: event.target.value })}><option>Tugas & Kuis Campuran</option><option>Tugas</option><option>Kuis</option></select></Field><Field label="Capaian Pembelajaran"><div className="tg-readonly tg-assessment-cp"><Badge>CP-JIK-02</Badge><span>Merancang Konfigurasi Topologi Jaringan</span><span aria-hidden="true">×</span></div></Field></> : <>
-            {/* TODO-DATA: materi contoh belum menjadi bagian dari model asesmen. */}
-            <Field label="Materi *"><select disabled defaultValue="Modul 04 • Perangkat Keras Jaringan"><option>Modul 04 • Perangkat Keras Jaringan</option></select></Field>
+            <Field label="Materi *"><select required value={form.materialId || defaultMaterialId} disabled={courseState.loading || availableMaterials.length === 0} onChange={event => change({ materialId: event.target.value })}><option value="">{courseState.loading ? "Memuat materi..." : "Pilih materi"}</option>{availableMaterials.map(item => <option key={item.id} value={item.id}>{item.material.title} · {sections.find(section => section.id === item.sectionId)?.title || "Materi"}</option>)}</select>{!courseState.loading && !availableMaterials.length && <small>{courseState.error || "Belum ada materi di mata pelajaran ini."}</small>}</Field>
           </>}
         </div>
         <Field label={formKind === "tugas" ? "Petunjuk & Instruksi Pengerjaan Siswa *" : "Instruksi Pengerjaan Siswa"}>
           <div className="tg-assessment-editor">
             <div className="tg-assessment-toolbar" aria-label="Pemformatan teks">
-              <span aria-hidden="true"><Solar name="text-bold" /></span><span aria-hidden="true"><Solar name="text-italic" /></span><span aria-hidden="true"><Solar name="text-underline" /></span><i />
-              <span aria-hidden="true"><Solar name="list" /></span><span aria-hidden="true"><Solar name="list-ordered" /></span><i /><span aria-hidden="true"><Solar name="link" /></span><span aria-hidden="true"><Solar name="text-cross" /></span>
+              <button type="button" aria-label="Tebalkan" title="Tebalkan" onClick={() => applyInstructionFormat("bold")}><Solar name="text-bold" /></button><button type="button" aria-label="Miringkan" title="Miringkan" onClick={() => applyInstructionFormat("italic")}><Solar name="text-italic" /></button><button type="button" aria-label="Garis bawah" title="Garis bawah" onClick={() => applyInstructionFormat("underline")}><Solar name="text-underline" /></button><i />
+              <button type="button" aria-label="Daftar bullet" title="Daftar bullet" onClick={() => applyInstructionFormat("unordered")}><Solar name="list" /></button><button type="button" aria-label="Daftar bernomor" title="Daftar bernomor" onClick={() => applyInstructionFormat("ordered")}><Solar name="list-ordered" /></button><i /><button type="button" aria-label="Sisipkan tautan" title="Sisipkan tautan" onClick={() => applyInstructionFormat("link")}><Solar name="link" /></button><button type="button" aria-label="Coret teks" title="Coret teks" onClick={() => applyInstructionFormat("strike")}><Solar name="text-cross" /></button>
             </div>
-            <textarea required value={form.instructions} onChange={event => change({ instructions: event.target.value })} />
+            <textarea ref={instructionsRef} required value={form.instructions} onChange={event => change({ instructions: event.target.value })} placeholder="Tuliskan instruksi untuk siswa..." />
           </div>
         </Field>
       </div>
     {formKind === "kuis" && <>
-    {/* TODO-DATA: durasi, token ujian, dan pengaturan pembahasan belum tersedia pada model asesmen. */}
     <div className="tg-assessment-quiz-settings">
       <div className="tg-assessment-quiz-settings-grid">
-        <section><h3>Durasi Pengerjaan</h3><div className="tg-assessment-duration"><button type="button" aria-label="Kurangi durasi" disabled>−</button><strong>60 <small>Menit</small></strong><button type="button" aria-label="Tambah durasi" disabled>+</button></div></section>
-        <section><h3>Jatah Token Ujian</h3><div className="tg-assessment-token-options"><span className="is-selected">1 Kali Ujian</span><span>Beberapa Kali</span></div></section>
+        <section><h3>Durasi Pengerjaan</h3><div className="tg-assessment-duration"><button type="button" aria-label="Kurangi durasi" disabled={(form.durationMinutes ?? 60) <= 5} onClick={() => change({ durationMinutes: Math.max(5, (form.durationMinutes ?? 60) - 5) })}>−</button><strong>{form.durationMinutes ?? 60} <small>Menit</small></strong><button type="button" aria-label="Tambah durasi" disabled={(form.durationMinutes ?? 60) >= 240} onClick={() => change({ durationMinutes: Math.min(240, (form.durationMinutes ?? 60) + 5) })}>+</button></div></section>
+        <section><h3>Jatah Token Ujian</h3><div className="tg-assessment-token-options"><button type="button" className={(form.maximumAttempt ?? 1) === 1 ? "is-selected" : ""} aria-pressed={(form.maximumAttempt ?? 1) === 1} onClick={() => change({ maximumAttempt: 1 })}>1 Kali Ujian</button><button type="button" className={(form.maximumAttempt ?? 1) > 1 ? "is-selected" : ""} aria-pressed={(form.maximumAttempt ?? 1) > 1} onClick={() => change({ maximumAttempt: 3 })}>Beberapa Kali (3x)</button></div></section>
       </div>
-      <p className="tg-assessment-token-note">*Token adalah jatah kesempatan siswa mengerjakan. Satu token terpakai setiap siswa menekan Mulai.</p>
-      <div className="tg-assessment-feedback-setting"><span><strong>Tampilkan pembahasan setelah siswa selesai</strong><small>Siswa dapat langsung meninjau ulasan dan penjelasan jawaban yang tepat setelah batas waktu berakhir.</small></span><span className="tg-assessment-switch" aria-hidden="true" /></div>
+      <p className="tg-assessment-token-note">*Siswa mendapat {form.maximumAttempt ?? 1} kesempatan mengerjakan kuis.</p>
+      <label className="tg-assessment-feedback-setting"><span><strong>Tampilkan pembahasan setelah siswa selesai</strong><small>Jika aktif, pembahasan soal yang diisi guru tampil pada halaman hasil.</small></span><input className="tg-assessment-switch-control" type="checkbox" checked={form.showExplanationAfterSubmission ?? false} onChange={event => change({ showExplanationAfterSubmission: event.target.checked })} /></label>
     </div>
     </>}
     </Card>
@@ -235,7 +294,8 @@ export function AssessmentEditor({ subject, editId, kind = "kuis" }: { subject: 
           {(formKind === "tugas" || expandedQuestions.includes(question.id)) ? <div className="tg-assessment-question-detail">
           <Field label={`Pertanyaan ${index + 1} *`}><textarea className="tg-assessment-question-text" rows={3} required value={question.text} onChange={event => updateQuestion(question.id, { text: event.target.value })} /></Field>
           {question.type === "Unggah Portofolio" && <span className="tg-assessment-format-note"><Solar name="info-circle" />{`Format diterima: ${uploadExtensionsLabel("studentAssessment")} (Maks. ${MAX_UPLOAD_FILE_SIZE_LABEL})`}</span>}
-          {question.type === "Pilihan Ganda" || question.type === "Benar / Salah" ? <><fieldset className="tg-assessment-options"><legend className="tg-sr-only">Pilihan jawaban, pilih satu kunci yang benar</legend><div className="tg-form-grid">{question.options.map((option, optionIndex) => <label className={`tg-assessment-option ${question.answer === String(optionIndex) ? "is-correct" : ""}`} key={optionIndex}><input aria-label={`Kunci soal ${index + 1}: ${question.type === "Benar / Salah" ? option : String.fromCharCode(65 + optionIndex)}`} type="radio" name={`answer-${question.id}`} checked={question.answer === String(optionIndex)} onChange={() => updateQuestion(question.id, { answer: String(optionIndex) })} /><span className="tg-assessment-option-letter">{question.type === "Benar / Salah" ? option : String.fromCharCode(65 + optionIndex)}</span><textarea required rows={question.answer === String(optionIndex) ? 2 : 1} aria-label={`Soal ${index + 1}, pilihan ${String.fromCharCode(65 + optionIndex)}`} value={option} onChange={event => updateQuestion(question.id, { options: question.options.map((text, i) => i === optionIndex ? event.target.value : text) })} />{question.answer === String(optionIndex) && <small><Solar name="check-circle" />Kunci Jawaban</small>}</label>)}</div></fieldset>{formKind === "kuis" && question.type === "Pilihan Ganda" && <div className="tg-assessment-question-discussion"><strong>Pembahasan Soal (Dapat Dilihat Siswa Setelah Selesai)</strong><p>Switch bekerja pada layer data link (OSI Layer 2) untuk meneruskan data secara selektif ke port tujuan berdasarkan MAC Address, sehingga memisahkan collision domain.</p></div>}</> : null}
+          {question.type === "Pilihan Ganda" || question.type === "Benar / Salah" ? <><fieldset className="tg-assessment-options"><legend className="tg-sr-only">Pilihan jawaban, pilih satu kunci yang benar</legend><div className="tg-form-grid">{question.options.map((option, optionIndex) => <label className={`tg-assessment-option ${question.answer === String(optionIndex) ? "is-correct" : ""}`} key={optionIndex}><input aria-label={`Kunci soal ${index + 1}: ${question.type === "Benar / Salah" ? option : String.fromCharCode(65 + optionIndex)}`} type="radio" name={`answer-${question.id}`} checked={question.answer === String(optionIndex)} onChange={() => updateQuestion(question.id, { answer: String(optionIndex) })} /><span className="tg-assessment-option-letter">{question.type === "Benar / Salah" ? option : String.fromCharCode(65 + optionIndex)}</span><textarea required rows={question.answer === String(optionIndex) ? 2 : 1} aria-label={`Soal ${index + 1}, pilihan ${String.fromCharCode(65 + optionIndex)}`} value={option} onChange={event => updateQuestion(question.id, { options: question.options.map((text, i) => i === optionIndex ? event.target.value : text) })} />{question.answer === String(optionIndex) && <small><Solar name="check-circle" />Kunci Jawaban</small>}</label>)}</div></fieldset></> : null}
+          {formKind === "kuis" && form.showExplanationAfterSubmission && <Field label="Pembahasan untuk Siswa"><textarea rows={3} value={question.explanation || ""} onChange={event => updateQuestion(question.id, { explanation: event.target.value })} placeholder="Jelaskan kunci atau konsep jawaban untuk siswa..." /></Field>}
           </div> : <p className="tg-assessment-question-preview">{question.text}</p>}
         </Card></div>)}
         {formKind === "kuis" && reorderMessage && <div className="tg-assessment-reorder-status"><span><Solar name="sort" />{reorderMessage}</span><Button type="button" tone="ghost" disabled={!previousQuestionOrderIds} onClick={undoQuestionReorder}>Urungkan</Button></div>}
@@ -244,10 +304,9 @@ export function AssessmentEditor({ subject, editId, kind = "kuis" }: { subject: 
       <aside className="tg-stack tg-assessment-builder-aside">
         <Targets className="tg-assessment-targets" subject={targetSubject} selected={form.targets} change={targets => change({ targets })} description="Tentukan rombel jenjang kelas 8 yang menerima notifikasi tugas:" summaryLabel="Total Akumulasi Siswa" shuffle={formKind === "tugas"} showSelectAll={false} compactLabels />
         {formKind === "kuis" && <>
-        {/* TODO-DATA: pengacakan belum menjadi bagian dari model asesmen. */}
         <Card className="tg-assessment-randomization" title="Pengacakan Soal">
-          <div className="tg-assessment-static-toggle"><span><strong>Acak nomor urut soal</strong><small>Setiap siswa melihat urutan butir yang berlainan saat asesmen.</small></span><span className="tg-assessment-switch" aria-hidden="true" /></div>
-          <div className="tg-assessment-static-toggle"><span><strong>Acak urutan opsi (A–D)</strong><small>Pilihan ganda diacak secara mandiri di perangkat siswa.</small></span><span className="tg-assessment-switch tg-assessment-switch-off" aria-hidden="true" /></div>
+          <label className="tg-assessment-static-toggle"><span><strong>Acak nomor urut soal</strong><small>Setiap siswa melihat urutan butir yang berlainan saat asesmen.</small></span><input className="tg-assessment-switch-control" type="checkbox" checked={form.shuffleQuestions ?? false} onChange={event => change({ shuffleQuestions: event.target.checked })} /></label>
+          <label className="tg-assessment-static-toggle"><span><strong>Acak urutan opsi (A–D)</strong><small>Pilihan ganda diacak secara mandiri di perangkat siswa.</small></span><input className="tg-assessment-switch-control" type="checkbox" checked={form.shuffleOptions ?? false} onChange={event => change({ shuffleOptions: event.target.checked })} /></label>
         </Card>
         </>}
         <Card className="tg-assessment-schedule" title="Jadwal & Batas Waktu" action={formKind === "kuis" ? <Badge tone="warning">Sisa 3 Hari</Badge> : undefined}>

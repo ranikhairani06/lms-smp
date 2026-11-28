@@ -3,8 +3,8 @@ import { createContext, useCallback, useContext, useMemo, useSyncExternalStore, 
 
 export type SavedMaterial = { id: string; subject: string; title: string; description: string; content: string; topic: string; targets: string[]; files: string[]; status: string };
 export type AssessmentKind = "tugas" | "kuis";
-export type Question = { id: number; type: string; text: string; weight: number; options: string[]; answer: string };
-export type SavedAssessment = { id: string; subject: string; title: string; type: string; kind?: AssessmentKind; instructions: string; targets: string[]; start: string; end: string; questions: Question[]; status: string };
+export type Question = { id: number; type: string; text: string; weight: number; options: string[]; answer: string; explanation?: string };
+export type SavedAssessment = { id: string; subject: string; title: string; type: string; kind?: AssessmentKind; instructions: string; targets: string[]; start: string; end: string; questions: Question[]; status: string; materialId?: string; durationMinutes?: number; maximumAttempt?: number; showExplanationAfterSubmission?: boolean; shuffleQuestions?: boolean; shuffleOptions?: boolean };
 export function assessmentKindOf(assessment: Pick<SavedAssessment, "id" | "type" | "kind">): AssessmentKind {
   if (assessment.kind === "tugas" || assessment.kind === "kuis") return assessment.kind;
   if (assessment.id.startsWith("tugas-")) return "tugas";
