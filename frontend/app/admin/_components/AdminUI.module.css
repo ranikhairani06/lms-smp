@@ -279,11 +279,11 @@
 .button { min-height: 38px; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-sm); padding: 0 var(--space-md); border: 1px solid transparent; border-radius: var(--radius-s); font: inherit; font-size: var(--text-l12-size); font-weight: 600; white-space: nowrap; cursor: pointer; transition: background .15s ease, border .15s ease, transform .15s ease; line-height: var(--text-l12-line); }
 .buttonMedium { min-height: calc(var(--space-2xl) - var(--space-xs)); font-size: var(--text-l16-size); line-height: var(--text-l16-line); }
 .button:disabled { opacity: .5; cursor: not-allowed; }
-.button_primary { color: var(--color-surface); background: var(--ad-primary); box-shadow: none; }
-.button_primary:hover { background: var(--ad-primary-hover); }
-.button_secondary { color: var(--ad-text); background: var(--ad-secondary); }
-.button_outline { color: var(--ad-primary); background: var(--color-surface); border-color: var(--ad-primary-light); }
-.button_outline:hover { background: var(--ad-primary-tint); }
+.button_primary { color: var(--color-surface); background: var(--ad-primary, var(--color-primary)); box-shadow: none; }
+.button_primary:hover { background: var(--ad-primary-hover, var(--color-primary-hover)); }
+.button_secondary { color: var(--ad-text, var(--color-text-primary)); background: var(--ad-secondary, var(--color-secondary)); }
+.button_outline { color: var(--ad-primary, var(--color-primary)); background: var(--color-surface); border-color: var(--ad-primary-light, var(--color-primary-light)); }
+.button_outline:hover { background: var(--ad-primary-tint, var(--color-primary-tint)); }
 .button_softPrimary { color: var(--color-primary); background: var(--color-primary-tint); border-color: transparent; }
 .button_softPrimary:hover { background: var(--color-primary-tint); }
 .button_primarySolid { color: var(--color-surface); background: var(--color-primary); border-color: var(--color-primary); }
@@ -293,8 +293,9 @@
 .button_dark:disabled { opacity: 1; }
 .button.button_outline.buttonAmber { color: var(--color-secondary-dark); background: var(--color-surface); border: var(--border-width-xs) solid var(--color-secondary); font-weight: var(--font-weight-semibold); }
 .button.button_outline.buttonAmber:hover { background: var(--color-secondary-tint); }
-.button_ghost { color: var(--ad-muted); background: transparent; border-color: transparent; }
-.button_danger { color: var(--color-surface); background: var(--ad-error); }
+.button_ghost { color: var(--ad-muted, var(--color-text-secondary)); background: transparent; border-color: transparent; }
+.button_danger { color: var(--color-surface); background: var(--ad-error, var(--color-error)); border-color: var(--ad-error, var(--color-error)); }
+.button_danger:hover:not(:disabled) { background: var(--color-error-dark); border-color: var(--color-error-dark); }
 
 /* Jarak antarkartu/stat-card menggunakan 24px (spasi LG). */
 .statGrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-lg); margin-bottom: var(--space-lg); }
@@ -1634,7 +1635,6 @@
   align-items: flex-start;
 }
 .studentIconActions { display: flex; align-items: center; gap: var(--space-xs); }
-.studentResetAction { display: none; }
 .studentUnlockButton {
   min-height: calc(var(--space-xl) - var(--space-xs));
   padding: var(--space-xs) var(--space-sm);

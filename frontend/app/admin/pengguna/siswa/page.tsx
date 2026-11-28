@@ -351,7 +351,7 @@ export default function SiswaPage() {
                   {student.status.startsWith("Terkunci") && <Button className={s.studentUnlockButton} onClick={() => openModal("reset", student)}>Buka Kunci</Button>}
                   <span className={s.studentIconActions}>
                     <AdminTableIconButton className={s.studentActionButton} icon="pen-linear" title="Edit" ariaLabel="Edit" onClick={() => openModal("edit", student)} />
-                    <AdminTableIconButton className={s.studentResetAction} icon="lock-keyhole-linear" title="Reset kata sandi" ariaLabel="Reset kata sandi" onClick={() => openModal("reset", student)} />
+                    <AdminTableIconButton className={s.studentActionButton} icon="lock-keyhole-linear" title="Reset kata sandi" ariaLabel="Reset kata sandi" onClick={() => openModal("reset", student)} />
                     <AdminTableIconButton className={s.studentActionButton} icon="trash-bin-trash-linear" title="Hapus" ariaLabel={`Hapus ${student.name}`} disabled={deleteStudent.loading} onClick={() => setDeleteSelected(student)} />
                   </span>
                 </ManagementActionButtons></td>
