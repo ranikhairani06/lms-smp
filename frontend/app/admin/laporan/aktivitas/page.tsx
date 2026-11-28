@@ -38,7 +38,13 @@ const dateRange = (range: string) => {
   else return { from: "", to: "" };
   return { from: fromDate.toISOString().slice(0, 10), to };
 };
-const textOrDash = (value?: string | null) => value?.trim() || "—";
+const textOrDash = (value: unknown) => {
+  if (value === null || value === undefined) return "—";
+  if (typeof value === "string") return value.trim() || "—";
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  try { return JSON.stringify(value) || "—"; }
+  catch { return "—"; }
+};
 const initials = (name: string) => name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || "—";
 
 export default function LaporanAktivitasPage() {
