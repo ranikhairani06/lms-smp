@@ -1634,7 +1634,6 @@
   align-items: flex-start;
 }
 .studentIconActions { display: flex; align-items: center; gap: var(--space-xs); }
-.studentResetAction { display: none; }
 .studentUnlockButton {
   min-height: calc(var(--space-xl) - var(--space-xs));
   padding: var(--space-xs) var(--space-sm);
