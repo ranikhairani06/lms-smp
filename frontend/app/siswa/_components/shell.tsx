@@ -86,7 +86,7 @@ export default function Shell({ children, user }: { children: ReactNode; user: A
           </Link>
         </div>,
       }}
-      footer={<>LMS SMP Terpadu â€¢ Sistem Administrasi &amp; Pembelajaran Terpadu</>}
+      footer={<>LMS SMP Terpadu · Sistem Administrasi &amp; Pembelajaran Terpadu</>}
       mobileNavigation={mobileNavigation}
       mobileNavigationBreakpoint="narrow"
       mobileNavigationPresentation="bar"

@@ -64,7 +64,7 @@ export default function OrangTuaPage() {
     phone: !form.phone || phoneIsValid ? "" : "Nomor HP harus 8–15 digit angka.",
     email: emailIsValid ? "" : "Masukkan alamat email yang valid.",
     address: "",
-    student: studentResource.data?.some((item) => `${item.user?.name ?? ""} â€¢ ${item.class_room?.name?.replace(/^Kelas\s+/i, "") ?? "â€”"}` === form.student || item.nisn === form.student) ? "" : "Pilih siswa tertaut yang terdaftar.",
+    student: studentResource.data?.some((item) => `${item.user?.name ?? ""} · ${item.class_room?.name?.replace(/^Kelas\s+/i, "") ?? "â€”"}` === form.student || item.nisn === form.student) ? "" : "Pilih siswa tertaut yang terdaftar.",
   };
   const shouldShowError = (field: keyof typeof fieldErrors) => submitAttempted || Boolean(touched[field]);
   const errorCount = Object.values(fieldErrors).filter(Boolean).length;
