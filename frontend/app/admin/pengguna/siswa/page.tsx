@@ -40,7 +40,11 @@ type FormFieldKey = "name" | "nisn" | "nik" | "birthplace" | "birthdate" | "gend
 type ApiStudent = { id: number; nisn: string; birth_date: string; cohort_year: number; class_room_id: number | null; user?: { name?: string; is_active?: boolean; must_change_password?: boolean }; class_room?: { id: number; name: string } | null };
 type ApiClass = { id: number; name: string; grade_level: number; students_count: number; is_active: boolean };
 const getStudentSearchText = (student: Student) => `${student.name} ${student.nisn}`;
-const matchesStudentCategory = (student: Student, category: string) => category === "Semua Kategori" || student.status.includes(category);
+const matchesStudentCategory = (student: Student, category: string) => {
+  if (category === "Semua Kategori") return true;
+  if (category === "Terkunci") return student.status === "Nonaktif" || student.status === "Terkunci";
+  return student.status === category;
+};
 
 const formatRombel = (rombel: Pick<RombelData, "code" | "wali">) => `Kelas ${rombel.code} — Wali: ${rombel.wali}`;
 
@@ -72,7 +76,7 @@ export default function SiswaPage() {
     capacity: null,
     grade_level: item.grade_level,
   }));
-  const [modal, setModal] = useState<"add" | "edit" | "detail" | "reset" | null>(null);
+  const [modal, setModal] = useState<"add" | "edit" | "reset" | null>(null);
   const [selected, setSelected] = useState<Student>(emptyStudent);
   const [deleteSelected, setDeleteSelected] = useState<Student | null>(null);
   const [page, setPage] = useState(1);
@@ -92,6 +96,14 @@ export default function SiswaPage() {
     initialCategory: "Semua Kategori",
   });
   const pageRows = filtered.slice((page - 1) * 7, page * 7);
+  const changeKeyword = (value: string) => {
+    setKeyword(value);
+    setPage(1);
+  };
+  const changeCategory = (value: string) => {
+    setCategory(value);
+    setPage(1);
+  };
   const importStudents = async (file: File | null) => {
     setImportError("");
     setImportSuccess("");
@@ -151,7 +163,7 @@ export default function SiswaPage() {
     return serverErrors[key]?.[0];
   };
 
-  const openModal = (type: "add" | "edit" | "detail" | "reset", student?: Student) => {
+  const openModal = (type: "add" | "edit" | "reset", student?: Student) => {
     if (student) {
       setSelected(student);
       const studentRombel = rombelData.find((rombel) => rombel.code === student.rombel);
@@ -215,7 +227,6 @@ export default function SiswaPage() {
     { label: "Total Siswa Terdaftar", value: String(students.length), icon: "users-group-rounded-linear", tone: "primary" },
     { label: "Siswa Aktif Login", value: "—", icon: "user-check-linear", tone: "success" },
     { label: "Belum Ganti Password", value: String((studentResource.data ?? []).filter((item) => item.user?.must_change_password).length), icon: "lock-keyhole-linear", tone: "warning" },
-    { label: "Perlu Verifikasi NISN", value: "—", icon: "clipboard-check-linear", tone: "danger" },
   ];
 
   return (
@@ -238,12 +249,12 @@ export default function SiswaPage() {
       {(studentResource.loading || classResource.loading) && <LoadingState title="Memuat data siswa..." />}
 
       {/* Bagian tampilan: kartu ringkasan akun peserta didik. */}
-      <div className={`${s.statGridFour} ${s.adminStatRow}`}>
+      <div className={`${s.statGridThree} ${s.adminStatRow}`}>
         {statistics.map((item) => <ManagementStatCard key={item.label} item={item} variant="student" />)}
       </div>
       {/* Bagian tampilan: pencarian dan penyaringan direktori siswa. */}
-      <ManagementToolbar keyword={keyword} onKeywordChange={setKeyword} searchPlaceholder="Cari nama / NISN..." category={category} onCategoryChange={setCategory} categoryOptions={["Semua Kategori", "Aktif", "Terkunci", "Belum Aktivasi"]} variant="student" />
-      {/* Bagian tampilan: tabel peserta didik beserta aksi detail, edit, dan reset kredensial. */}
+      <ManagementToolbar keyword={keyword} onKeywordChange={changeKeyword} searchPlaceholder="Cari nama / NISN..." category={category} onCategoryChange={changeCategory} categoryOptions={["Semua Kategori", "Aktif", "Terkunci", "Belum Ganti Password"]} variant="student" />
+      {/* Bagian tampilan: tabel peserta didik beserta aksi edit, reset kredensial, dan hapus. */}
       <ManagementTable variant="student" tableClassName={`${s.dataTable} ${s.studentDataTable}`} footer={<Pagination className={s.studentPagination} variant="directory" current={page} total={Math.max(1, Math.ceil(filtered.length / 7))} onChange={setPage} label={`Menampilkan ${filtered.length ? (page - 1) * 7 + 1 : 0}-${Math.min(page * 7, filtered.length)} dari ${filtered.length} siswa`} emphasizeLabelNumbers />}>
           <thead><tr><th>NISN</th><th>Nama Siswa</th><th>Rombel / Kelas</th><th>Jenis Kelamin</th><th>Status Akun LMS</th><th>Aktivitas Terakhir</th><th>Aksi</th></tr></thead>
           <tbody>
@@ -254,7 +265,6 @@ export default function SiswaPage() {
                 <td><ManagementActionButtons className={student.status.startsWith("Terkunci") ? s.studentLockedActions : s.studentRowActions}>
                   {student.status.startsWith("Terkunci") && <Button className={s.studentUnlockButton} onClick={() => openModal("reset", student)}>Buka Kunci</Button>}
                   <span className={s.studentIconActions}>
-                    <AdminTableIconButton className={s.studentActionButton} icon="eye-linear" title="Detail" ariaLabel="Detail" onClick={() => openModal("detail", student)} />
                     <AdminTableIconButton className={s.studentActionButton} icon="pen-linear" title="Edit" ariaLabel="Edit" onClick={() => openModal("edit", student)} />
                     <AdminTableIconButton className={s.studentResetAction} icon="lock-keyhole-linear" title="Reset kata sandi" ariaLabel="Reset kata sandi" onClick={() => openModal("reset", student)} />
                     <AdminTableIconButton className={s.studentActionButton} icon="trash-bin-trash-linear" title="Hapus" ariaLabel={`Hapus ${student.name}`} disabled={deleteStudent.loading} onClick={() => setDeleteSelected(student)} />
@@ -335,11 +345,6 @@ export default function SiswaPage() {
             <div className={s.studentGuardianEmpty}><AdminIcon name="users-group-rounded-linear" size={18} />Belum ada data orang tua/wali tertaut.</div>
           )}
         </form>
-      </Modal>}
-
-      {/* Bagian tampilan: modal detail siswa. */}
-      {modal === "detail" && <Modal title="Detail Peserta Didik" subtitle={`${selected.name} • ${selected.rombel}`} onClose={() => setModal(null)} footer={<Button onClick={() => setModal(null)}>Tutup</Button>}>
-        <div className={s.formGrid}><Field label="Nama Lengkap" value={selected.name} onChange={() => undefined} /><Field label="NISN" value={selected.nisn} onChange={() => undefined} /><Field label="Rombel" value={selected.rombel} onChange={() => undefined} /><Field label="Jenis Kelamin" value={selected.gender} onChange={() => undefined} /><div className={s.formFull}><StatusBadge tone={selected.status.startsWith("Aktif") ? "success" : "warning"}>{selected.status}</StatusBadge></div></div>
       </Modal>}
 
       {/* Bagian tampilan: konfirmasi reset sandi sesuai modal pada PDF. */}

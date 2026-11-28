@@ -19,6 +19,7 @@ export type AdminDashboardAcademicYear = {
 };
 
 export type AdminDashboardData = {
+  users?: number | null;
   students: number;
   teachers: number;
   parents: number;
@@ -39,6 +40,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 function isAdminDashboardData(value: unknown): value is AdminDashboardData {
   if (!isRecord(value)) return false;
   if (
+    (value.users !== undefined && value.users !== null && typeof value.users !== "number") ||
     typeof value.students !== "number" ||
     typeof value.teachers !== "number" ||
     typeof value.parents !== "number" ||

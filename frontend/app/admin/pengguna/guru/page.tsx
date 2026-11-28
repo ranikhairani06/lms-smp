@@ -23,7 +23,11 @@ type TeacherDirectoryItem = { name: string; nip: string; subject: string; status
 type ApiTeacher = { id: number; employee_no: string; phone?: string | null; user?: { name?: string; email?: string | null; is_active?: boolean; must_change_password?: boolean } };
 
 const getTeacherSearchText = (teacher: TeacherDirectoryItem) => `${teacher.name} ${teacher.nip} ${teacher.subject}`;
-const matchesTeacherCategory = (teacher: TeacherDirectoryItem, category: string) => category === "Semua Kategori" || teacher.status.includes(category);
+const matchesTeacherCategory = (teacher: TeacherDirectoryItem, category: string) => {
+  if (category === "Semua Kategori") return true;
+  if (category === "Terkunci") return teacher.status === "Nonaktif" || teacher.status === "Terkunci";
+  return teacher.status === category;
+};
 
 const subjectTones: Record<string, "primary" | "info" | "success" | "warning" | "neutral"> = {
   Informatika: "primary",
@@ -70,6 +74,14 @@ export default function GuruPage() {
     matchesCategory: matchesTeacherCategory,
     initialCategory: "Semua Kategori",
   });
+  const changeKeyword = (value: string) => {
+    setKeyword(value);
+    setPage(1);
+  };
+  const changeCategory = (value: string) => {
+    setCategory(value);
+    setPage(1);
+  };
   const toggleClass = (item: string) => setForm((current) => ({ ...current, classes: current.classes.includes(item) ? current.classes.filter((value) => value !== item) : [...current.classes, item] }));
   const nameIsValid = form.name.trim().length > 0;
   const nipIsValid = form.nip.length === 18;
@@ -116,8 +128,6 @@ export default function GuruPage() {
   };
   const statistics: ManagementStat[] = [
     { label: "Total Guru", value: String(teacherRows.length), icon: "users-group-rounded-linear", tone: "primary" },
-    { label: "Guru Bersertifikasi", value: "—", icon: "square-academic-cap-linear", tone: "success" },
-    { label: "Wali Kelas Ditugaskan", value: "—", icon: "user-circle-linear", tone: "warning" },
   ];
   const pageRows = filtered.slice((page - 1) * 7, page * 7);
 
@@ -131,22 +141,22 @@ export default function GuruPage() {
       {(createTeacher.error || updateTeacher.error) && !apiMessage && <InfoBanner tone="danger">{createTeacher.error ?? updateTeacher.error}</InfoBanner>}
       {teacherResource.loading && <LoadingState title="Memuat data guru..." />}
       {teacherResource.error && <ErrorState title={teacherResource.error} action={<Button variant="outline" onClick={() => void refreshTeachers()}>Coba Lagi</Button>} />}
-      {/* Bagian tampilan: statistik guru dan staf. */}
+      {/* Bagian tampilan: statistik guru. */}
       <div className={`${s.statGridThree} ${s.adminStatRow}`}>
         {statistics.map((item) => <ManagementStatCard key={item.label} item={item} />)}
       </div>
       {/* Bagian tampilan: filter direktori guru. */}
       <ManagementToolbar
         keyword={keyword}
-        onKeywordChange={setKeyword}
+        onKeywordChange={changeKeyword}
         searchPlaceholder="Cari nama guru, NIP, atau mata pelajaran..."
         category={category}
-        onCategoryChange={setCategory}
-        categoryOptions={["Semua Kategori", "Aktif", "Terkunci"]}
+        onCategoryChange={changeCategory}
+        categoryOptions={["Semua Kategori", "Aktif", "Terkunci", "Belum Ganti Password"]}
       />
-      {/* Bagian tampilan: tabel guru, mata pelajaran, tugas, dan rombel yang diampu. */}
+      {/* Bagian tampilan: tabel guru, mata pelajaran, dan rombel yang diampu. */}
       <ManagementTable className={s.teacherTableWrap} tableClassName={`${s.dataTable} ${s.teacherTable} ${s.directoryTable}`} footer={<Pagination variant="directory" current={page} total={Math.max(1, Math.ceil(filtered.length / 7))} onChange={setPage} label={`Menampilkan ${filtered.length ? (page - 1) * 7 + 1 : 0}-${Math.min(page * 7, filtered.length)} dari ${filtered.length} guru`} />}>
-          <thead><tr><th>Nama Guru</th><th>NIP</th><th>Mata Pelajaran</th><th>Tugas Tambahan</th><th>Rombel Diampu</th><th>Status &amp; Kredensial</th><th>Aktivitas Terakhir</th><th>Aksi</th></tr></thead>
+          <thead><tr><th>Nama Guru</th><th>NIP</th><th>Mata Pelajaran</th><th>Rombel Diampu</th><th>Status &amp; Kredensial</th><th>Aktivitas Terakhir</th><th>Aksi</th></tr></thead>
           <tbody>{pageRows.map((teacher) => {
             const subjectTone = subjectTones[teacher.subject] ?? "primary";
             const statusTone = teacher.status.startsWith("Aktif") ? "primary" : teacher.status.startsWith("Terkunci") ? "danger" : "warning";
@@ -156,12 +166,11 @@ export default function GuruPage() {
             return <tr key={teacher.nip}>
             <td><span className={`${s.tableStrong} ${s.teacherName}`}>{teacher.name}</span></td><td className={s.teacherNip}>{teacher.nip}</td>
             <td><StatusBadge tone={subjectTone} className={s.teacherBadge}>{teacher.subject}</StatusBadge></td>
-            <td>{teacher.task === "-" ? null : teacher.task.startsWith("Wali Kelas") ? <StatusBadge tone="primary" className={`${s.teacherBadge} ${s.teacherHomeroomTask}`}>{teacher.task}</StatusBadge> : <span className={s.teacherTaskTag}>{teacher.task}</span>}</td>
             <td><div className={s.teacherClassList}>{classNames.map((className) => <span key={`${teacher.nip}-${className}`} className={s.teacherClassChip}>{className}</span>)}</div></td>
             <td><StatusBadge tone={statusTone} className={`${s.teacherBadge} ${s.directoryBadge} ${s.directoryStatusBadge} ${s.teacherStatus} ${statusClass}`}>{teacher.status}</StatusBadge></td><td className={s.teacherActivity}>{teacher.activity}</td>
-            <td><ManagementActionButtons><button type="button" className={s.teacherActionButton} title="Detail" aria-label={`Detail ${teacher.name}`} onClick={() => alert(`${teacher.name}\n${teacher.nip}\n${teacher.subject}`)}><AdminIcon name="eye-linear" size={14} />Detail</button><button type="button" className={s.teacherActionButton} title="Edit" aria-label={`Edit ${teacher.name}`} onClick={() => { setEditingTeacher({ id: teacher.id, employee_no: teacher.nip, phone: teacher.phone, user: { name: teacher.name, email: teacher.email } }); setForm({ name: teacher.name, nip: teacher.nip, subject: "", task: "", homeroom: "", classes: [], email: teacher.email, phone: teacher.phone }); setTouched({}); setSubmitAttempted(false); setModal(true); }}>Edit</button><button type="button" className={s.teacherActionButton} title="Hapus" aria-label={`Hapus ${teacher.name}`} disabled={removeTeacher.loading} onClick={() => setDeleteTeacher({ id: teacher.id, employee_no: teacher.nip, user: { name: teacher.name, email: teacher.email } })}><AdminIcon name="trash-bin-trash-linear" size={14} />Hapus</button></ManagementActionButtons></td>
+            <td><ManagementActionButtons><button type="button" className={s.teacherActionButton} title="Edit" aria-label={`Edit ${teacher.name}`} onClick={() => { setEditingTeacher({ id: teacher.id, employee_no: teacher.nip, phone: teacher.phone, user: { name: teacher.name, email: teacher.email } }); setForm({ name: teacher.name, nip: teacher.nip, subject: "", task: "", homeroom: "", classes: [], email: teacher.email, phone: teacher.phone }); setTouched({}); setSubmitAttempted(false); setModal(true); }}>Edit</button><button type="button" className={s.teacherActionButton} title="Hapus" aria-label={`Hapus ${teacher.name}`} disabled={removeTeacher.loading} onClick={() => setDeleteTeacher({ id: teacher.id, employee_no: teacher.nip, user: { name: teacher.name, email: teacher.email } })}><AdminIcon name="trash-bin-trash-linear" size={14} />Hapus</button></ManagementActionButtons></td>
           </tr>;
-          })}{filtered.length === 0 && <TableEmpty colSpan={8} />}</tbody>
+          })}{filtered.length === 0 && <TableEmpty colSpan={7} />}</tbody>
       </ManagementTable>
 
       {/* Bagian tampilan: modal alokasi akun guru, mata pelajaran, tugas tambahan, dan rombel. */}

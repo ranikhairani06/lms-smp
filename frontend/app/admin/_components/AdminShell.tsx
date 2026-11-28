@@ -13,7 +13,7 @@ import s from "./AdminUI.module.css";
 
 const userLinks = [
   { label: "Peserta Didik", href: "/admin/pengguna/siswa" },
-  { label: "Guru & Staf", href: "/admin/pengguna/guru" },
+  { label: "Guru", href: "/admin/pengguna/guru" },
   { label: "Orang Tua (Wali)", href: "/admin/pengguna/orang-tua" },
 ];
 const masterLinks = [
